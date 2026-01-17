@@ -1,7 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const MobileNav = () => {
+    const { t } = useLanguage();
+
     return (
         <nav className="mobile-bottom-nav">
             <style>{`
@@ -54,27 +57,27 @@ const MobileNav = () => {
 
             <NavLink to="/" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="mobile-nav-icon">🏠</span>
-                <span>Home</span>
+                <span>{t('home')}</span>
             </NavLink>
 
             <NavLink to="/sell?type=Sell" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="mobile-nav-icon">🌾</span>
-                <span>Sell</span>
+                <span>{t('sell')}</span>
             </NavLink>
 
             <NavLink to="/marketplace" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="mobile-nav-icon">🛒</span>
-                <span>Buy</span>
+                <span>{t('buy')}</span>
             </NavLink>
 
             <NavLink to="/rates" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="mobile-nav-icon">📊</span>
-                <span>Rates</span>
+                <span>{t('nav_rates')}</span>
             </NavLink>
 
             <NavLink to="/profile" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="mobile-nav-icon">👤</span>
-                <span>Profile</span>
+                <span>{t('nav_profile')}</span>
             </NavLink>
         </nav>
     );

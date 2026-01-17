@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import BackToHomeButton from '../components/BackToHomeButton';
 
 const Partner = () => {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -23,6 +26,38 @@ const Partner = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Custom Validation with Auto-Focus
+        if (!formData.name) {
+            alert(t('partner_error_name'));
+            document.getElementsByName('name')[0]?.focus();
+            return;
+        }
+        if (!formData.phone || formData.phone.length < 10) {
+            alert(t('partner_error_phone'));
+            document.getElementsByName('phone')[0]?.focus();
+            return;
+        }
+        if (!formData.email) {
+            alert(t('partner_error_email'));
+            document.getElementsByName('email')[0]?.focus();
+            return;
+        }
+        if (!formData.city) {
+            alert(t('partner_error_city'));
+            document.getElementsByName('city')[0]?.focus();
+            return;
+        }
+        if (!formData.companyName) {
+            alert(t('partner_error_company'));
+            document.getElementsByName('companyName')[0]?.focus();
+            return;
+        }
+        if (!formData.activities) {
+            alert(t('partner_error_activities'));
+            document.getElementsByName('activities')[0]?.focus();
+            return;
+        }
+
         // Save to local storage for admin view
         const existingPartners = JSON.parse(localStorage.getItem('kisan_partners') || '[]');
         const newPartner = {
@@ -32,7 +67,7 @@ const Partner = () => {
         };
         localStorage.setItem('kisan_partners', JSON.stringify([newPartner, ...existingPartners]));
 
-        alert(`Thank you, ${formData.name}! Your partnership request has been submitted.\n(धन्यवाद! आपका अनुरोध जमा कर दिया गया है।)`);
+        alert(`${t('partner_success')}`);
         // Reset form
         setFormData({
             name: '',
@@ -58,6 +93,8 @@ const Partner = () => {
             alignItems: 'center'
         }}>
             <div className="container" style={{ maxWidth: '800px' }}>
+                <BackToHomeButton compact />
+
                 <div style={{
                     backgroundColor: 'white',
                     borderRadius: '16px',
@@ -66,25 +103,24 @@ const Partner = () => {
                     border: '1px solid #eee'
                 }}>
                     {/* Header Section */}
-                    {/* Header Section */}
                     <div style={{
                         backgroundColor: 'var(--color-primary)',
                         color: 'white',
                         padding: '2rem',
                         textAlign: 'center'
                     }}>
-                        <h1 style={{ margin: 0, fontSize: '2rem', fontFamily: 'serif' }}>Be A Partner (हमसे जुड़े)</h1>
+                        <h1 style={{ margin: 0, fontSize: '2rem', fontFamily: 'serif' }}>{t('partner_title')}</h1>
                         <p style={{ marginTop: '0.5rem', opacity: 0.9 }}>
-                            Join our network and grow with KisanBazaar (किसान बाज़ार के साथ जुड़ें और आगे बढ़ें)
+                            {t('partner_subtitle')}
                         </p>
                         <div style={{ marginTop: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6', opacity: 0.9, maxWidth: '600px', margin: '1.5rem auto 0', textAlign: 'center' }}>
-                            <p style={{ marginBottom: '0.4rem' }}>If you are interested to be a part of KisanBazaar then fill up following detail.</p>
-                            <p>Our top management and commerce department will contact you. <strong style={{ color: 'white' }}>Thank You!</strong></p>
+                            <p style={{ marginBottom: '0.4rem' }}>{t('partner_intro')}</p>
+                            <p>{t('partner_contact_msg')}</p>
                         </div>
                     </div>
 
                     {/* Form Section */}
-                    <form onSubmit={handleSubmit} style={{ padding: '2rem' }}>
+                    <form onSubmit={handleSubmit} style={{ padding: '2rem' }} noValidate>
 
                         {/* Responsive Grid Logic via CSS */}
                         <style>{`
@@ -111,11 +147,10 @@ const Partner = () => {
 
                             {/* Name */}
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>Name (नाम) *</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_name')} *</label>
                                 <input
                                     type="text"
                                     name="name"
-                                    required
                                     placeholder="Enter your Name"
                                     value={formData.name}
                                     onChange={handleChange}
@@ -125,13 +160,10 @@ const Partner = () => {
 
                             {/* Phone */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>Phone Number (मोबाइल) *</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_phone')} *</label>
                                 <input
                                     type="tel"
                                     name="phone"
-                                    required
-                                    pattern="[0-9]{10}"
-                                    title="Please enter a valid 10-digit mobile number"
                                     placeholder="Enter 10-digit Mobile Number"
                                     value={formData.phone}
                                     onChange={(e) => {
@@ -145,11 +177,10 @@ const Partner = () => {
 
                             {/* Email */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>Email (ईमेल) *</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_email')} *</label>
                                 <input
                                     type="email"
                                     name="email"
-                                    required
                                     placeholder="Enter your Email Address"
                                     value={formData.email}
                                     onChange={handleChange}
@@ -159,11 +190,10 @@ const Partner = () => {
 
                             {/* City */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>City (शहर) *</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_city')} *</label>
                                 <input
                                     type="text"
                                     name="city"
-                                    required
                                     placeholder="Enter your city name"
                                     value={formData.city}
                                     onChange={handleChange}
@@ -173,7 +203,7 @@ const Partner = () => {
 
                             {/* Country */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>Country (देश)</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_country')}</label>
                                 <input
                                     type="text"
                                     name="country"
@@ -185,11 +215,10 @@ const Partner = () => {
 
                             {/* Company Name (Span 2 on desktop, auto on mobile via CSS above) */}
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>Company Name (कंपनी का नाम) *</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_company')} *</label>
                                 <input
                                     type="text"
                                     name="companyName"
-                                    required
                                     placeholder="Enter your Company Name"
                                     value={formData.companyName}
                                     onChange={handleChange}
@@ -199,7 +228,7 @@ const Partner = () => {
 
                             {/* Web Address */}
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>Web Address (वेबसाइट)</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_website')}</label>
                                 <input
                                     type="url"
                                     name="webAddress"
@@ -208,17 +237,16 @@ const Partner = () => {
                                     onChange={handleChange}
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc' }}
                                 />
-                                <small style={{ color: '#666', fontSize: '0.8rem' }}>Format: https://example.com</small>
+                                <small style={{ color: '#666', fontSize: '0.8rem' }}>{t('partner_website_format')}</small>
                             </div>
 
                             {/* Company Activities */}
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>Company Activities (कंपनी की गतिविधियाँ) *</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#444' }}>{t('partner_activities')} *</label>
                                 <textarea
                                     name="activities"
                                     rows="4"
-                                    required
-                                    placeholder="Describe what your company does..."
+                                    placeholder={t('partner_activities_placeholder')}
                                     value={formData.activities}
                                     onChange={handleChange}
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc', resize: 'vertical' }}
@@ -238,7 +266,7 @@ const Partner = () => {
                                     width: '100%' // Full width button on mobile
                                 }}
                             >
-                                Submit Request (अनुरोध भेजें)
+                                {t('partner_submit')}
                             </button>
                         </div>
                     </form>

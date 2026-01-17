@@ -1,136 +1,146 @@
-// Weather API Service using WeatherAPI.com
-// Free tier: 1M calls/month, perfect for our needs!
+import { locationData } from '../data/locationData';
 
-const API_KEY = import.meta.env.VITE_WEATHER_API_KEY || 'demo_key';
-const BASE_URL = 'https://api.weatherapi.com/v1';
+const API_KEY = 'zpka_3e36f919d14b482bab42a3647f93c313_8fbe4bad';
+const BASE_URL = 'http://dataservice.accuweather.com';
 
-// Cache to reduce API calls and improve performance
 const weatherCache = new Map();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
-/**
- * Get current weather and forecast for a city
- * @param {string} city - City name (e.g., "Indore", "Bhopal")
- * @param {number} days - Number of forecast days (1-3 for free tier)
- * @returns {Promise<Object>} Weather data
- */
-export const getWeather = async (city, days = 3) => {
-    // Check cache first
-    const cacheKey = `${city}-${days}`;
+export const getWeather = async (query, days = 5) => { // Days ignored, AW gives 1, 5, 10, 15
+    const cacheKey = `aw-${query}`;
     const cached = weatherCache.get(cacheKey);
 
-    // Check if API key is configured
-    if (!API_KEY || API_KEY === 'demo_key' || API_KEY === 'your_api_key_here') {
-        console.warn('⚠️ Weather API key not configured. Using fallback data.');
-        return getFallbackWeather(city);
-    }
-
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        console.log('📦 Using cached weather data for', city);
         return cached.data;
     }
 
     try {
-        const url = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${city},India&days=${days}&aqi=yes&alerts=yes`;
+        // Step 1: Search for Location Key
+        const locationKey = await getLocationKey(query);
+        if (!locationKey) throw new Error('Location not found');
 
-        console.log('🌤️ Fetching weather data for', city);
-        const response = await fetch(url);
+        // Step 2: Parallel Fetch (Current + Forecast)
+        const [current, forecast] = await Promise.all([
+            fetch(`${BASE_URL}/currentconditions/v1/${locationKey.Key}?apikey=${API_KEY}&details=true`),
+            fetch(`${BASE_URL}/forecasts/v1/daily/5day/${locationKey.Key}?apikey=${API_KEY}&metric=true`)
+        ]);
 
-        if (!response.ok) {
-            throw new Error(`Weather API error: ${response.status}`);
-        }
+        if (!current.ok || !forecast.ok) throw new Error('Weather API Error');
 
-        const data = await response.json();
+        const currentData = await current.json();
+        const forecastData = await forecast.json();
 
-        // Transform API response to our format
-        const transformedData = transformWeatherData(data);
+        const transformed = transformAccuWeatherData(currentData[0], forecastData, locationKey);
 
-        // Cache the result
-        weatherCache.set(cacheKey, {
-            data: transformedData,
-            timestamp: Date.now()
-        });
+        weatherCache.set(cacheKey, { data: transformed, timestamp: Date.now() });
+        return transformed;
 
-        return transformedData;
     } catch (error) {
-        console.error('❌ Error fetching weather:', error);
-
-        // Return fallback mock data if API fails
-        return getFallbackWeather(city);
+        console.error('Weather Fail:', error);
+        return getFallbackWeather(query);
     }
 };
 
-/**
- * Transform WeatherAPI.com response to our app format
- */
-const transformWeatherData = (apiData) => {
-    const { current, forecast, alerts } = apiData;
+export const clearWeatherCache = () => {
+    weatherCache.clear();
+    console.log('🗑️ Weather cache cleared');
+};
 
+export const getCacheStatus = () => {
+    return {
+        size: weatherCache.size,
+        keys: Array.from(weatherCache.keys())
+    };
+};
+
+const getLocationKey = async (query) => {
+    // Sanitize: AccuWeather search works best with "City" or "City, State"
+    // Remove "Tehsil" word if present? No, let's just pass the query.
+    // Ensure URL encoding.
+    const url = `${BASE_URL}/locations/v1/cities/search?apikey=${API_KEY}&q=${encodeURIComponent(query)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data && data.length > 0 ? data[0] : null;
+};
+
+// ... Transformer and Icon Mapper ...
+const transformAccuWeatherData = (current, forecast, location) => {
     return {
         current: {
-            temp: Math.round(current.temp_c),
-            condition: current.condition.text,
-            humidity: current.humidity,
-            wind: `${Math.round(current.wind_kph)} km/h`,
-            feelsLike: Math.round(current.feelslike_c),
-            uv: current.uv,
-            visibility: current.vis_km,
-            pressure: current.pressure_mb,
-            windDir: current.wind_dir,
-            rainProb: forecast.forecastday[0]?.day?.daily_chance_of_rain + '%' || '0%',
-            icon: current.condition.icon,
-            lastUpdated: current.last_updated
+            temp: Math.round(current.Temperature.Metric.Value),
+            condition: current.WeatherText,
+            humidity: current.RelativeHumidity,
+            wind: `${Math.round(current.Wind?.Speed?.Metric?.Value || 0)} km/h`,
+            feelsLike: Math.round(current.RealFeelTemperature?.Metric?.Value || current.Temperature.Metric.Value),
+            uv: current.UVIndex,
+            visibility: current.Visibility?.Metric?.Value,
+            pressure: current.Pressure?.Metric?.Value,
+            windDir: current.Wind?.Direction?.English,
+            rainProb: current.PrecipitationSummary?.Precipitation?.Metric?.Value > 0 ? 'High' : 'Low',
+            icon: getWeatherEmoji(current.WeatherIcon),
+            lastUpdated: new Date(current.LocalObservationDateTime).toLocaleTimeString(),
         },
-        forecast: forecast.forecastday.map((day, index) => {
-            const date = new Date(day.date);
-            const dayName = index === 0 ? 'Today' :
-                date.toLocaleDateString('en-US', { weekday: 'short' });
-
+        forecast: forecast.DailyForecasts.map((day, index) => {
+            const date = new Date(day.Date);
+            const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
             return {
                 day: dayName,
-                date: day.date,
-                temp: Math.round(day.day.avgtemp_c),
-                maxTemp: Math.round(day.day.maxtemp_c),
-                minTemp: Math.round(day.day.mintemp_c),
-                condition: day.day.condition.text,
-                icon: getWeatherEmoji(day.day.condition.text),
-                rainChance: day.day.daily_chance_of_rain,
-                humidity: day.day.avghumidity,
-                maxWind: Math.round(day.day.maxwind_kph)
+                date: day.Date,
+                temp: Math.round((day.Temperature.Maximum.Value + day.Temperature.Minimum.Value) / 2),
+                maxTemp: Math.round(day.Temperature.Maximum.Value),
+                minTemp: Math.round(day.Temperature.Minimum.Value),
+                condition: day.Day.IconPhrase,
+                icon: getWeatherEmoji(day.Day.Icon),
+                rainChance: day.Day.PrecipitationProbability || 0,
+                humidity: 50, // AccuWeather basic forecast doesn't always have humidity in this endpoint
+                maxWind: Math.round(day.Day.Wind?.Speed?.Value || 0)
             };
         }),
-        alerts: alerts?.alert || [],
+        alerts: [],
         location: {
-            name: apiData.location.name,
-            region: apiData.location.region,
-            country: apiData.location.country
+            name: location.LocalizedName,
+            region: location.AdministrativeArea.LocalizedName,
+            country: location.Country.LocalizedName
         }
     };
 };
 
-/**
- * Get appropriate emoji for weather condition
- */
-const getWeatherEmoji = (condition) => {
-    const lowerCondition = condition.toLowerCase();
-
-    if (lowerCondition.includes('sunny') || lowerCondition.includes('clear')) return '☀️';
-    if (lowerCondition.includes('partly cloudy')) return '⛅';
-    if (lowerCondition.includes('cloudy') || lowerCondition.includes('overcast')) return '☁️';
-    if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) return '🌧️';
-    if (lowerCondition.includes('thunder') || lowerCondition.includes('storm')) return '⛈️';
-    if (lowerCondition.includes('snow')) return '❄️';
-    if (lowerCondition.includes('fog') || lowerCondition.includes('mist')) return '🌫️';
-    if (lowerCondition.includes('wind')) return '💨';
-
-    return '🌤️'; // Default
+const getWeatherEmoji = (iconCode) => {
+    if (iconCode >= 1 && iconCode <= 5) return '☀️'; // Sunny
+    if (iconCode >= 6 && iconCode <= 8) return '☁️'; // Cloudy
+    if (iconCode === 11) return '🌫️'; // Fog
+    if ((iconCode >= 12 && iconCode <= 14) || iconCode === 18) return '🌧️'; // Rain
+    if (iconCode >= 15 && iconCode <= 17) return '⛈️'; // T-Storms
+    if (iconCode >= 19 && iconCode <= 21) return '❄️'; // Snow
+    if (iconCode >= 22 && iconCode <= 29) return '❄️'; // Snow/Ice
+    if (iconCode >= 33 && iconCode <= 36) return '🌙'; // Night Clear
+    return '🌤️';
 };
 
-/**
- * Fallback mock weather data when API fails
- */
 const getFallbackWeather = (city) => {
-    console.log('⚠️ Using fallback weather data for', city);
+    // Sanitize input
+    const searchName = city.split(',')[0].trim();
+    console.log('⚠️ Using fallback weather data for', searchName);
+
+    // Dynamic State Lookup
+    let foundState = 'Unknown Region';
+
+    // Search in locationData
+    for (const [state, districts] of Object.entries(locationData)) {
+        if (districts[searchName]) {
+            foundState = state;
+            break;
+        }
+        for (const districtData of Object.values(districts)) {
+            if (districtData.tehsils && districtData.tehsils.includes(searchName)) {
+                foundState = state;
+                break;
+            }
+        }
+        if (foundState !== 'Unknown Region') break;
+    }
+
+    if (foundState === 'Unknown Region') foundState = 'Madhya Pradesh';
 
     return {
         current: {
@@ -147,30 +157,14 @@ const getFallbackWeather = (city) => {
             lastUpdated: new Date().toLocaleString()
         },
         forecast: [
-            { day: 'Today', temp: 24, maxTemp: 28, minTemp: 18, icon: '⛅', condition: 'Partly Cloudy (आंशिक बादल)', rainChance: 10 },
-            { day: 'Mon', temp: 25, maxTemp: 29, minTemp: 19, icon: '☀️', condition: 'Sunny (धूप)', rainChance: 0 },
-            { day: 'Tue', temp: 23, maxTemp: 27, minTemp: 17, icon: '☁️', condition: 'Cloudy (बादल)', rainChance: 20 }
+            { day: 'Today', temp: 24, maxTemp: 28, minTemp: 18, icon: '⛅', condition: 'Partly Cloudy', rainChance: 10 },
+            { day: 'Tomorrow', temp: 25, maxTemp: 29, minTemp: 19, icon: '☀️', condition: 'Sunny', rainChance: 0 },
+            { day: 'Day 3', temp: 23, maxTemp: 27, minTemp: 17, icon: '☁️', condition: 'Cloudy', rainChance: 20 },
+            { day: 'Day 4', temp: 24, maxTemp: 28, minTemp: 18, icon: '⛅', condition: 'Partly Cloudy', rainChance: 10 },
+            { day: 'Day 5', temp: 25, maxTemp: 29, minTemp: 19, icon: '☀️', condition: 'Sunny', rainChance: 0 }
         ],
         alerts: [],
-        location: { name: city, region: 'Madhya Pradesh', country: 'India' },
+        location: { name: city, region: foundState, country: 'India' },
         isFallback: true
-    };
-};
-
-/**
- * Clear weather cache (useful for refresh)
- */
-export const clearWeatherCache = () => {
-    weatherCache.clear();
-    console.log('🗑️ Weather cache cleared');
-};
-
-/**
- * Get cache status for debugging
- */
-export const getCacheStatus = () => {
-    return {
-        size: weatherCache.size,
-        keys: Array.from(weatherCache.keys())
     };
 };

@@ -1,39 +1,63 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useMarket } from '../context/MarketContext';
-import { mpLocations } from '../data/mpData';
-import { getSearchSynonyms } from '../utils/searchMapping';
+import { locationData, getStates, getDistricts, getTehsils } from '../data/locationData';
+import { getSearchSynonyms, commodityMapping } from '../utils/searchMapping';
+import LocationSelector from '../components/LocationSelector';
+import { useLanguage } from '../context/LanguageContext';
+import BackToHomeButton from '../components/BackToHomeButton';
 
 const SellerDirectory = () => {
     const { getUniqueSellers, isRestrictedMode, toggleRestriction } = useMarket();
+    const { t } = useLanguage();
 
-    // SCALABILITY: Generate large mock dataset with structure: District -> Tehsil
+    // SCALABILITY: Generate large mock dataset with structure: State -> District -> Tehsil
     const [allSellers] = useState(() => {
         const baseSellers = getUniqueSellers();
-        let largeList = [];
-        const districts = Object.keys(mpLocations);
+        let largeList = [...baseSellers.map(s => ({
+            ...s,
+            id: s.contactMobile || s.name, // Ensure unique ID for real sellers
+            // If location is partial, try to keep it, else fallback
+            location: s.location.includes(',') ? s.location : `${s.district || 'Unknown'}, ${s.state || 'Unknown'}`
+        }))];
 
-        // Generate 500 sellers with specific locations
+        const states = getStates();
+        const mockCrops = ['Wheat', 'Rice', 'Sugarcane', 'Cotton', 'Tomato', 'Onion', 'Soybean', 'Maize', 'Turmeric', 'Gram', 'Ginger', 'Bajra'];
+
+        // Generate mock sellers to fill up to 500
         for (let i = 0; i < 500; i++) {
-            const base = baseSellers[i % baseSellers.length];
+            // Use a mock base if we have no real sellers, or cycle through them
+            const base = baseSellers.length > 0 ? baseSellers[i % baseSellers.length] : { name: 'Seller' };
 
-            // 1. Pick Random District
-            const randomDistrict = districts[Math.floor(Math.random() * districts.length)];
+            // Random Crop for better search testing
+            const randomCrop = mockCrops[Math.floor(Math.random() * mockCrops.length)];
+            const randomCrop2 = mockCrops[Math.floor(Math.random() * mockCrops.length)];
+            const products = base.products ? base.products : [randomCrop, randomCrop2 !== randomCrop ? randomCrop2 : null].filter(Boolean);
 
-            // 2. Pick Random Tehsil from that District
-            // FIX: Access .tehsils property from the new data structure
-            const tehsilsList = mpLocations[randomDistrict]?.tehsils || [];
-            const randomTehsil = tehsilsList.length > 0
-                ? tehsilsList[Math.floor(Math.random() * tehsilsList.length)]
+            // 1. Pick Random State
+            const randomState = states[Math.floor(Math.random() * states.length)];
+
+            // 2. Pick Random District
+            const districts = getDistricts(randomState);
+            const randomDistrict = districts.length > 0 ? districts[Math.floor(Math.random() * districts.length)] : 'Unknown';
+
+            // 3. Pick Random Tehsil
+            const tehsils = getTehsils(randomState, randomDistrict);
+            const randomTehsil = tehsils.length > 0
+                ? tehsils[Math.floor(Math.random() * tehsils.length)]
                 : 'Main City';
 
             largeList.push({
                 ...base,
-                id: `seller-${i}`,
-                name: `${base.name} ${i + 1}`,
+                id: `mock-seller-${i}`,
+                name: `${base.name || 'Farmer'} (Mock ${i + 1})`, // Distinct name
+                contactMobile: '9123456789', // Dummy number for testing actions
+                products: products,
+                state: randomState,
                 district: randomDistrict,
                 tehsil: randomTehsil,
-                location: `${randomTehsil}, ${randomDistrict}` // Display format
+                location: `${randomTehsil}, ${randomDistrict}, ${randomState}`, // Display format
+                isMock: true
             });
         }
         return largeList;
@@ -42,20 +66,18 @@ const SellerDirectory = () => {
     const [searchParams] = useSearchParams();
     const globalSearch = searchParams.get('search')?.toLowerCase() || '';
 
-    const [selectedDistrict, setSelectedDistrict] = useState('All');
-    const [selectedTehsil, setSelectedTehsil] = useState('All');
+    const [selectedState, setSelectedState] = useState('');
+    const [selectedDistrict, setSelectedDistrict] = useState('');
+    const [selectedTehsil, setSelectedTehsil] = useState('');
     const [productSearch, setProductSearch] = useState('');
     const [visibleCount, setVisibleCount] = useState(9);
-
-    // Dynamic Tehsils based on selected District
-    // FIX: Access .tehsils property
-    const currentTehsils = selectedDistrict !== 'All' ? mpLocations[selectedDistrict]?.tehsils || [] : [];
 
     // Filter Logic
     const filteredSellers = useMemo(() => {
         return allSellers.filter(seller => {
-            const matchDistrict = selectedDistrict === 'All' || seller.district === selectedDistrict;
-            const matchTehsil = selectedTehsil === 'All' || seller.tehsil === selectedTehsil;
+            const matchState = !selectedState || seller.state === selectedState;
+            const matchDistrict = !selectedDistrict || seller.district === selectedDistrict;
+            const matchTehsil = !selectedTehsil || seller.tehsil === selectedTehsil;
 
             const prodSearchLower = productSearch.toLowerCase();
             const prodSynonyms = getSearchSynonyms(prodSearchLower);
@@ -75,9 +97,9 @@ const SellerDirectory = () => {
                     return globalSynonyms.some(syn => pLower.includes(syn));
                 });
 
-            return matchDistrict && matchTehsil && matchGlobalSearch && matchProduct;
+            return matchState && matchDistrict && matchTehsil && matchGlobalSearch && matchProduct;
         });
-    }, [selectedDistrict, selectedTehsil, allSellers, globalSearch, productSearch]);
+    }, [selectedState, selectedDistrict, selectedTehsil, allSellers, globalSearch, productSearch]);
 
     const displayedSellers = filteredSellers.slice(0, visibleCount);
 
@@ -85,13 +107,23 @@ const SellerDirectory = () => {
         setVisibleCount(prev => prev + 9);
     };
 
+    const cropSuggestions = useMemo(() => {
+        const unique = new Set([
+            ...Object.keys(commodityMapping),
+            ...Object.values(commodityMapping)
+        ]);
+        return Array.from(unique).sort();
+    }, []);
+
     return (
         <div className="container fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+            <BackToHomeButton compact />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', marginTop: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                        <h1 style={{ margin: 0 }}>Verified Sellers (सत्यापित विक्रेता)</h1>
-                        <p style={{ color: '#666' }}>Find buyers & sellers in your district.</p>
+                        <h1 style={{ margin: 0 }}>{t('verified_sellers')}</h1>
+                        <p style={{ color: '#666' }}>{t('find_sellers_desc')}</p>
                     </div>
 
                     {/* Admin Toggle */}
@@ -128,65 +160,41 @@ const SellerDirectory = () => {
                     {/* Product Search */}
                     <div style={{ flex: 1, minWidth: '200px' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
-                            🌾 Product (फसल):
+                            🌾 {t('product_label')}:
                         </label>
                         <input
                             type="text"
+                            list="crop-suggestions"
                             placeholder="e.g. Tomato, Wheat..."
                             value={productSearch}
                             onChange={(e) => setProductSearch(e.target.value)}
                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #aaa', fontSize: '1rem' }}
                         />
+                        <datalist id="crop-suggestions">
+                            {cropSuggestions.map((crop, index) => (
+                                <option key={index} value={crop} />
+                            ))}
+                        </datalist>
                     </div>
 
-                    {/* District Dropdown */}
-                    <div style={{ flex: 1, minWidth: '200px' }}>
+                    {/* Location Selector */}
+                    <div style={{ flex: 2, minWidth: '300px' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
-                            📍 District (जिला):
+                            📍 {t('location')}:
                         </label>
-                        <select
-                            value={selectedDistrict}
-                            onChange={(e) => {
-                                setSelectedDistrict(e.target.value);
-                                setSelectedTehsil('All'); // Reset Tehsil when District changes
-                                setVisibleCount(9);
+                        <LocationSelector
+                            selectedState={selectedState}
+                            selectedDistrict={selectedDistrict}
+                            selectedTehsil={selectedTehsil}
+                            onLocationChange={(loc) => {
+                                setSelectedState(loc.state);
+                                setSelectedDistrict(loc.district);
+                                setSelectedTehsil(loc.tehsil);
+                                setVisibleCount(9); // Reset view on location change
                             }}
-                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #aaa', fontSize: '1rem' }}
-                        >
-                            <option value="All">All Districts</option>
-                            {Object.keys(mpLocations).map((dist) => (
-                                <option key={dist} value={dist}>{mpLocations[dist].label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Tehsil Dropdown (Conditional) */}
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
-                            🏘️ Tehsil (तहसील):
-                        </label>
-                        <select
-                            value={selectedTehsil}
-                            onChange={(e) => {
-                                setSelectedTehsil(e.target.value);
-                                setVisibleCount(9);
-                            }}
-                            disabled={selectedDistrict === 'All'} // Disabled until District is chosen
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                borderRadius: '8px',
-                                border: '1px solid #aaa',
-                                fontSize: '1rem',
-                                backgroundColor: selectedDistrict === 'All' ? '#eee' : 'white',
-                                cursor: selectedDistrict === 'All' ? 'not-allowed' : 'pointer'
-                            }}
-                        >
-                            <option value="All">All Tehsils</option>
-                            {currentTehsils.map((tehsil) => (
-                                <option key={tehsil} value={tehsil}>{tehsil}</option>
-                            ))}
-                        </select>
+                            showTehsil={true}
+                            vertical={false}
+                        />
                     </div>
                 </div>
             </div>
@@ -201,20 +209,42 @@ const SellerDirectory = () => {
                 gap: '10px'
             }}>
                 <span style={{ color: '#666', fontSize: '0.9rem' }}>
-                    Found <strong>{filteredSellers.length}</strong> sellers
-                    {selectedDistrict !== 'All' && ` in ${selectedDistrict}`}
-                    {selectedTehsil !== 'All' && ` -> ${selectedTehsil}`}
+                    {t('found_sellers')}: <strong>{filteredSellers.length}</strong>
+                    {selectedDistrict && ` (${selectedDistrict})`}
+                    {selectedTehsil && ` -> ${selectedTehsil}`}
                 </span>
                 {filteredSellers.length > 0 && (
                     <button
                         onClick={() => {
-                            setSelectedDistrict('All');
-                            setSelectedTehsil('All');
+                            setSelectedState('');
+                            setSelectedDistrict('');
+                            setSelectedTehsil('');
                             setProductSearch('');
                         }}
-                        style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
+                        style={{
+                            background: 'white',
+                            border: '1px solid var(--color-primary)',
+                            color: 'var(--color-primary)',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            fontWeight: 'bold',
+                            padding: '6px 16px',
+                            borderRadius: '20px',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                        }}
+                        onMouseOver={(e) => {
+                            e.target.style.backgroundColor = 'var(--color-primary)';
+                            e.target.style.color = 'white';
+                        }}
+                        onMouseOut={(e) => {
+                            e.target.style.backgroundColor = 'white';
+                            e.target.style.color = 'var(--color-primary)';
+                        }}
                     >
-                        Reset Filters
+                        🔄 {t('reset_filters')}
                     </button>
                 )}
             </div>
@@ -257,7 +287,7 @@ const SellerDirectory = () => {
 
                         <div style={{ padding: '1.5rem' }}>
                             <div style={{ marginBottom: '1rem' }}>
-                                <strong style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>Deals In:</strong>
+                                <strong style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>{t('deals_in')}:</strong>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                                     {seller.products.map((prod, i) => (
                                         <span key={i} style={{
@@ -285,29 +315,59 @@ const SellerDirectory = () => {
                                     textAlign: 'center',
                                     fontSize: '0.9rem'
                                 }}>
-                                    🔒 <strong>Contact Hidden</strong>
-                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem' }}>Upgrade to Premium to view contact details.</p>
+                                    🔒 <strong>{t('contact_hidden')}</strong>
+                                    <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem' }}>{t('upgrade_premium')}</p>
                                     <button className="btn btn-primary" style={{ width: '100%', marginTop: '10px', fontSize: '0.8rem', padding: '5px' }}>
-                                        Unlock Access
+                                        {t('unlock_access')}
                                     </button>
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button className="btn btn-outline" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-                                        📞 Call Now
-                                    </button>
-                                    <button className="btn" style={{
-                                        flex: 1,
-                                        backgroundColor: '#25D366',
-                                        color: 'white',
-                                        border: 'none',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '5px'
-                                    }}>
-                                        💬 WhatsApp
-                                    </button>
+                                    <a
+                                        href={seller.contactMobile ? `tel:${seller.contactMobile}` : '#'}
+                                        className="btn btn-outline"
+                                        style={{
+                                            flex: 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '5px',
+                                            textDecoration: 'none'
+                                        }}
+                                        onClick={(e) => {
+                                            if (!seller.contactMobile) {
+                                                e.preventDefault();
+                                                alert('Contact number hidden or not available.');
+                                            }
+                                        }}
+                                    >
+                                        📞 {t('call_now')}
+                                    </a>
+                                    <a
+                                        href={seller.contactMobile ? `https://wa.me/${seller.contactMobile}?text=Hi ${seller.name}, I found your profile on KisanBazaar.` : '#'}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn"
+                                        style={{
+                                            flex: 1,
+                                            backgroundColor: '#25D366',
+                                            color: 'white',
+                                            border: 'none',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '5px',
+                                            textDecoration: 'none'
+                                        }}
+                                        onClick={(e) => {
+                                            if (!seller.contactMobile) {
+                                                e.preventDefault();
+                                                alert('Contact number hidden or not available.');
+                                            }
+                                        }}
+                                    >
+                                        💬 {t('whatsapp')}
+                                    </a>
                                 </div>
                             )}
                         </div>
@@ -316,9 +376,9 @@ const SellerDirectory = () => {
 
                 {filteredSellers.length === 0 && (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem', color: '#666' }}>
-                        <h3>No sellers found in this area.</h3>
-                        <p>Try changing the Tehsil or District.</p>
-                        {selectedDistrict === 'All' && <Link to="/sell" className="btn btn-primary">Start Selling</Link>}
+                        <h3>{t('no_sellers_found')}</h3>
+                        <p>{t('try_changing_location')}</p>
+                        {selectedDistrict === 'All' && <Link to="/sell" className="btn btn-primary">{t('list_product')}</Link>}
                     </div>
                 )}
             </div>
@@ -331,13 +391,17 @@ const SellerDirectory = () => {
                         className="btn btn-outline"
                         style={{ padding: '0.8rem 3rem', fontSize: '1.1rem' }}
                     >
-                        Load More Sellers (⬇️)
+                        {t('load_more_sellers')} (⬇️)
                     </button>
                     <p style={{ marginTop: '0.5rem', color: '#999', fontSize: '0.8rem' }}>
-                        Showing {displayedSellers.length} of {filteredSellers.length}
+                        {t('showing_sellers_count')} {displayedSellers.length} / {filteredSellers.length}
                     </p>
                 </div>
             )}
+
+            <div style={{ marginTop: '2rem' }}>
+                <BackToHomeButton />
+            </div>
         </div>
     );
 };

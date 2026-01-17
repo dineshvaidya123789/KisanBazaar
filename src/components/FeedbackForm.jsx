@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 const FeedbackForm = () => {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         name: '',
         mobile: '',
@@ -15,6 +17,11 @@ const FeedbackForm = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (!formData.suggestion.trim()) {
+            alert(t('placeholder_suggestion').replace('*', '').trim());
+            return;
+        }
 
         // Save to local storage for admin view
         const existingFeedback = JSON.parse(localStorage.getItem('kisan_feedback') || '[]');
@@ -33,7 +40,7 @@ const FeedbackForm = () => {
 
     return (
         <div style={{ maxWidth: '400px' }}>
-            <h4 style={{ color: 'var(--color-secondary)', marginBottom: 'var(--spacing-md)' }}>सुझाव दें (Feedback)</h4>
+            <h4 style={{ color: 'var(--color-secondary)', marginBottom: 'var(--spacing-md)' }}>{t('feedback_title')}</h4>
             {submitted ? (
                 <div style={{
                     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -42,17 +49,16 @@ const FeedbackForm = () => {
                     color: '#fff',
                     textAlign: 'center'
                 }}>
-                    धन्यवाद! आपका सुझाव प्राप्त हुआ।
+                    {t('feedback_success')}
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <input
                         type="text"
                         name="name"
-                        placeholder="आपका नाम (Name)"
+                        placeholder={t('placeholder_name')}
                         value={formData.name}
                         onChange={handleChange}
-                        required
                         style={{
                             padding: '10px',
                             borderRadius: '5px',
@@ -64,10 +70,9 @@ const FeedbackForm = () => {
                     <input
                         type="tel"
                         name="mobile"
-                        placeholder="मोबाइल नंबर (Mobile)"
+                        placeholder={t('placeholder_mobile')}
                         value={formData.mobile}
                         onChange={handleChange}
-                        required
                         style={{
                             padding: '10px',
                             borderRadius: '5px',
@@ -78,10 +83,10 @@ const FeedbackForm = () => {
                     />
                     <textarea
                         name="suggestion"
-                        placeholder="आपका सुझाव (Suggestion)"
+                        required
+                        placeholder={t('placeholder_suggestion')}
                         value={formData.suggestion}
                         onChange={handleChange}
-                        required
                         rows="3"
                         style={{
                             padding: '10px',
@@ -107,7 +112,7 @@ const FeedbackForm = () => {
                         onMouseOver={(e) => e.target.style.opacity = '0.9'}
                         onMouseOut={(e) => e.target.style.opacity = '1'}
                     >
-                        भेजें (Submit)
+                        {t('submit')}
                     </button>
                 </form>
             )}

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Login = () => {
     const [step, setStep] = useState(1); // 1: Phone, 2: OTP
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
+    const [city, setCity] = useState(''); // New state for city/samiti
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const { login } = useAuth();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -36,7 +39,7 @@ const Login = () => {
         setIsLoading(true);
         setError('');
         try {
-            await login(phone, otp);
+            await login(phone, otp, 'Farmer', city); // Pass city to login
             navigate(from, { replace: true });
         } catch (err) {
             setError(err);
@@ -49,8 +52,8 @@ const Login = () => {
         <div className="container fade-in" style={{ padding: 'var(--spacing-xl) 0', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
             <div className="card" style={{ maxWidth: '400px', width: '100%', padding: '2rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <h1 style={{ color: 'var(--color-primary)' }}>Sign In / लॉग इन</h1>
-                    <p style={{ color: '#666' }}>Access exclusive farmer features.</p>
+                    <h1 style={{ color: 'var(--color-primary)' }}>{t('login_title')}</h1>
+                    <p style={{ color: '#666' }}>{t('login_subtitle')}</p>
                 </div>
 
                 {error && (
@@ -62,14 +65,24 @@ const Login = () => {
                 {step === 1 ? (
                     <form onSubmit={handleSendOtp}>
                         <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Phone Number (मोबाइल नंबर)</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('label_city')}</label>
+                            <input
+                                type="text"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                placeholder={t('placeholder_city')}
+                                style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem' }}
+                            />
+                        </div>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('label_phone')}</label>
                             <div style={{ display: 'flex' }}>
                                 <span style={{ padding: '0.8rem', backgroundColor: '#f0f0f0', border: '1px solid #ccc', borderRight: 'none', borderRadius: '4px 0 0 4px', color: '#555' }}>+91</span>
                                 <input
                                     type="tel"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))} // Only numbers
-                                    placeholder="Enter 10 digit number"
+                                    placeholder={t('placeholder_phone')}
                                     maxLength="10"
                                     style={{ flex: 1, padding: '0.8rem', borderRadius: '0 4px 4px 0', border: '1px solid #ccc', fontSize: '1rem' }}
                                     required
@@ -82,28 +95,28 @@ const Login = () => {
                             style={{ width: '100%', fontSize: '1.1rem', padding: '1rem' }}
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Sending OTP...' : 'Get OTP (ओटीपी भेजें)'}
+                            {isLoading ? t('btn_sending') : t('btn_get_otp')}
                         </button>
                     </form>
                 ) : (
                     <form onSubmit={handleVerifyOtp}>
                         <p style={{ textAlign: 'center', marginBottom: '1rem', color: '#555' }}>
-                            We sent an OTP to <strong>+91 {phone}</strong><br />
-                            <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setStep(1)}>Change Number</span>
+                            {t('otp_sent_to')} <strong>+91 {phone}</strong><br />
+                            <span style={{ fontSize: '0.8rem', color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setStep(1)}>{t('change_number')}</span>
                         </p>
 
                         <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Enter OTP (ओटीपी डालें)</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('label_enter_otp')}</label>
                             <input
                                 type="text"
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value)}
-                                placeholder="e.g. 1234"
+                                placeholder={t('placeholder_otp')}
                                 style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1.2rem', textAlign: 'center', letterSpacing: '5px' }}
                                 required
                             />
                             <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: '#888' }}>
-                                (Use mock OTP: 1234)
+                                {t('mock_otp_msg')}
                             </div>
                         </div>
                         <button
@@ -112,7 +125,7 @@ const Login = () => {
                             style={{ width: '100%', fontSize: '1.1rem', padding: '1rem' }}
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Verifying...' : 'Verify & Login'}
+                            {isLoading ? t('btn_verifying') : t('btn_verify_login')}
                         </button>
                     </form>
                 )}

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useMarket } from '../context/MarketContext';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import getCommodityImage from '../utils/commodityImages';
 
 const DeleteConfirmModal = ({ show, onConfirm, onCancel, productName }) => {
+    const { t } = useLanguage();
     if (!show) return null;
 
     return (
@@ -47,19 +49,12 @@ const DeleteConfirmModal = ({ show, onConfirm, onCancel, productName }) => {
                 {/* Confirmation Message */}
                 <h3 style={{
                     color: '#333',
-                    marginBottom: '0.5rem',
+                    marginBottom: '1rem',
                     fontSize: '1.5rem',
                     fontWeight: 'bold'
                 }}>
-                    क्या आप वाकई इसे हटाना चाहते हैं?
+                    {t('delete_confirm_title')}
                 </h3>
-                <p style={{
-                    color: '#333',
-                    marginBottom: '1rem',
-                    fontSize: '1.2rem'
-                }}>
-                    Do you really want to delete this?
-                </p>
 
                 {productName && (
                     <p style={{
@@ -93,7 +88,7 @@ const DeleteConfirmModal = ({ show, onConfirm, onCancel, productName }) => {
                         onMouseOver={(e) => e.target.style.backgroundColor = '#e0e0e0'}
                         onMouseOut={(e) => e.target.style.backgroundColor = '#f5f5f5'}
                     >
-                        ❌ नहीं (No)
+                        ❌ {t('delete_confirm_no')}
                     </button>
 
                     <button
@@ -114,7 +109,7 @@ const DeleteConfirmModal = ({ show, onConfirm, onCancel, productName }) => {
                         onMouseOver={(e) => e.target.style.backgroundColor = '#B71C1C'}
                         onMouseOut={(e) => e.target.style.backgroundColor = '#D32F2F'}
                     >
-                        ✓ हाँ, हटाएं (Yes, Delete)
+                        ✓ {t('delete_confirm_yes')}
                     </button>
                 </div>
             </div>
@@ -124,6 +119,7 @@ const DeleteConfirmModal = ({ show, onConfirm, onCancel, productName }) => {
 
 const MyProducts = () => {
     const { getUserListings, deleteListing } = useMarket();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const [deleteModal, setDeleteModal] = useState({ show: false, id: null, name: '' });
 
@@ -133,14 +129,13 @@ const MyProducts = () => {
     if (!currentUserMobile) {
         return (
             <div className="container" style={{ padding: 'var(--spacing-xl) 0', textAlign: 'center' }}>
-                <h2>Please sign in to view your products</h2>
-                <p>कृपया अपने उत्पाद देखने के लिए साइन इन करें</p>
+                <h2>{t('please_sign_in')}</h2>
                 <button
                     onClick={() => navigate('/sell')}
                     className="btn btn-primary"
                     style={{ marginTop: '1rem' }}
                 >
-                    Sign In (साइन इन करें)
+                    {t('sign_in_btn')}
                 </button>
             </div>
         );
@@ -176,9 +171,7 @@ const MyProducts = () => {
                     paddingBottom: '0.5rem',
                     color: 'var(--color-primary)'
                 }}>
-                    My Products List
-                    <br />
-                    <span style={{ fontSize: '1.2rem', color: '#666' }}>मेरी पोस्ट की सूची</span>
+                    {t('my_products_list')}
                 </h1>
 
                 {userListings.length === 0 ? (
@@ -190,41 +183,39 @@ const MyProducts = () => {
                     }}>
                         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📦</div>
                         <h3 style={{ color: '#666', marginBottom: '0.5rem' }}>
-                            आपने अभी तक कुछ पोस्ट नहीं किया है
+                            {t('no_posts_title')}
                         </h3>
-                        <p style={{ color: '#999', marginBottom: '2rem' }}>
-                            You haven't posted anything yet
-                        </p>
                         <button
                             onClick={() => navigate('/sell')}
                             className="btn btn-primary"
                             style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}
                         >
-                            ➕ Post Your First Requirement (पहली पोस्ट करें)
+                            ➕ {t('post_first_req')}
                         </button>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                    <div className="products-grid" style={{ display: 'grid', gap: '1.5rem' }}>
                         {userListings.map(listing => (
                             <div
                                 key={listing.id}
-                                className="card"
+                                className="card product-card"
                                 style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'auto 1fr auto',
+                                    display: 'flex',
+                                    flexDirection: 'row',
                                     gap: '1.5rem',
                                     alignItems: 'center',
-                                    padding: '1.5rem'
+                                    padding: '1.5rem',
+                                    flexWrap: 'wrap' // Allow wrapping on small screens
                                 }}
                             >
                                 {/* Product Image Container */}
                                 <div style={{
                                     width: '120px',
                                     height: '120px',
-                                    minWidth: '120px', // Force width
+                                    minWidth: '120px',
                                     borderRadius: '8px',
                                     overflow: 'hidden',
-                                    background: '#f1f5f9', // Slightly different gray for better visibility
+                                    background: '#f1f5f9',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -232,7 +223,6 @@ const MyProducts = () => {
                                     border: '1px solid #e2e8f0'
                                 }}>
                                     {(() => {
-                                        // Robust image selection logic
                                         const hasImagesArray = Array.isArray(listing.images) && listing.images.length > 0 && listing.images[0];
                                         const hasSingleImage = listing.image && typeof listing.image === 'string' && listing.image.length > 5;
 
@@ -273,15 +263,15 @@ const MyProducts = () => {
                                             return (
                                                 <div style={{ textAlign: 'center', color: '#94a3b8' }}>
                                                     <div style={{ fontSize: '2rem' }}>🖼️</div>
-                                                    <div style={{ fontSize: '0.7rem', marginTop: '2px' }}>No Photo</div>
+                                                    <div style={{ fontSize: '0.7rem', marginTop: '2px' }}>{t('no_photo')}</div>
                                                 </div>
                                             );
                                         }
                                     })()}
                                 </div>
 
-                                {/* Product Details */}
-                                <div>
+                                {/* Product Details - flexible width */}
+                                <div style={{ flex: '1 1 300px' }}>
                                     <div style={{
                                         display: 'inline-block',
                                         padding: '4px 12px',
@@ -292,7 +282,7 @@ const MyProducts = () => {
                                         backgroundColor: listing.type === 'Buy' ? '#FFEBEE' : '#E8F5E9',
                                         color: listing.type === 'Buy' ? '#D32F2F' : '#2E7D32'
                                     }}>
-                                        {listing.type === 'Buy' ? '🔴 WANT TO BUY' : '🟢 WANT TO SELL'}
+                                        {listing.type === 'Buy' ? `🔴 ${t('want_to_buy')}` : `🟢 ${t('want_to_sell')}`}
                                     </div>
 
                                     <h3 style={{
@@ -305,20 +295,37 @@ const MyProducts = () => {
 
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', // Responsive grid
                                         gap: '0.5rem',
                                         fontSize: '0.95rem',
                                         color: '#666'
                                     }}>
-                                        <div><strong>Quantity:</strong> {listing.quantity} {listing.unit}</div>
-                                        <div><strong>Price:</strong> ₹{listing.targetPrice}/{listing.priceUnit}</div>
-                                        <div><strong>Location:</strong> {listing.district}, {listing.state}</div>
-                                        <div><strong>Quality:</strong> {listing.quality}</div>
+                                        <div><strong>{t('quantity')}:</strong> {listing.quantity} {listing.unit}</div>
+                                        <div><strong>{t('price')}:</strong> ₹{listing.targetPrice}/{listing.priceUnit}</div>
+                                        <div><strong>{t('location')}:</strong> {listing.district}, {listing.state}</div>
+                                        {listing.type === 'Sell' && <div><strong>{t('quality')}:</strong> {listing.quality}</div>}
                                     </div>
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                {/* Action Buttons - Stack on mobile */}
+                                <div className="action-buttons" style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.8rem',
+                                    flex: '1 1 100%', // Take full width on wrap
+                                    marginTop: '1rem',
+                                    '@media (min-width: 768px)': { // This won't work inline, need class or raw style logic
+                                        flex: '0 0 auto',
+                                        marginTop: 0
+                                    }
+                                }}>
+                                    {/* Inline style hack for responsive flex-basis: using a class would be better but keeping it simple */}
+                                    <style>{`
+                                        @media (min-width: 768px) {
+                                            .product-card { flex-wrap: nowrap !important; }
+                                            .action-buttons { flex: 0 0 auto !important; margin-top: 0 !important; }
+                                        }
+                                    `}</style>
                                     <button
                                         onClick={() => handleEdit(listing)}
                                         style={{
@@ -331,12 +338,13 @@ const MyProducts = () => {
                                             borderRadius: '6px',
                                             cursor: 'pointer',
                                             transition: 'all 0.3s',
-                                            whiteSpace: 'nowrap'
+                                            whiteSpace: 'nowrap',
+                                            width: '100%' // Full width on mobile
                                         }}
                                         onMouseOver={(e) => e.target.style.backgroundColor = '#1B5E20'}
                                         onMouseOut={(e) => e.target.style.backgroundColor = '#2E7D32'}
                                     >
-                                        ✏️ Edit Product
+                                        ✏️ {t('edit_product')}
                                     </button>
 
                                     <button
@@ -351,12 +359,13 @@ const MyProducts = () => {
                                             borderRadius: '6px',
                                             cursor: 'pointer',
                                             transition: 'all 0.3s',
-                                            whiteSpace: 'nowrap'
+                                            whiteSpace: 'nowrap',
+                                            width: '100%' // Full width on mobile
                                         }}
                                         onMouseOver={(e) => e.target.style.backgroundColor = '#B71C1C'}
                                         onMouseOut={(e) => e.target.style.backgroundColor = '#D32F2F'}
                                     >
-                                        🗑️ Delete Product
+                                        🗑️ {t('delete_product')}
                                     </button>
                                 </div>
                             </div>

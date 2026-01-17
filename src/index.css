@@ -1,17 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 :root {
   /* Premium Nature Palette */
   --color-primary: #1E4A35;
-  /* Deep Nature Green */
   --color-primary-light: #2E6B4D;
+  --color-primary-gradient: linear-gradient(135deg, #1E4A35 0%, #2E6B4D 100%);
   --color-secondary: #D4A017;
-  /* Harvest Gold */
   --color-secondary-dark: #B08512;
   --color-background: #F8F5F2;
-  /* Cream/Off-white */
   --color-surface: #FFFFFF;
   --color-text: #2C2C2C;
   --color-text-light: #666666;
   --color-border: #E0E0E0;
+
+  /* Premium Accents */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -21,19 +27,22 @@
   --spacing-xl: 4rem;
 
   /* Typography */
-  --font-family-base: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-family-base: 'Outfit', 'Poppins', 'Segoe UI', system-ui, sans-serif;
   --font-family-hindi: 'Poppins', 'Hind', 'Nirmala UI', system-ui, sans-serif;
 
   /* UI Elements */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.15);
 
   --transition-speed: 0.3s;
+  --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -54,6 +63,13 @@ body {
   color: var(--color-text);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
 }
 
 h1,
@@ -147,6 +163,192 @@ button {
 .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
+}
+
+/* Premium Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-speed) var(--transition-smooth);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.18);
+  transform: translateY(-2px);
+}
+
+/* Premium Input Styles */
+.premium-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+  background: white;
+  transition: all 0.2s var(--transition-smooth);
+  outline: none;
+}
+
+.premium-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(30, 74, 53, 0.1);
+  transform: translateY(-1px);
+}
+
+.premium-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Premium Select */
+.premium-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s var(--transition-smooth);
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.premium-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(30, 74, 53, 0.1);
+}
+
+/* Premium Textarea */
+.premium-textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+  background: white;
+  transition: all 0.2s var(--transition-smooth);
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.premium-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(30, 74, 53, 0.1);
+}
+
+/* Premium Label */
+.premium-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  letter-spacing: 0.01em;
+}
+
+/* Premium Button Enhancements */
+.premium-btn {
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  transition: all 0.3s var(--transition-smooth);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.premium-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.premium-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.premium-btn:active {
+  transform: translateY(-1px);
+}
+
+/* Toggle Switch Premium */
+.toggle-container {
+  display: flex;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  position: relative;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s var(--transition-smooth);
+  position: relative;
+  z-index: 1;
+}
+
+.toggle-btn.active {
+  color: white;
+}
+
+.toggle-btn:not(.active) {
+  color: #6b7280;
+}
+
+/* Slide-in Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.4s var(--transition-smooth);
 }
 
 /* Utility Animations */

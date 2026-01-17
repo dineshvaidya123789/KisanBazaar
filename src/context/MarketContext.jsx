@@ -1,47 +1,114 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useLanguage } from './LanguageContext';
 
 const MarketContext = createContext();
 
 export const useMarket = () => useContext(MarketContext);
 
 export const MarketProvider = ({ children }) => {
+    const { t } = useLanguage();
     // Initial Mock Data (used only if localStorage is empty)
     const initialMockData = [
         {
             id: 1,
             title: 'ताज़ा टमाटर (Fresh Tomato)',
+            commodity: 'tomato',
+            type: 'Sell',
             category: 'Vegetables',
             price: '20',
             unit: 'kg',
             quantity: '500',
             location: 'Burhanpur',
             seller: 'Ramesh Kumar',
+            contactMobile: '919876543210',
             image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=300&q=80',
             description: 'देसी टमाटर, पूरी तरह से जैविक।'
         },
         {
             id: 2,
             title: 'बासमती चावल (Basmati Rice)',
+            commodity: 'rice',
+            type: 'Sell',
             category: 'Grains',
             price: '4500',
             unit: 'quintal',
             quantity: '10',
             location: 'Nepanagar',
             seller: 'Suresh Patel',
+            contactMobile: '919876543211',
             image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80',
             description: 'उच्च गुणवत्ता वाला बासमती चावल।'
         },
         {
             id: 3,
             title: 'केला (Banana)',
+            commodity: 'banana',
+            type: 'Sell',
             category: 'Fruits',
             price: '1500',
             unit: 'quintal',
             quantity: '50',
             location: 'Ambada',
             seller: 'Mukesh Bhai',
+            contactMobile: '919876543212',
             image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=300&q=80',
             description: 'मिठास से भरपूर ताजे केले।'
+        },
+        {
+            id: 4,
+            title: 'टमाटर चाहिए (Need Tomato)',
+            commodity: 'tomato',
+            type: 'Buy',
+            category: 'Vegetables',
+            price: '18',
+            unit: 'kg',
+            quantity: '200',
+            location: 'Indore',
+            seller: 'Rahul Singh',
+            contactMobile: '919876543213',
+            description: 'Looking for bulk tomatoes.'
+        },
+        {
+            id: 5,
+            title: 'Sona Tomato Sellers',
+            commodity: 'tomato',
+            type: 'Sell',
+            category: 'Vegetables',
+            price: '22',
+            unit: 'kg',
+            quantity: '1000',
+            location: 'Dhar',
+            seller: 'Vikram Singh',
+            contactMobile: '919876543214',
+            description: 'High quality hybrid tomatoes.'
+        },
+        {
+            id: 6,
+            title: 'Premium Kela (Banana)',
+            commodity: 'banana',
+            type: 'Sell',
+            category: 'Fruits',
+            price: '1600',
+            unit: 'quintal',
+            quantity: '100',
+            location: 'Buranpur',
+            seller: 'Anil Gupta',
+            contactMobile: '919876543215',
+            description: 'Grade A bananas for export.'
+        },
+        {
+            id: 7,
+            title: 'Banana Buyer (bulk)',
+            commodity: 'banana',
+            type: 'Buy',
+            category: 'Fruits',
+            price: '1400',
+            unit: 'quintal',
+            quantity: '500',
+            location: 'Mumbai',
+            seller: 'Fruit Co.',
+            contactMobile: '919876543216',
+            description: 'Buying bananas in bulk.'
         }
     ];
 
@@ -50,6 +117,12 @@ export const MarketProvider = ({ children }) => {
         try {
             const savedListings = localStorage.getItem('kisan_listings');
             const data = savedListings ? JSON.parse(savedListings) : initialMockData;
+
+            // Defense: Handle null or non-array data
+            if (!data || !Array.isArray(data)) {
+                console.warn("MarketProvider: Data is not an array, falling back to mock data");
+                return initialMockData;
+            }
 
             // Normalize: Ensure all listings have 'images' array and other required fields
             const normalized = data.map(item => ({
@@ -60,7 +133,8 @@ export const MarketProvider = ({ children }) => {
             }));
 
             // Sort by ID descending (Latest on Top)
-            return normalized.sort((a, b) => (b.id || 0) - (a.id || 0));
+            const sorted = normalized.sort((a, b) => (b.id || 0) - (a.id || 0));
+            return sorted;
         } catch (error) {
             console.error("Failed to load from local storage", error);
             return initialMockData;
@@ -110,8 +184,12 @@ export const MarketProvider = ({ children }) => {
             if (item.seller && !sellersMap.has(item.seller)) {
                 sellersMap.set(item.seller, {
                     name: item.seller,
-                    location: item.location || item.district || 'Unknown',
+                    location: item.location || `${item.district || ''}, ${item.state || ''}`,
+                    state: item.state || '',
+                    district: item.district || '',
+                    tehsil: item.tehsil || '',
                     products: [item.title || item.commodity],
+                    contactMobile: item.contactMobile || '', // Include mobile number
                     rating: (Math.random() * 2 + 3).toFixed(1) // Mock rating 3.0-5.0
                 });
             } else if (item.seller) {
@@ -125,7 +203,9 @@ export const MarketProvider = ({ children }) => {
     };
 
     const checkListingEligibility = (mobile, commodity, editId = null) => {
-        const userListings = listings.filter(l => l.contactMobile === mobile);
+        if (!listings || !Array.isArray(listings)) return { eligible: true };
+
+        const userListings = listings.filter(l => l && l.contactMobile === mobile);
 
         // 1. Max 5 listings check
         const otherListings = editId ? userListings.filter(l => l.id !== editId) : userListings;
@@ -133,15 +213,18 @@ export const MarketProvider = ({ children }) => {
             return {
                 eligible: false,
                 reason: 'limit',
-                message: 'You have reached the limit of 5 listings. Please contact admin for more. (आप 5 लिस्टिंग की सीमा तक पहुँच गए हैं। अधिक के लिए व्यवस्थापक से संपर्क करें।)'
+                message: t('limit_reached')
             };
         }
 
         // 2. Duplicate crop within 7 days check - ALLOW 2, BLOCK 3rd+
+        if (!commodity || typeof commodity !== 'string') return { eligible: true };
+
         const normalizedCommodity = commodity.toLowerCase().trim();
         const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
 
         const duplicatesWithin7Days = otherListings.filter(l => {
+            if (!l) return false;
             const lCommodity = (l.commodity || '').toLowerCase().trim();
             const lTimestamp = new Date(l.timestamp).getTime();
             return lCommodity === normalizedCommodity && lTimestamp > sevenDaysAgo;
@@ -151,7 +234,7 @@ export const MarketProvider = ({ children }) => {
             return {
                 eligible: false,
                 reason: 'duplicate',
-                message: 'You can only post the same crop twice in 7 days. (आप 7 दिनों में एक ही फसल केवल दो बार पोस्ट कर सकते हैं।)'
+                message: t('duplicate_limit')
             };
         }
 
@@ -162,17 +245,25 @@ export const MarketProvider = ({ children }) => {
     const publicListings = (() => {
         const seen = new Set();
         return listings.filter(l => {
-            const key = `${l.contactMobile}_${(l.commodity || '').toLowerCase().trim()}`;
+            const mobile = l.contactMobile || 'unknown';
+            const comm = (l.commodity || '').toLowerCase().trim();
+            const type = (l.type || 'Sell').toLowerCase();
+            const key = `${mobile}_${comm}_${type}`;
             if (seen.has(key)) return false;
             seen.add(key);
             return true;
         });
     })();
 
+    const sellerListings = publicListings.filter(l => l.type === 'Sell');
+    const buyerPosts = publicListings.filter(l => l.type === 'Buy');
+
     return (
         <MarketContext.Provider value={{
             listings,
             publicListings,
+            sellerListings,
+            buyerPosts,
             addListing,
             updateListing,
             deleteListing,

@@ -1,12 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { services, serviceCategories } from '../data/farmingServices';
-import { mpLocations, getDistricts, getTehsils, getDistrictLabel } from '../data/mpData';
+import { locationData, getStates, getDistricts, getTehsils } from '../data/locationData';
+import { useLanguage } from '../context/LanguageContext';
+import LocationSelector from '../components/LocationSelector';
+import BackToHomeButton from '../components/BackToHomeButton';
 
 const Transport = () => {
+    const { t } = useLanguage();
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedDistrict, setSelectedDistrict] = useState('All');
-    const [selectedTehsil, setSelectedTehsil] = useState('All');
+
+    // Filter State
+    const [selectedState, setSelectedState] = useState('');
+    const [selectedDistrict, setSelectedDistrict] = useState('');
+    const [selectedTehsil, setSelectedTehsil] = useState('');
 
     // Pagination State
     const [visibleCount, setVisibleCount] = useState(6);
@@ -15,22 +22,25 @@ const Transport = () => {
     const [allServices, setAllServices] = useState(() => {
         // Create a larger dataset for demo (multiply original by 2 to avoid too many duplicates)
         let largeList = [];
-        const districts = getDistricts();
+        const states = getStates();
 
         for (let i = 0; i < 2; i++) {
             services.forEach(service => {
-                // Assign random district/tehsil
-                const randomDist = districts[Math.floor(Math.random() * districts.length)];
-                const tehsils = getTehsils(randomDist);
+                // Assign random state/district/tehsil
+                const randomState = states[Math.floor(Math.random() * states.length)];
+                const districts = getDistricts(randomState);
+                const randomDist = districts.length > 0 ? districts[Math.floor(Math.random() * districts.length)] : 'Unknown';
+                const tehsils = getTehsils(randomState, randomDist);
                 const randomTehsil = tehsils.length > 0 ? tehsils[Math.floor(Math.random() * tehsils.length)] : 'Main City';
 
                 largeList.push({
                     ...service,
                     id: `${service.id}-${i}`,
                     title: `${service.title}`, // Removed index from title for cleaner look
+                    state: randomState,
                     district: randomDist,
                     tehsil: randomTehsil,
-                    location: `${randomTehsil}, ${randomDist}`
+                    location: `${randomTehsil}, ${randomDist}, ${randomState}`
                 });
             });
         }
@@ -39,11 +49,13 @@ const Transport = () => {
 
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [showAdForm, setShowAdForm] = useState(false);
+
+    // Ad Form Data
     const [adFormData, setAdFormData] = useState({
         title: '',
         category: 'Tractor',
         marketingLine: '',
-
+        state: '',
         district: '',
         tehsil: '',
         phone: '',
@@ -57,6 +69,11 @@ const Transport = () => {
     const handleAdSubmit = (e) => {
         e.preventDefault();
 
+        if (!adFormData.state || !adFormData.district) {
+            alert('Please select State and District (कृपया राज्य और जिला चुनें)');
+            return;
+        }
+
         // Create new service object
         const newService = {
             id: `new-${Date.now()}`,
@@ -67,7 +84,7 @@ const Transport = () => {
             expiryDate: new Date(Date.now() + parseInt(adFormData.duration) * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
             duration: adFormData.duration,
             tehsil: adFormData.tehsil || 'Main City',
-            location: `${adFormData.tehsil || 'Main City'}, ${adFormData.district}`,
+            location: `${adFormData.tehsil || 'Main City'}, ${adFormData.district}, ${adFormData.state}`,
             price: `₹${adFormData.price} / ${adFormData.unit}`,
             phone: adFormData.phone,
             image: serviceCategories.find(c => c.id === adFormData.category)?.image || 'https://images.unsplash.com/photo-1595837021678-5d272996e382', // Fallback or dynamic
@@ -89,6 +106,7 @@ const Transport = () => {
             marketingLine: '',
             price: '',
             unit: 'Hour',
+            state: '',
             district: '',
             tehsil: '',
             phone: '',
@@ -103,15 +121,15 @@ const Transport = () => {
             const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 service.location.toLowerCase().includes(searchTerm.toLowerCase());
 
-            const matchesDistrict = selectedDistrict === 'All' || service.district === selectedDistrict;
-            const matchesTehsil = selectedTehsil === 'All' || service.tehsil === selectedTehsil;
+            const matchesState = !selectedState || service.state === selectedState;
+            const matchesDistrict = !selectedDistrict || service.district === selectedDistrict;
+            const matchesTehsil = !selectedTehsil || service.tehsil === selectedTehsil;
 
-            return matchesCategory && matchesSearch && matchesDistrict && matchesTehsil;
+            return matchesCategory && matchesSearch && matchesState && matchesDistrict && matchesTehsil;
         });
-    }, [selectedCategory, searchTerm, selectedDistrict, selectedTehsil, allServices]);
+    }, [selectedCategory, searchTerm, selectedState, selectedDistrict, selectedTehsil, allServices]);
 
     const displayedServices = filteredServices.slice(0, visibleCount);
-    const currentTehsils = selectedDistrict !== 'All' ? getTehsils(selectedDistrict) : [];
 
     const handleLoadMore = () => {
         setVisibleCount(prev => prev + 6);
@@ -119,19 +137,20 @@ const Transport = () => {
 
     return (
         <div className="container fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+            <BackToHomeButton compact />
 
             {/* Header Section */}
             <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-xl)' }}>
-                <h1>Farming Services Marketplace (कृषि सेवाएँ)</h1>
+                <h1>{t('transport_title')}</h1>
                 <p style={{ fontSize: '1.2rem', color: '#666' }}>
-                    Rent Tractors, Find Harvesters, Buy Inputs & Hire Logistics
+                    {t('transport_subtitle')}
                 </p>
                 <button
                     className="btn btn-primary"
                     style={{ marginTop: '1rem', padding: '0.8rem 2rem', fontSize: '1.1rem', boxShadow: '0 4px 15px rgba(46, 125, 50, 0.3)' }}
                     onClick={() => setShowPaymentModal(true)}
                 >
-                    📢 Post Your Ad (अपनी सेवा जोड़ें)
+                    + {t('post_ad')}
                 </button>
             </div>
 
@@ -139,48 +158,27 @@ const Transport = () => {
             <div className="card" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                 {/* Location Filters */}
-                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
-                            📍 District (जिला):
-                        </label>
-                        <select
-                            value={selectedDistrict}
-                            onChange={(e) => {
-                                setSelectedDistrict(e.target.value);
-                                setSelectedTehsil('All');
-                            }}
-                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
-                        >
-                            <option value="All">All Districts</option>
-                            {getDistricts().map(dist => (
-                                <option key={dist} value={dist}>{getDistrictLabel(dist)}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#2e7d32' }}>
-                            🏘️ Tehsil (तहसील):
-                        </label>
-                        <select
-                            value={selectedTehsil}
-                            onChange={(e) => setSelectedTehsil(e.target.value)}
-                            disabled={selectedDistrict === 'All'}
-                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: selectedDistrict === 'All' ? '#eee' : 'white' }}
-                        >
-                            <option value="All">All Tehsils</option>
-                            {currentTehsils.map(tehsil => (
-                                <option key={tehsil} value={tehsil}>{tehsil}</option>
-                            ))}
-                        </select>
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontWeight: 'bold', color: '#2e7d32' }}>📍 {t('filter_location')}:</label>
+                    <LocationSelector
+                        selectedState={selectedState}
+                        selectedDistrict={selectedDistrict}
+                        selectedTehsil={selectedTehsil}
+                        onLocationChange={(loc) => {
+                            setSelectedState(loc.state);
+                            setSelectedDistrict(loc.district);
+                            setSelectedTehsil(loc.tehsil);
+                        }}
+                        showTehsil={true}
+                        vertical={false}
+                    />
                 </div>
 
                 {/* Search */}
                 <div style={{ position: 'relative' }}>
                     <input
                         type="text"
-                        placeholder="Search for 'Tractor', 'Harvester'..."
+                        placeholder={t('search_placeholder_transport')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         style={{ width: '100%', padding: '1rem 1rem 1rem 3rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1rem' }}
@@ -209,7 +207,7 @@ const Transport = () => {
                             }}
                         >
                             <span>{cat.icon}</span>
-                            {cat.label}
+                            {t(cat.label_key)}
                         </button>
                     ))}
                 </div>
@@ -223,7 +221,7 @@ const Transport = () => {
                             <img src={service.image} alt={service.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             {service.verified && (
                                 <span style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', color: 'green', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    ✅ Verified
+                                    ✅ {t('verified')}
                                 </span>
                             )}
                             <span style={{ position: 'absolute', bottom: '10px', left: '10px', backgroundColor: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>
@@ -236,12 +234,12 @@ const Transport = () => {
                                 <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.2rem' }}>{service.title}</h3>
                                 {service.duration && (
                                     <span style={{ fontSize: '0.7rem', color: '#e65100', backgroundColor: '#fff3e0', padding: '2px 6px', borderRadius: '4px' }}>
-                                        Exp: {service.expiryDate || '30 days'}
+                                        {t('expiry_date')}: {service.expiryDate || '30 days'}
                                     </span>
                                 )}
                             </div>
                             <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-                                By: <span
+                                {t('by')}: <span
                                     style={{ color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'underline' }}
                                     onClick={() => setSelectedProvider({ name: service.provider, verified: service.verified })}
                                 >
@@ -249,7 +247,7 @@ const Transport = () => {
                                 </span>
                             </p>
                             <p style={{ fontSize: '0.8rem', color: '#999', marginTop: '2px' }}>
-                                Posted: {service.postedDate || '14 Dec'}
+                                {t('posted')}: {service.postedDate || '14 Dec'}
                             </p>
 
                             <div style={{ margin: '1rem 0', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '8px', fontSize: '0.9rem' }}>
@@ -258,9 +256,9 @@ const Transport = () => {
                             </div>
 
                             <div style={{ marginTop: 'auto', display: 'flex', gap: '10px' }}>
-                                <a href={`tel:${service.phone}`} className="btn btn-outline" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}>📞 Call</a>
-                                <button className="btn btn-outline" style={{ padding: '0 10px', color: '#d32f2f', borderColor: '#d32f2f' }} onClick={() => alert('Reported for review! (रिपोर्ट भेजी गई)')}>🚩</button>
-                                <a href="#" className="btn" style={{ flex: 1, textAlign: 'center', textDecoration: 'none', backgroundColor: '#25D366', color: 'white', border: 'none' }}>💬 WhatsApp</a>
+                                <a href={`tel:${service.phone}`} className="btn btn-outline" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}>📞 {t('call')}</a>
+                                <button className="btn btn-outline" style={{ padding: '0 10px', color: '#d32f2f', borderColor: '#d32f2f' }} onClick={() => alert(t('reported_for_review'))}>🚩</button>
+                                <a href="#" className="btn" style={{ flex: 1, textAlign: 'center', textDecoration: 'none', backgroundColor: '#25D366', color: 'white', border: 'none' }}>💬 {t('whatsapp')}</a>
                             </div>
                         </div>
                     </div>
@@ -269,8 +267,8 @@ const Transport = () => {
 
             {filteredServices.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>
-                    <h3>No services found.</h3>
-                    <p>Try adjusting your search or filters.</p>
+                    <h3>{t('no_services_found')}</h3>
+                    <p>{t('adjust_filters_suggestion')}</p>
                 </div>
             )}
 
@@ -322,14 +320,15 @@ const Transport = () => {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setShowAdForm(false)}>
                     <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '12px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
                         <h2 style={{ borderBottom: '2px solid var(--color-primary)', paddingBottom: '10px', marginBottom: '1.5rem', color: 'var(--color-primary)' }}>
-                            Service Details (सेवा विवरण)
+                            {t('service_details')}
                         </h2>
 
                         <form onSubmit={handleAdSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
                             {/* Service Title */}
                             <div>
-                                <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Service Title (सेवा का नाम) *</label>
+
+                                <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>{t('service_title')} *</label>
                                 <input
                                     type="text"
                                     required
@@ -344,7 +343,7 @@ const Transport = () => {
                             {/* Category & District Row */}
                             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                                 <div style={{ flex: 1, minWidth: '150px' }}>
-                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Category (श्रेणी) *</label>
+                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>{t('category')} *</label>
                                     <select
                                         value={adFormData.category}
                                         onChange={e => setAdFormData({ ...adFormData, category: e.target.value })}
@@ -360,41 +359,28 @@ const Transport = () => {
                             </div>
 
                             {/* District & Tehsil Row */}
-                            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                                <div style={{ flex: 1, minWidth: '150px' }}>
-                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>District (जिला) *</label>
-                                    <select
-                                        required
-                                        value={adFormData.district}
-                                        onChange={e => setAdFormData({ ...adFormData, district: e.target.value, tehsil: '' })}
-                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                                    >
-                                        <option value="">Select District</option>
-                                        {getDistricts().map(d => <option key={d} value={d}>{getDistrictLabel(d)}</option>)}
-                                    </select>
-                                </div>
-
-                                <div style={{ flex: 1, minWidth: '150px' }}>
-                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Tehsil (तहसील) *</label>
-                                    <select
-                                        required
-                                        value={adFormData.tehsil}
-                                        onChange={e => setAdFormData({ ...adFormData, tehsil: e.target.value })}
-                                        disabled={!adFormData.district}
-                                        style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: !adFormData.district ? '#f0f0f0' : 'white' }}
-                                    >
-                                        <option value="">Select Tehsil</option>
-                                        {adFormData.district && getTehsils(adFormData.district).map(t => (
-                                            <option key={t} value={t}>{t}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                            <div>
+                                <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>{t('filter_location')} *</label>
+                                <LocationSelector
+                                    selectedState={adFormData.state}
+                                    selectedDistrict={adFormData.district}
+                                    selectedTehsil={adFormData.tehsil}
+                                    onLocationChange={(loc) => {
+                                        setAdFormData(prev => ({
+                                            ...prev,
+                                            state: loc.state,
+                                            district: loc.district,
+                                            tehsil: loc.tehsil
+                                        }));
+                                    }}
+                                    showTehsil={true}
+                                />
                             </div>
 
                             {/* Price Row */}
                             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                                 <div style={{ flex: 2, minWidth: '150px' }}>
-                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Price (कीमत) *</label>
+                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>{t('price')} *</label>
                                     <input
                                         type="number"
                                         required
@@ -405,7 +391,7 @@ const Transport = () => {
                                     />
                                 </div>
                                 <div style={{ flex: 1, minWidth: '100px' }}>
-                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Unit (इकाई)</label>
+                                    <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>{t('unit')}</label>
                                     <select
                                         value={adFormData.unit}
                                         onChange={e => setAdFormData({ ...adFormData, unit: e.target.value })}
@@ -423,7 +409,7 @@ const Transport = () => {
 
                             {/* Duration */}
                             <div>
-                                <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Duration of your post (पोस्ट की अवधि) *</label>
+                                <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>{t('post_duration')} *</label>
                                 <select
                                     value={adFormData.duration}
                                     onChange={e => setAdFormData({ ...adFormData, duration: e.target.value })}
@@ -437,7 +423,7 @@ const Transport = () => {
 
                             {/* Phone */}
                             <div>
-                                <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>Mobile Number (मोबाइल) *</label>
+                                <label style={{ display: 'block', fontWeight: '500', marginBottom: '5px' }}>{t('mobile_number')} *</label>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <span style={{ padding: '0.8rem', background: '#eee', borderRadius: '4px', display: 'flex', alignItems: 'center' }}>+91</span>
                                     <input
@@ -458,12 +444,12 @@ const Transport = () => {
                                     Cancel
                                 </button>
                                 <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '0.8rem' }}>
-                                    Submit Ad (जमा करें)
+                                    {t('submit_ad')}
                                 </button>
                             </div>
                         </form>
                     </div>
-                </div>
+                </div >
             )}
 
             {/* Seller Profile Modal */}
@@ -493,6 +479,8 @@ const Transport = () => {
                     </div>
                 )
             }
+
+            <BackToHomeButton />
         </div >
     );
 };

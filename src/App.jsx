@@ -3,13 +3,12 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import './App.css';
-import { AuthProvider } from './context/AuthContext';
-import { AlertProvider } from './context/AlertContext';
-import { MarketProvider } from './context/MarketContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import WhatsAppFAB from './components/WhatsAppFAB';
 import VoiceNavigation from './components/VoiceNavigation';
 import MobileNav from './components/MobileNav';
+import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
+import NetworkStatus from './components/NetworkStatus'; // Import NetworkStatus
 
 // Lazy loading pages
 const Home = lazy(() => import('./pages/Home'));
@@ -34,6 +33,8 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Help = lazy(() => import('./pages/Help'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const FPORegistration = lazy(() => import('./pages/FPORegistration'));
+const TradeArea = lazy(() => import('./pages/TradeArea'));
 import ConsentBanner from './components/ConsentBanner';
 
 // Loading component
@@ -64,49 +65,53 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <AlertProvider>
-          <MarketProvider>
-            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-              <Header />
-              <main style={{ flex: 1 }}>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/marketplace" element={<Buyer />} />
-                    <Route path="/sell" element={<Seller />} />
-                    <Route path="/my-products" element={<MyProducts />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/rates" element={<MandiRates />} />
-                    <Route path="/partner" element={<Partner />} />
-                    <Route path="/news" element={<News />} />
-                    <Route path="/weather" element={<Weather />} />
-                    <Route path="/advisory" element={<CropAdvisory />} />
-                    <Route path="/chaupal" element={<Chaupal />} />
-                    <Route path="/pashu-palan" element={<PashuPalan />} />
-                    <Route path="/transport" element={<Transport />} />
-                    <Route path="/sellers" element={<SellerDirectory />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/help" element={<Help />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-              </main>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Header />
+        <main style={{ flex: 1 }}>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/marketplace" element={<Buyer />} />
+              <Route path="/sell" element={<Seller />} />
+              <Route path="/my-products" element={<MyProducts />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/rates" element={<MandiRates />} />
+              <Route path="/partner" element={<Partner />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/weather" element={<Weather />} />
+              <Route path="/advisory" element={<CropAdvisory />} />
+              <Route path="/chaupal" element={<Chaupal />} />
+              <Route path="/pashu-palan" element={<PashuPalan />} />
+              <Route path="/transport" element={<Transport />} />
+              <Route path="/sellers" element={<SellerDirectory />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute allowedRole="Admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/fpo-registration" element={<FPORegistration />} />
+              <Route path="/trade-area" element={<TradeArea />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </main>
 
-              <WhatsAppFAB />
-              <VoiceNavigation />
-              <MobileNav />
-              <ConsentBanner />
-              <Footer />
-            </div>
-          </MarketProvider>
-        </AlertProvider>
-      </AuthProvider>
+        <WhatsAppFAB />
+        <VoiceNavigation />
+        <MobileNav />
+        <ConsentBanner />
+        <NetworkStatus />
+        <Footer />
+      </div>
     </ErrorBoundary>
   );
 }

@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const SuccessModal = ({ show, onClose, type = 'Sell' }) => {
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     if (!show) return null;
 
@@ -52,16 +54,8 @@ const SuccessModal = ({ show, onClose, type = 'Sell' }) => {
                     fontSize: '1.8rem',
                     fontWeight: 'bold'
                 }}>
-                    Post Created Successfully!
+                    {t('success_title')}
                 </h2>
-                <p style={{
-                    color: '#2E7D32',
-                    marginBottom: '0.5rem',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold'
-                }}>
-                    पोस्ट सफलतापूर्वक बनाई गई!
-                </p>
 
                 <p style={{
                     color: '#666',
@@ -69,9 +63,7 @@ const SuccessModal = ({ show, onClose, type = 'Sell' }) => {
                     marginBottom: '2rem',
                     lineHeight: '1.6'
                 }}>
-                    Your post has been successfully submitted. It will be live on the platform shortly.
-                    <br />
-                    आपकी पोस्ट सफलतापूर्वक सबमिट हो गई है। यह जल्द ही प्लेटफॉर्म पर लाइव होगी।
+                    {t('success_msg')}
                 </p>
 
                 {/* Action Buttons */}
@@ -96,7 +88,7 @@ const SuccessModal = ({ show, onClose, type = 'Sell' }) => {
                         onMouseOver={(e) => e.target.style.backgroundColor = '#1B5E20'}
                         onMouseOut={(e) => e.target.style.backgroundColor = '#2E7D32'}
                     >
-                        📋 View My Listings (मेरी पोस्ट देखें)
+                        {t('view_my_listings')}
                     </button>
 
                     <button
@@ -122,7 +114,7 @@ const SuccessModal = ({ show, onClose, type = 'Sell' }) => {
                             e.target.style.backgroundColor = 'white';
                         }}
                     >
-                        🏠 Return to Home (होम पर जाएं)
+                        {t('return_home')}
                     </button>
                 </div>
 

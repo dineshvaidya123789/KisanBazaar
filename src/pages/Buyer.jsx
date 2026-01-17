@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useMarket } from '../context/MarketContext';
-import { mpLocations } from '../data/mpData';
+import { useLanguage } from '../context/LanguageContext';
+// mpData import removed
 import getCommodityImage from '../utils/commodityImages';
-import { getSearchSynonyms } from '../utils/searchMapping';
+import { getSearchSynonyms, commodityMapping } from '../utils/searchMapping';
+import LocationSelector from '../components/LocationSelector';
 
-const ProductCard = ({ product }) => {
+const ProductCard = React.memo(({ product }) => {
+    const { t } = useLanguage();
     // Handle both old format and new format
     const title = product.title || product.commodity || 'Unknown Product';
     const location = product.location || product.district || 'Unknown Location';
@@ -31,6 +34,7 @@ const ProductCard = ({ product }) => {
                             src={mainImg}
                             alt={title}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            loading="lazy" /* Lazy load image */
                         />
                         {displayImages.length > 1 && (
                             <div style={{
@@ -61,7 +65,7 @@ const ProductCard = ({ product }) => {
                         borderBottom: '1px solid #eee'
                     }}>
                         <div style={{ fontSize: '3rem' }}>📦</div>
-                        <div style={{ fontSize: '0.9rem', marginTop: '8px', fontWeight: '500' }}>No Photo Provided</div>
+                        <div style={{ fontSize: '0.9rem', marginTop: '8px', fontWeight: '500' }}>{t('no_photo')}</div>
                     </div>
                 )}
 
@@ -78,7 +82,7 @@ const ProductCard = ({ product }) => {
                     fontWeight: 'bold',
                     textTransform: 'uppercase'
                 }}>
-                    {product.type === 'Buy' ? 'WANT TO BUY' : 'FOR SALE'}
+                    {product.type === 'Buy' ? t('want_to_buy') : t('want_to_sell')}
                 </span>
 
                 {/* Location Badge */}
@@ -118,25 +122,49 @@ const ProductCard = ({ product }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
                     <div>
                         <span style={{ display: 'block', fontSize: '0.8rem', color: '#888' }}>
-                            {product.type === 'Buy' ? 'Target Price' : 'Price'}
+                            {product.type === 'Buy' ? t('price') : t('price')}
                         </span>
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: product.type === 'Buy' ? '#D32F2F' : 'var(--color-primary)' }}>
                             ₹{price}
                             <span style={{ fontSize: '0.9rem', color: '#666', fontWeight: 'normal' }}>/{unit}</span>
                         </span>
                     </div>
                     <div>
-                        <span style={{ display: 'block', fontSize: '0.8rem', color: '#888' }}>Quantity</span>
+                        <span style={{ display: 'block', fontSize: '0.8rem', color: '#888' }}>
+                            {product.type === 'Buy' ? t('needed') : t('available')}
+                        </span>
                         <span style={{ fontWeight: '500' }}>{quantity} {unit}</span>
                     </div>
                 </div>
 
+                {product.type === 'Sell' && product.quality && (
+                    <div style={{ marginBottom: '12px', fontSize: '0.85rem', color: '#666', backgroundColor: '#f9f9f9', padding: '6px 10px', borderRadius: '4px', borderLeft: '3px solid #4CAF50' }}>
+                        <strong>{t('quality')}:</strong> {product.quality}
+                    </div>
+                )}
+
                 <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => alert(`Contacting ${seller}... \n(Feature coming soon)`)}>
-                        {product.type === 'Buy' ? '📞 Call' : '📞 Contact'}
-                    </button>
                     <a
-                        href={`https://wa.me/919876543210?text=I am interested in your ${title} listing at KisanBazaar.`}
+                        href={product.contactMobile ? `tel:${product.contactMobile}` : '#'}
+                        className="btn btn-outline"
+                        style={{
+                            flex: 1,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                        onClick={(e) => {
+                            if (!product.contactMobile) {
+                                e.preventDefault();
+                                alert('Contact number not available for this listing.');
+                            }
+                        }}
+                    >
+                        📞 {t('call_now')}
+                    </a>
+                    <a
+                        href={product.contactMobile ? `https://wa.me/${product.contactMobile}?text=Hi, I am interested in your ${title} listing on KisanBazaar.` : '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn"
@@ -150,345 +178,287 @@ const ProductCard = ({ product }) => {
                             justifyContent: 'center',
                             textDecoration: 'none'
                         }}
+                        onClick={(e) => {
+                            if (!product.contactMobile) {
+                                e.preventDefault();
+                                alert('Contact number not available for this listing.');
+                            }
+                        }}
                     >
-                        💬 WhatsApp
+                        💬 {t('whatsapp')}
                     </a>
                 </div>
             </div>
         </div>
     );
-};
+});
 
 const Buyer = () => {
-    const { publicListings: listings } = useMarket();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [filter, setFilter] = useState('All');
-    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-
-    // Enhanced Filter State
-    const [selectedDistrict, setSelectedDistrict] = useState('All');
-    const [selectedTehsil, setSelectedTehsil] = useState('All');
-    const [minPrice, setMinPrice] = useState('');
-    const [maxPrice, setMaxPrice] = useState('');
+    const { buyerPosts, sellerListings } = useMarket();
+    const { t } = useLanguage();
+    const [activeTab, setActiveTab] = useState('buy'); // 'buy' (I want to buy) or 'sell' (I want to sell)
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
     const [showFilters, setShowFilters] = useState(false);
 
-    // Sync state with URL search params if it changes from external search
-    React.useEffect(() => {
-        const query = searchParams.get('search');
-        if (query !== null) {
-            setSearchTerm(query);
-        }
-    }, [searchParams]);
+    // Scroll to top on mount
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
-    const handleSearchChange = (e) => {
-        const val = e.target.value;
-        setSearchTerm(val);
+    // Suggestions Logic
+    const cropSuggestions = React.useMemo(() => {
+        const unique = new Set([
+            ...Object.keys(commodityMapping),
+            ...Object.values(commodityMapping)
+        ]);
+        return Array.from(unique).sort();
+    }, []);
+
+    // Filter Logic
+    const getFilteredItems = () => {
+        // If activeTab is 'buy', show SELLER LISTINGS (what's available for sale)
+        // If activeTab is 'sell', show BUYER POSTS (who wants to buy)
+        const sourceData = activeTab === 'buy' ? sellerListings : buyerPosts;
+
+        return sourceData.filter(item => {
+            const prodSearchLower = searchTerm.toLowerCase();
+            const prodSynonyms = getSearchSynonyms(prodSearchLower);
+
+            const matchesSearch = !searchTerm ||
+                item.commodity?.toLowerCase().includes(prodSearchLower) ||
+                item.location?.toLowerCase().includes(prodSearchLower) ||
+                item.title?.toLowerCase().includes(prodSearchLower) ||
+                prodSynonyms.some(syn => item.commodity?.toLowerCase().includes(syn));
+
+            const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory; // Assuming category exists
+            // Simple price check if available (some might be market price)
+            let itemPrice = parseFloat(item.price || item.expectedPrice || 0);
+            const matchesPrice = itemPrice >= priceRange.min && itemPrice <= priceRange.max;
+
+            return matchesSearch && matchesCategory && matchesPrice;
+        });
     };
 
-    // Smart Search Parsing
-    const parsedSearch = React.useMemo(() => {
-        if (!searchTerm) return { type: null, location: null, commodityTerms: [] };
+    const filteredItems = getFilteredItems();
 
-        const lower = searchTerm.toLowerCase();
-        let type = null;
-        let location = null;
-
-        // 1. Detect Type Intent
-        if (lower.includes('buyer') || lower.includes('buy') || lower.includes('want')) type = 'Buy';
-        else if (lower.includes('seller') || lower.includes('sell')) type = 'Sell';
-
-        // 2. Detect Location (Basic logic: check against known districts/tehsils)
-        // Flatten all known locations for checking
-        const allLocations = [
-            ...Object.keys(mpLocations),
-            ...Object.values(mpLocations).flatMap(d => d.tehsil || [])
-        ].map(l => l.toLowerCase());
-
-        const words = lower.split(/\s+/);
-        const commodityWords = [];
-
-        words.forEach(word => {
-            // Skip keywords we already handled or common particles
-            if (['buyer', 'buyers', 'buying', 'seller', 'sellers', 'selling', 'in', 'at', 'near', 'want', 'buy', 'sell'].includes(word)) return;
-
-            // Check if word is a location
-            if (allLocations.some(loc => loc === word || word.includes(loc) || loc.includes(word))) {
-                location = word;
-            } else {
-                commodityWords.push(word);
-            }
-        });
-
-        return { type, location, commodityTerms: commodityWords };
-    }, [searchTerm]);
-
-    const filteredListings = listings.filter(item => {
-        const matchesCategory = filter === 'All' || item.category === filter;
-
-        // Price Filter - Robust parsing for currency/strings
-        const cleanPrice = (val) => parseFloat(String(val || 0).replace(/[^\d.]/g, '')) || 0;
-        const itemPrice = cleanPrice(item.price || item.targetPrice);
-        const matchesMinPrice = minPrice === '' || itemPrice >= parseFloat(minPrice);
-        const matchesMaxPrice = maxPrice === '' || itemPrice <= parseFloat(maxPrice);
-
-        // Location Filter (Dropdown)
-        const itemDistrict = (item.district || (item.location ? item.location.split(',').pop().trim() : '')).toLowerCase();
-        const itemTehsil = (item.tehsil || (item.location ? item.location.split(',')[0].trim() : '')).toLowerCase();
-        const itemLocationFull = (item.location || '').toLowerCase();
-
-        const matchesDistrict = selectedDistrict === 'All' || itemDistrict.includes(selectedDistrict.toLowerCase());
-        const matchesTehsil = selectedTehsil === 'All' || itemTehsil.includes(selectedTehsil.toLowerCase());
-
-        // Smart Search Matching
-        let matchesSearch = true;
-        if (searchTerm) {
-            // 1. Match Type if detected
-            if (parsedSearch.type && item.type !== parsedSearch.type) {
-                matchesSearch = false;
-            }
-
-            // 2. Match Location if detected in query (overrides dropdown if present in query)
-            if (matchesSearch && parsedSearch.location) {
-                const locMatch = itemDistrict.includes(parsedSearch.location) ||
-                    itemTehsil.includes(parsedSearch.location) ||
-                    itemLocationFull.includes(parsedSearch.location);
-                if (!locMatch) matchesSearch = false;
-            }
-
-            // 3. Match Commodity/Title with remaining words
-            if (matchesSearch && parsedSearch.commodityTerms.length > 0) {
-                const query = parsedSearch.commodityTerms.join(' ');
-                const searchSynonyms = getSearchSynonyms(query);
-
-                const searchableTitle = (item.title || item.commodity || '').toLowerCase();
-                const titleMatch = searchSynonyms.some(syn => searchableTitle.includes(syn));
-
-                if (!titleMatch) matchesSearch = false;
-            }
-        }
-
-        return matchesCategory && matchesSearch && matchesMinPrice && matchesMaxPrice && matchesDistrict && matchesTehsil;
-    });
+    const categories = [
+        { id: 'All', icon: '🌾', label: t('filter_all') },
+        { id: 'Vegetables', icon: '🍅', label: t('filter_veg') },
+        { id: 'Fruits', icon: '🥭', label: t('filter_fruits') },
+        { id: 'Grains', icon: '🌾', label: t('filter_grains') }
+    ];
 
     return (
-        <div className="container fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
-
-            {/* Header & Controls */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 'var(--spacing-md)',
-                marginBottom: 'var(--spacing-lg)'
+        <div className="buyer-page fade-in" style={{ paddingBottom: '80px' }}>
+            {/* Header Section */}
+            <div className="page-header" style={{
+                background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
+                color: 'white',
+                padding: 'var(--spacing-xl) var(--spacing-md)',
+                textAlign: 'center',
+                borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
+                marginBottom: 'var(--spacing-lg)',
+                boxShadow: '0 4px 20px rgba(46, 125, 50, 0.2)'
             }}>
-                <div>
-                    <h1 style={{ marginBottom: '8px' }}>फ़सल बाज़ार (Marketplace)</h1>
-                    <p style={{ color: 'var(--color-text-light)' }}>
-                        खरीदें और बेचें - सभी एक जगह पर<br />
-                        (Buy & Sell - All in one place)
-                    </p>
-                </div>
+                <h1 style={{ marginBottom: '8px', fontSize: '2rem' }}>{t('marketplace_title')}</h1>
+                <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.1rem' }}>
+                    {t('buy_sell_hub')}
+                </p>
 
-                <Link to="/sell" className="btn btn-primary">
-                    + पोस्ट करें (Post Buy/Sell)
-                </Link>
-            </div>
-
-            {/* Main Search & Basic Category Filter */}
-            <div style={{
-                backgroundColor: 'white',
-                padding: 'var(--spacing-md)',
-                borderRadius: 'var(--radius-md)',
-                boxShadow: 'var(--shadow-sm)',
-                marginBottom: 'var(--spacing-md)',
-                display: 'flex',
-                gap: 'var(--spacing-md)',
-                flexWrap: 'wrap',
-                alignItems: 'center'
-            }}>
-                <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-                    <input
-                        type="text"
-                        placeholder="Search crop name (e.g. Tamatar, Rice)..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #ddd', fontSize: '1rem' }}
-                    />
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-                    {['All', 'Vegetables', 'Fruits', 'Grains', 'Others'].map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setFilter(cat)}
-                            style={{
-                                padding: '0.5rem 1.2rem',
-                                borderRadius: '25px',
-                                border: '1px solid var(--color-primary)',
-                                backgroundColor: filter === cat ? 'var(--color-primary)' : 'transparent',
-                                color: filter === cat ? 'white' : 'var(--color-primary)',
-                                fontWeight: '600',
-                                whiteSpace: 'nowrap',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                        >
-                            {cat === 'All' ? 'सभी (All)' : cat}
-                        </button>
-                    ))}
-                </div>
-
-                <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '8px',
-                        border: '1px solid #ccc',
-                        backgroundColor: showFilters ? '#f0f0f0' : 'white',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '5px'
-                    }}
-                >
-                    {showFilters ? '🔼 Close' : '🔽 Filters'}
-                </button>
-            </div>
-
-            {/* Advanced Filters (Location & Price) */}
-            {showFilters && (
-                <div className="advanced-filters" style={{
-                    backgroundColor: '#f8fafc',
-                    padding: '1.5rem',
-                    borderRadius: '12px',
-                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)',
-                    marginBottom: 'var(--spacing-lg)',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '1.5rem',
-                    border: '1px solid #e2e8f0',
-                    animation: 'slideDown 0.3s ease-out'
+                {/* Main Toggle Switch */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '2rem',
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    padding: '6px',
+                    borderRadius: 'var(--radius-xl)',
+                    maxWidth: '400px',
+                    margin: '2rem auto 0',
+                    backdropFilter: 'blur(10px)'
                 }}>
-                    <style>{`
-                        @keyframes slideDown {
-                            from { opacity: 0; transform: translateY(-10px); }
-                            to { opacity: 1; transform: translateY(0); }
-                        }
-                        @media (max-width: 600px) {
-                            .advanced-filters {
-                                grid-template-columns: 1fr !important;
-                                padding: 1rem !important;
-                            }
-                        }
-                    `}</style>
+                    <button
+                        onClick={() => setActiveTab('buy')}
+                        style={{
+                            flex: 1,
+                            padding: '12px 24px',
+                            borderRadius: 'var(--radius-lg)',
+                            background: activeTab === 'buy' ? 'white' : 'transparent',
+                            color: activeTab === 'buy' ? 'var(--color-primary)' : 'white',
+                            border: 'none',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: activeTab === 'buy' ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.2rem' }}>🛒</span> {t('i_want_buy')}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('sell')}
+                        style={{
+                            flex: 1,
+                            padding: '12px 24px',
+                            borderRadius: 'var(--radius-lg)',
+                            background: activeTab === 'sell' ? 'white' : 'transparent',
+                            color: activeTab === 'sell' ? 'var(--color-secondary)' : 'white',
+                            border: 'none',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: activeTab === 'sell' ? '0 4px 12px rgba(0,0,0,0.1)' : 'none'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.2rem' }}>🚜</span> {t('i_want_sell')}
+                    </button>
+                </div>
+            </div>
 
-                    {/* District */}
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.85rem', color: '#64748b' }}>📍 District (जिला):</label>
-                        <select
-                            value={selectedDistrict}
-                            onChange={(e) => {
-                                setSelectedDistrict(e.target.value);
-                                setSelectedTehsil('All');
-                            }}
-                            style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                        >
-                            <option value="All">All Districts</option>
-                            {Object.keys(mpLocations).map(dist => (
-                                <option key={dist} value={dist}>{mpLocations[dist].label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Tehsil */}
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.85rem', color: '#64748b' }}>🏘️ Tehsil (तहसील):</label>
-                        <select
-                            value={selectedTehsil}
-                            onChange={(e) => setSelectedTehsil(e.target.value)}
-                            disabled={selectedDistrict === 'All'}
+            <div className="container">
+                {/* Search & Filter Bar */}
+                <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    marginBottom: 'var(--spacing-lg)',
+                    position: 'sticky',
+                    top: '80px', // Below header
+                    zIndex: 10,
+                    flexWrap: 'wrap'
+                }}>
+                    <div style={{
+                        flex: 1,
+                        position: 'relative',
+                        minWidth: '280px'
+                    }}>
+                        <input
+                            type="text"
+                            list="marketplace-suggestions" /* Added suggestions */
+                            placeholder={t('search_placeholder')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             style={{
                                 width: '100%',
-                                padding: '0.6rem',
-                                borderRadius: '6px',
-                                border: '1px solid #cbd5e1',
-                                backgroundColor: selectedDistrict === 'All' ? '#f1f5f9' : 'white'
+                                padding: '1rem 1rem 1rem 3rem',
+                                borderRadius: 'var(--radius-xl)',
+                                border: '1px solid #e0e0e0',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                                fontSize: '1rem'
                             }}
-                        >
-                            <option value="All">All Tehsils</option>
-                            {currentTehsils.map(tehsil => (
-                                <option key={tehsil} value={tehsil}>{tehsil}</option>
+                        />
+                        <datalist id="marketplace-suggestions">
+                            {cropSuggestions.map((crop, index) => (
+                                <option key={index} value={crop} />
                             ))}
-                        </select>
+                        </datalist>
+                        <span style={{
+                            position: 'absolute',
+                            left: '1rem',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            fontSize: '1.2rem',
+                            color: '#666'
+                        }}>🔍</span>
                     </div>
 
-                    {/* Price Range */}
-                    <div style={{ gridColumn: 'span 1' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', fontSize: '0.85rem', color: '#64748b' }}>💰 Price Range (₹):</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                        className="btn"
+                        onClick={() => setShowFilters(!showFilters)}
+                        style={{
+                            background: showFilters ? 'var(--color-primary)' : 'white',
+                            color: showFilters ? 'white' : 'var(--color-primary)',
+                            border: '1px solid var(--color-primary)',
+                            borderRadius: 'var(--radius-xl)',
+                            padding: '0 1.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontWeight: '600'
+                        }}
+                    >
+                        <span>⚙️</span> {t('filters')}
+                    </button>
+                </div>
+
+                {/* Expanded Filters */}
+                {showFilters && (
+                    <div className="fade-in" style={{
+                        background: 'white',
+                        padding: '1.5rem',
+                        borderRadius: 'var(--radius-lg)',
+                        marginBottom: 'var(--spacing-lg)',
+                        boxShadow: 'var(--shadow-md)',
+                        border: '1px solid #eee'
+                    }}>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#666' }}>{t('category')}</label>
+                            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        style={{
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
+                                            border: `1px solid ${selectedCategory === cat.id ? 'var(--color-primary)' : '#ddd'}`,
+                                            background: selectedCategory === cat.id ? '#e8f5e9' : 'white',
+                                            color: selectedCategory === cat.id ? 'var(--color-primary)' : '#666',
+                                            cursor: 'pointer',
+                                            whiteSpace: 'nowrap',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {cat.icon} {cat.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#666' }}>{t('price_range')}</label>
                             <input
-                                type="number"
-                                placeholder="Min"
-                                value={minPrice}
-                                onChange={(e) => setMinPrice(e.target.value)}
-                                style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                                type="range"
+                                min="0"
+                                max="100000"
+                                step="1000"
+                                style={{ width: '100%', accentColor: 'var(--color-primary)' }}
                             />
-                            <span>-</span>
-                            <input
-                                type="number"
-                                placeholder="Max"
-                                value={maxPrice}
-                                onChange={(e) => setMaxPrice(e.target.value)}
-                                style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                            />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.9rem', color: '#666' }}>
+                                <span>₹0</span>
+                                <span>₹1,00,000+</span>
+                            </div>
                         </div>
                     </div>
+                )}
 
-                    {/* Reset Filters */}
-                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                        <button
-                            onClick={() => {
-                                setSelectedDistrict('All');
-                                setSelectedTehsil('All');
-                                setMinPrice('');
-                                setMaxPrice('');
-                                setSearchTerm('');
-                            }}
-                            style={{
-                                width: '100%',
-                                padding: '0.6rem 1rem',
-                                borderRadius: '6px',
-                                border: '1px solid #ef4444',
-                                color: '#ef4444',
-                                backgroundColor: 'transparent',
-                                cursor: 'pointer',
-                                fontWeight: 'bold',
-                                fontSize: '0.85rem'
-                            }}
-                        >
-                            🔄 Reset All
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Grid */}
-            {filteredListings.length > 0 ? (
+                {/* Listings Grid */}
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                     gap: 'var(--spacing-lg)'
                 }}>
-                    {filteredListings.map(listing => (
-                        <ProductCard key={listing.id} product={listing} />
-                    ))}
+                    {filteredItems.length === 0 ? (
+                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem 2rem', color: '#666' }}>
+                            <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>🍃</div>
+                            <h3>{t('no_posts_found')}</h3>
+                            <p>{t('try_adjusting_filters')}</p>
+                        </div>
+                    ) : (
+                        filteredItems.map(item => (
+                            <ProductCard key={item.id} product={item} />
+                        ))
+                    )}
                 </div>
-            ) : (
-                <div style={{ textAlign: 'center', padding: 'var(--spacing-xl)', color: '#888' }}>
-                    <h3>No posts found matching your criteria.</h3>
-                </div>
-            )}
+            </div>
         </div>
     );
 };

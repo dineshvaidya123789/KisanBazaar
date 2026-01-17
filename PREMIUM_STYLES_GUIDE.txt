@@ -1,0 +1,20 @@
+// Premium Form Styles Helper - Apply to all inputs in Seller.jsx
+// Replace inline styles with these className assignments:
+
+// For all text inputs:
+className="premium-input"
+
+// For all select dropdowns:
+className="premium-select"
+
+// For all textareas:
+className="premium-textarea"
+
+// For all labels:
+className="premium-label"
+
+// For submit button:
+className="premium-btn btn-primary"
+
+// For conditional sections (Quality, Photos, etc.):
+className="slide-in"

@@ -65,8 +65,10 @@ export const AlertProvider = ({ children }) => {
                             icon: wa.icon,
                             title: wa.title,
                             titleHi: wa.titleHindi,
+                            titleMr: wa.titleMarathi || wa.titleHindi,
                             message: wa.message,
                             messageHi: wa.messageHindi,
+                            messageMr: wa.messageMarathi || wa.messageHindi,
                             whatsappMsg: `⛈️ *Weather Alert:* ${wa.title} (${wa.titleHindi})\n${wa.message}\nTake action: ${wa.actions?.join(', ')}`
                         });
                     }
@@ -96,8 +98,10 @@ export const AlertProvider = ({ children }) => {
                             icon: '📉',
                             title: `Price Drop: ${todayCrop.name}`,
                             titleHi: `दाम में गिरावट: ${todayCrop.name.split(' (')[1].replace(')', '')}`,
+                            titleMr: `किंमत घसरली: ${todayCrop.name.split(' (')[1].replace(')', '')}`,
                             message: `Modal price dropped by ${Math.abs(diff).toFixed(1)}% to ₹${todayCrop.modal}/qtl in Indore Mandi.`,
                             messageHi: `इन्दौर मंडी में ${todayCrop.name.split(' (')[1].replace(')', '')} के दाम ${Math.abs(diff).toFixed(1)}% गिरकर ₹${todayCrop.modal} हो गए हैं।`,
+                            messageMr: `इंदूर मंडीमध्ये ${todayCrop.name.split(' (')[1].replace(')', '')} ची किंमत ${Math.abs(diff).toFixed(1)}% घसरून ₹${todayCrop.modal} झाली आहे.`,
                             whatsappMsg: `📉 *Mandi Alert:* Price Drop in ${todayCrop.name}\nDropped by ${Math.abs(diff).toFixed(1)}% to ₹${todayCrop.modal}/qtl.\nStay updated on KisanBazaar!`
                         });
                     }
@@ -111,8 +115,10 @@ export const AlertProvider = ({ children }) => {
                             icon: '📈',
                             title: `Price Increase: ${todayCrop.name}`,
                             titleHi: `दाम में उछाल: ${todayCrop.name.split(' (')[1].replace(')', '')}`,
+                            titleMr: `किंमत वाढली: ${todayCrop.name.split(' (')[1].replace(')', '')}`,
                             message: `Modal price increased by ${diff.toFixed(1)}% to ₹${todayCrop.modal}/qtl! Good time to sell.`,
                             messageHi: `${todayCrop.name.split(' (')[1].replace(')', '')} के दाम ${diff.toFixed(1)}% बढ़कर ₹${todayCrop.modal} हो गए हैं! बेचने का सही समय है।`,
+                            messageMr: `${todayCrop.name.split(' (')[1].replace(')', '')} ची किंमत ${diff.toFixed(1)}% वाढून ₹${todayCrop.modal} झाली आहे! विक्रीसाठी योग्य वेळ आहे.`,
                             whatsappMsg: `📈 *Mandi Alert:* Price Increase in ${todayCrop.name}\nIncreased by ${diff.toFixed(1)}% to ₹${todayCrop.modal}/qtl. Good time to sell!`
                         });
                     }
@@ -129,8 +135,10 @@ export const AlertProvider = ({ children }) => {
                         icon: '📜',
                         title: `New Scheme: ${scheme.title}`,
                         titleHi: `नई योजना: ${scheme.titleHi}`,
+                        titleMr: `नवीन योजना: ${scheme.titleMr || scheme.titleHi}`,
                         message: scheme.benefit,
                         messageHi: scheme.benefitHi,
+                        messageMr: scheme.benefitMr || scheme.benefitHi,
                         whatsappMsg: `📜 *Govt Scheme:* ${scheme.title}\n${scheme.benefit}\nApply here: ${scheme.applyUrl}`
                     });
                 }

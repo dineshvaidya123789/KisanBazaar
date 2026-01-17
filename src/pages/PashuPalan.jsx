@@ -1,66 +1,55 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import BackToHomeButton from '../components/BackToHomeButton';
 
 const PashuPalan = () => {
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('dairy');
 
     const sections = {
         dairy: {
-            title: "Dairy Farming (डेयरी पालन)",
+            title: t('dairy_farming'),
             icon: "🐄",
             content: [
                 {
-                    title: "Feeding Management",
-                    titleHindi: "आहार प्रबंधन",
-                    desc: "Provide balanced ration (Green fodder + Dry fodder + Concentrates). Ensure 24/7 clean water access.",
-                    descHindi: "संतुलित आहार दें (हरा चारा + सूखा चारा + दाना)। 24/7 साफ पानी की व्यवस्था सुनिश्चित करें।"
+                    title: t('feeding_mgmt'),
+                    desc: t('feeding_desc')
                 },
                 {
-                    title: "Breeding",
-                    titleHindi: "प्रजनन",
-                    desc: "Artificial Insemination (AI) is recommended for better breed improvement. Detect heat symptoms early.",
-                    descHindi: "नस्ल सुधार के लिए कृत्रिम गर्भाधान (AI) की सलाह दी जाती है। गर्मी के लक्षणों को जल्दी पहचानें।"
+                    title: t('breeding'),
+                    desc: t('breeding_desc')
                 },
                 {
-                    title: "Disease Prevention",
-                    titleHindi: "रोग निवारण",
-                    desc: "Vaccinate against FMD (Foot & Mouth Disease) and HS annually. Deworm every 3 months.",
-                    descHindi: "साल में एक बार FMD (खुरपका-मुंहपका) और HS का टीका लगवाएं। हर 3 महीने में पेट के कीड़ों की दवा दें।"
+                    title: t('disease_prev'),
+                    desc: t('disease_desc')
                 }
             ]
         },
         goat: {
-            title: "Goat Farming (बकरी पालन)",
+            title: t('goat_farming'),
             icon: "🐐",
             content: [
                 {
-                    title: "Housing",
-                    titleHindi: "आवास",
-                    desc: "Ensure dry, elevated floor with good ventilation. Protect from cold winds.",
-                    descHindi: "सूखी, ऊंची और हवादार जगह सुनिश्चित करें। ठंडी हवाओं से बचाएं।"
+                    title: t('housing'),
+                    desc: t('housing_desc')
                 },
                 {
-                    title: "Vaccination",
-                    titleHindi: "टीकाकरण",
-                    desc: "PPR and ET vaccines are critical. Consult local vet for schedule.",
-                    descHindi: "PPR और ET टीके महत्वपूर्ण हैं। समय सारिणी के लिए पशु चिकित्सक से संपर्क करें।"
+                    title: t('vaccination'),
+                    desc: t('vaccination_desc')
                 }
             ]
         },
         poultry: {
-            title: "Poultry (मुर्गी पालन)",
+            title: t('poultry_farming'),
             icon: "🐔",
             content: [
                 {
-                    title: "Bio-security",
-                    titleHindi: "जैव सुरक्षा",
-                    desc: "Restrict entry of visitors. Use disinfectant footbaths at entrance.",
-                    descHindi: "बाहरी लोगों का प्रवेश रोकें। प्रवेश द्वार पर कीटाणुनाशक फुटबाथ का प्रयोग करें।"
+                    title: t('biosecurity'),
+                    desc: t('biosecurity_desc')
                 },
                 {
-                    title: "Layer Farming",
-                    titleHindi: "अंडा उत्पादन",
-                    desc: "Maintain 16 hours of light for optimal egg production. Provide calcium-rich diet.",
-                    descHindi: "अंडा उत्पादन के लिए 16 घंटे रोशनी आवश्यक है। कैल्शियम युक्त आहार दें।"
+                    title: t('layer_farming'),
+                    desc: t('layer_desc')
                 }
             ]
         }
@@ -68,13 +57,14 @@ const PashuPalan = () => {
 
     return (
         <div className="container fade-in" style={{ padding: '2rem 1rem', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
+            <BackToHomeButton compact />
+
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>
-                    Animal Husbandry (पशुपालन)
+                    {t('pashu_title')}
                 </h1>
                 <p style={{ color: '#666', fontSize: '1.1rem' }}>
-                    Expert tips for Dairy, Goat, and Poultry farming.<br />
-                    (डेयरी, बकरी और मुर्गी पालन के लिए विशेषज्ञ सुझाव)
+                    {t('pashu_subtitle')}
                 </p>
             </div>
 
@@ -132,11 +122,8 @@ const PashuPalan = () => {
                                 <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#333' }}>
                                     {item.title}
                                 </h3>
-                                <h4 className="text-hindi" style={{ fontSize: '1rem', marginBottom: '1rem', color: '#666', fontWeight: 'normal' }}>
-                                    {item.titleHindi}
-                                </h4>
+                                {/* Content is now fully dynamic from translations, no separate Hindi fields needed */}
                                 <p style={{ marginBottom: '0.5rem', color: '#444' }}>{item.desc}</p>
-                                <p className="text-hindi" style={{ color: '#666', opacity: 0.9 }}>{item.descHindi}</p>
                             </div>
                         ))}
                     </div>
@@ -144,13 +131,16 @@ const PashuPalan = () => {
             </div>
 
             <div style={{ marginTop: '3rem', textAlign: 'center', padding: '2rem', backgroundColor: '#e8f5e9', borderRadius: '12px' }}>
-                <h3 style={{ marginBottom: '1rem' }}>Need specific advice? (विशिष्ट सलाह चाहिए?)</h3>
+                <h3 style={{ marginBottom: '1rem' }}>{t('need_advice')}</h3>
                 <button className="btn btn-primary" onClick={() => window.location.href = '/chaupal'}>
-                    Ask in Kisan Chaupal (किसान चौपाल में पूछें)
+                    {t('ask_chaupal')}
                 </button>
             </div>
+
+            <BackToHomeButton />
         </div>
     );
 };
 
 export default PashuPalan;
+

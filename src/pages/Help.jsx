@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import BackToHomeButton from '../components/BackToHomeButton';
 
 const Help = () => {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         name: '',
         mobile: '',
@@ -26,7 +29,7 @@ const Help = () => {
         };
         localStorage.setItem('kisan_help_requests', JSON.stringify([newEntry, ...existingHelp]));
 
-        setStatus({ type: 'success', text: 'Thank you! Your request has been submitted. (धन्यवाद! आपका अनुरोध प्राप्त हुआ है।)' });
+        setStatus({ type: 'success', text: t('help_success') });
         setFormData({ name: '', mobile: '', topic: 'Suggestion', message: '' });
 
         // Reset status after 5 seconds
@@ -35,14 +38,15 @@ const Help = () => {
 
     return (
         <div className="container fade-in" style={{ padding: 'var(--spacing-xl) 0', maxWidth: '600px' }}>
+            <BackToHomeButton compact />
+
             <div className="card" style={{ padding: '2rem' }}>
                 <h1 style={{ color: 'var(--color-primary)', marginBottom: '1rem', textAlign: 'center' }}>
-                    How can we help you? <br />
-                    (हम आपकी क्या मदद कर सकते हैं?)
+                    {t('help_title')}
                 </h1>
 
                 <p style={{ textAlign: 'center', marginBottom: '2rem', color: '#666' }}>
-                    Please fill out this simple form and we will get back to you soon.
+                    {t('help_subtitle')}
                 </p>
 
                 {status.text && (
@@ -61,7 +65,7 @@ const Help = () => {
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontWeight: '600', color: '#444' }}>Full Name (पूरा नाम) *</label>
+                        <label style={{ fontWeight: '600', color: '#444' }}>{t('help_name')} *</label>
                         <input
                             type="text"
                             name="name"
@@ -80,7 +84,7 @@ const Help = () => {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontWeight: '600', color: '#444' }}>Mobile Number (मोबाइल नंबर) *</label>
+                        <label style={{ fontWeight: '600', color: '#444' }}>{t('help_mobile')} *</label>
                         <input
                             type="tel"
                             name="mobile"
@@ -100,7 +104,7 @@ const Help = () => {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontWeight: '600', color: '#444' }}>Topic (विषय) *</label>
+                        <label style={{ fontWeight: '600', color: '#444' }}>{t('help_topic')} *</label>
                         <select
                             name="topic"
                             value={formData.topic}
@@ -114,20 +118,20 @@ const Help = () => {
                                 backgroundColor: 'white'
                             }}
                         >
-                            <option value="Suggestion">Suggestion (सुझाव)</option>
-                            <option value="Issue">Technical Issue (तकनीकी समस्या)</option>
-                            <option value="Question">Question (प्रश्न)</option>
-                            <option value="Other">Other (अन्य)</option>
+                            <option value="Suggestion">{t('help_topic_suggestion')}</option>
+                            <option value="Issue">{t('help_topic_issue')}</option>
+                            <option value="Question">{t('help_topic_question')}</option>
+                            <option value="Other">{t('help_topic_other')}</option>
                         </select>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontWeight: '600', color: '#444' }}>Message (संदेश) *</label>
+                        <label style={{ fontWeight: '600', color: '#444' }}>{t('help_message')} *</label>
                         <textarea
                             name="message"
                             value={formData.message}
                             onChange={handleChange}
-                            placeholder="How can we improve? Or what do you need help with?"
+                            placeholder={t('help_message_placeholder')}
                             rows="4"
                             required
                             style={{
@@ -152,7 +156,7 @@ const Help = () => {
                             marginTop: '1rem'
                         }}
                     >
-                        Submit Information (जानकारी भेजें)
+                        {t('help_submit')}
                     </button>
                 </form>
             </div>

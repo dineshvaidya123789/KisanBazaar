@@ -1,0 +1,50 @@
+import React, { useState, useEffect } from 'react';
+
+const NetworkStatus = () => {
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    if (isOnline) return null;
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: '#d32f2f', // Red for alert
+            color: 'white',
+            textAlign: 'center',
+            padding: '8px',
+            zIndex: 10000,
+            fontSize: '0.9rem',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '8px'
+        }}>
+            <span>⚠</span>
+            <span>
+                No Internet Connection. You are offline.
+                <br />
+                (इंटरनेट कनेक्शन नहीं है। आप ऑफ़लाइन हैं।)
+            </span>
+        </div>
+    );
+};
+
+export default NetworkStatus;

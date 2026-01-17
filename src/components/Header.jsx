@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAlerts } from '../context/AlertContext';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../data/translations';
 import { useSearchLogic } from '../hooks/useSearchLogic';
 
 const Header = () => {
@@ -15,6 +17,8 @@ const Header = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [activeMobileSubmenu, setActiveMobileSubmenu] = useState(null); // Track open submenu on mobile
     const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const { language, t, changeLanguage } = useLanguage();
     const { alerts, unreadCount, markAsRead, clearAll } = useAlerts();
 
     const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -45,60 +49,93 @@ const Header = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0.6rem 1rem', // Further reduced padding
+                padding: '0.6rem 0.5rem', // Reduced padding for mobile
                 borderBottom: '1px solid #eee',
-                flexWrap: 'wrap',
+                flexWrap: 'nowrap', // Prevent wrapping of main row
                 gap: '8px'
             }}>
-                {/* Logo & Actions Wrapper - Adjusted for Logo Left, Login Right */}
+                {/* Logo & Actions Wrapper */}
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     width: '100%',
-                    gap: '8px'
+                    gap: '4px'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Link to="/" onClick={closeMenu} style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                        <Link to="/" onClick={closeMenu} style={{ display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}>
                             <img
                                 src="/images/logo.png"
                                 alt="Logo"
                                 style={{
-                                    height: '32px',
+                                    height: '28px', // Smaller logo on mobile
                                     width: 'auto',
                                     objectFit: 'contain'
                                 }}
                             />
-                            <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--color-primary)', fontFamily: 'serif', whiteSpace: 'nowrap' }}>
+                            <span style={{
+                                fontSize: '1.2rem',
+                                fontWeight: '800',
+                                color: 'var(--color-primary)',
+                                fontFamily: 'serif',
+                                whiteSpace: 'nowrap'
+                            }} className="logo-text">
                                 KisanBazaar
                             </span>
+                            <style>{`
+                                @media (max-width: 340px) { .logo-text { display: none; } }
+                            `}</style>
                         </Link>
 
-                        {/* Hamburger Button - Now labeled for farmers */}
+                        {/* Hamburger Button */}
                         <button
                             onClick={toggleMenu}
                             className="mobile-menu-btn"
                             style={{
                                 background: '#f8fafc',
                                 border: '1px solid #e2e8f0',
-                                padding: '4px 8px',
-                                borderRadius: '8px',
+                                padding: '4px 6px',
+                                borderRadius: '6px',
                                 cursor: 'pointer',
                                 fontSize: '0.9rem',
                                 color: '#333',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '4px',
+                                gap: '2px',
                                 fontWeight: 'bold'
                             }}
                         >
                             <span>☰</span>
-                            <span style={{ fontSize: '0.8rem' }}>मेनू (Menu)</span>
                         </button>
                     </div>
 
-                    {/* Right side actions - Login pinned to right */}
-                    <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Right side actions */}
+                    <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                        {/* Language Switcher */}
+                        <div style={{ display: 'flex', gap: '2px', backgroundColor: '#f1f5f9', padding: '2px', borderRadius: '12px' }}>
+                            {['en', 'hi', 'mr'].map((lang) => (
+                                <button
+                                    key={lang}
+                                    onClick={() => changeLanguage(lang)}
+                                    style={{
+                                        padding: '4px 6px',
+                                        fontSize: '0.6rem',
+                                        fontWeight: '800',
+                                        borderRadius: '10px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        backgroundColor: language === lang ? 'var(--color-primary)' : 'transparent',
+                                        color: language === lang ? 'white' : '#64748b',
+                                        transition: 'all 0.2s',
+                                        textTransform: 'uppercase',
+                                        minWidth: '24px' // Smaller buttons
+                                    }}
+                                >
+                                    {lang === 'en' ? 'EN' : lang === 'hi' ? 'हिं' : 'मरा'}
+                                </button>
+                            ))}
+                        </div>
+
                         {/* Notification Bell */}
                         <div style={{ position: 'relative' }}>
                             <button
@@ -106,9 +143,9 @@ const Header = () => {
                                 style={{
                                     background: 'none',
                                     border: 'none',
-                                    fontSize: '1.4rem',
+                                    fontSize: '1.2rem',
                                     cursor: 'pointer',
-                                    padding: '5px',
+                                    padding: '4px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     position: 'relative'
@@ -149,90 +186,98 @@ const Header = () => {
                                     backgroundColor: 'white',
                                     boxShadow: 'var(--shadow-lg)',
                                     borderRadius: '12px',
-                                    zIndex: 1001,
+                                    zIndex: 1010,
                                     overflowY: 'auto',
                                     border: '1px solid #e2e8f0'
                                 }}>
                                     <div style={{ padding: '1rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-                                        <h4 style={{ margin: 0, fontSize: '1rem' }}>Notifications (सूचनाएं)</h4>
-                                        <button onClick={clearAll} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}>Clear All</button>
+                                        <h4 style={{ margin: 0, fontSize: '1rem' }}>{t('notifications')}</h4>
+                                        <button onClick={clearAll} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}>{t('clear_all')}</button>
                                     </div>
 
                                     {alerts.length === 0 ? (
                                         <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
                                             <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📭</div>
-                                            <p style={{ margin: 0, fontSize: '0.9rem' }}>No new alerts</p>
+                                            <p style={{ margin: 0, fontSize: '0.9rem' }}>{t('no_new_alerts')}</p>
                                         </div>
                                     ) : (
                                         <div style={{ padding: '0.5rem' }}>
-                                            {alerts.map(alert => (
-                                                <div
-                                                    key={alert.id}
-                                                    onClick={() => markAsRead(alert.id)}
-                                                    style={{
-                                                        padding: '1rem',
-                                                        borderRadius: '8px',
-                                                        marginBottom: '0.5rem',
-                                                        backgroundColor: alert.read ? 'transparent' : '#f0f9ff',
-                                                        borderLeft: `4px solid ${alert.type === 'weather' ? '#ef4444' : alert.type.includes('market') ? '#f59e0b' : '#10b981'}`,
-                                                        cursor: 'pointer',
-                                                        transition: 'background-color 0.2s'
-                                                    }}
-                                                >
-                                                    <div style={{ display: 'flex', gap: '10px' }}>
-                                                        <span style={{ fontSize: '1.2rem' }}>{alert.icon}</span>
-                                                        <div style={{ flex: 1 }}>
-                                                            <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>
-                                                                {alert.title}
-                                                                <span style={{ display: 'block', fontSize: '0.8rem', fontWeight: 'normal', color: '#64748b' }}>{alert.titleHi}</span>
-                                                            </div>
-                                                            <p style={{ fontSize: '0.8rem', margin: '5px 0', lineHeight: '1.4', color: '#334155' }}>
-                                                                {alert.message}
-                                                                <span style={{ display: 'block', fontStyle: 'italic', marginTop: '2px' }}>{alert.messageHi}</span>
-                                                            </p>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
-                                                                    {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                </span>
-                                                                <a
-                                                                    href={`https://wa.me/?text=${encodeURIComponent(alert.whatsappMsg)}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                    style={{
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        gap: '4px',
-                                                                        fontSize: '0.75rem',
-                                                                        color: '#25D366',
-                                                                        textDecoration: 'none',
-                                                                        fontWeight: 'bold',
-                                                                        padding: '4px 8px',
-                                                                        backgroundColor: '#f0fff4',
-                                                                        borderRadius: '4px'
-                                                                    }}
-                                                                >
-                                                                    Share 🟢
-                                                                </a>
+                                            {alerts.map(alert => {
+                                                // Select language-specific content
+                                                const title = language === 'hi' ? (alert.titleHi || alert.title) :
+                                                    language === 'mr' ? (alert.titleMr || alert.titleHi || alert.title) :
+                                                        alert.title;
+                                                const message = language === 'hi' ? (alert.messageHi || alert.message) :
+                                                    language === 'mr' ? (alert.messageMr || alert.messageHi || alert.message) :
+                                                        alert.message;
+
+                                                return (
+                                                    <div
+                                                        key={alert.id}
+                                                        onClick={() => markAsRead(alert.id)}
+                                                        style={{
+                                                            padding: '1rem',
+                                                            borderRadius: '8px',
+                                                            marginBottom: '0.5rem',
+                                                            backgroundColor: alert.read ? 'transparent' : '#f0f9ff',
+                                                            borderLeft: `4px solid ${alert.type === 'weather' ? '#ef4444' : alert.type.includes('market') ? '#f59e0b' : '#10b981'}`,
+                                                            cursor: 'pointer',
+                                                            transition: 'background-color 0.2s'
+                                                        }}
+                                                    >
+                                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                                            <span style={{ fontSize: '1.2rem' }}>{alert.icon}</span>
+                                                            <div style={{ flex: 1 }}>
+                                                                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '2px' }}>
+                                                                    {title}
+                                                                </div>
+                                                                <p style={{ fontSize: '0.8rem', margin: '5px 0', lineHeight: '1.4', color: '#334155' }}>
+                                                                    {message}
+                                                                </p>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                                                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                                                        {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                    </span>
+                                                                    <a
+                                                                        href={`https://wa.me/?text=${encodeURIComponent(alert.whatsappMsg)}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            gap: '4px',
+                                                                            fontSize: '0.75rem',
+                                                                            color: '#25D366',
+                                                                            textDecoration: 'none',
+                                                                            fontWeight: 'bold',
+                                                                            padding: '4px 8px',
+                                                                            backgroundColor: '#f0fff4',
+                                                                            borderRadius: '4px'
+                                                                        }}
+                                                                    >
+                                                                        {t('share_whatsapp')} 🟢
+                                                                    </a>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
 
                                     {/* Subscribe CTA */}
                                     <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderTop: '1px solid #f1f5f9', textAlign: 'center' }}>
-                                        <p style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: '#475569' }}>Want alerts on WhatsApp?</p>
+                                        <p style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: '#475569' }}>{t('want_alerts_whatsapp')}</p>
                                         <a
-                                            href="https://wa.me/91XXXXXXXXXX?text=I%20want%20to%20subscribe%20to%20Kisan%20Bazaar%20Alerts"
+                                            href={`https://wa.me/91XXXXXXXXXX?text=${encodeURIComponent(t('whatsapp_subscribe_msg'))}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="btn btn-primary"
                                             style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', borderRadius: '8px' }}
                                         >
-                                            📲 Subscribe Now
+                                            {t('subscribe_now')}
                                         </a>
                                     </div>
                                 </div>
@@ -263,6 +308,9 @@ const Header = () => {
                         .mobile-menu-btn { display: flex !important; }
                         .desktop-nav { display: none !important; }
                         .login-text { font-size: 0.75rem; }
+                        .voice-search-desktop { display: none !important; }
+                        .voice-icon-mobile { display: inline-flex !important; }
+                        .search-icon { display: none !important; }
                         
                         .header-search { 
                             order: 3; 
@@ -283,6 +331,7 @@ const Header = () => {
 
                     @media (min-width: 769px) {
                         .header-actions { margin-left: auto; }
+                        .voice-icon-mobile { display: none !important; }
                     }
 
                     @keyframes slideDown {
@@ -291,88 +340,169 @@ const Header = () => {
                     }
                 `}</style>
 
-                {/* Search Bar - Centered */}
                 <div className="header-search" style={{
-                    position: 'relative', // For dropdown positioning
+                    position: 'relative',
                     display: 'flex',
                     alignItems: 'center',
                     flexWrap: 'nowrap',
                     flex: '1 1 300px',
                     maxWidth: '500px',
                     margin: '0 auto',
-                    zIndex: 1002 // Higher than alert dropdown if they overlap
+                    zIndex: 1002
                 }}>
                     <div style={{
                         display: 'flex',
                         width: '100%',
-                        border: '1.5px solid var(--color-primary)',
-                        borderRadius: '25px',
+                        border: '1px solid #cbd5e1', // More subtle border
+                        borderRadius: '50px', // Rounder pill shape
                         overflow: 'hidden',
-                        height: '36px',
-                        backgroundColor: 'white'
-                    }}>
-                        <select
-                            value={searchMode}
-                            onChange={(e) => setSearchMode(e.target.value)}
-                            style={{
-                                width: 'auto',
-                                border: 'none',
-                                padding: '0 0.4rem',
-                                backgroundColor: '#f1f5f9',
-                                borderRight: '1px solid #e2e8f0',
-                                outline: 'none',
-                                color: '#475569',
-                                fontSize: '0.75rem',
-                                fontWeight: '600',
-                                height: '100%',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <option value="Buyers">Buy</option>
-                            <option value="Sellers">Sell</option>
-                            <option value="Rates">Rates</option>
-                        </select>
+                        height: '42px', // Slightly taller for professional feel
+                        backgroundColor: '#f8fafc', // Slight off-white background
+                        transition: 'all 0.3s ease',
+                        boxShadow: isSearchFocused ? '0 0 0 3px rgba(34, 197, 94, 0.2)' : 'none' // Focus ring
+                    }} className="search-input-wrapper">
+
+
+
                         <input
                             type="text"
-                            placeholder={
-                                searchMode === 'Buyers' ? 'Search Buyers... (e.g. Wheat)' :
-                                    searchMode === 'Sellers' ? 'Search Farmers... (e.g. Seeds)' :
-                                        'Search Mandi Rates...'
-                            }
+                            placeholder="Search crops, mandi rates, or weather..."
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                            onBlur={() => {
+                                setTimeout(() => setIsSearchFocused(false), 200);
+                            }}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearchRaw()}
                             style={{
                                 flex: 1,
                                 border: 'none',
-                                padding: '0 0.8rem',
+                                padding: '0 12px',
                                 outline: 'none',
-                                fontSize: '0.85rem',
+                                fontSize: '0.95rem',
                                 minWidth: '0',
                                 height: '100%',
+                                backgroundColor: 'transparent',
                                 color: '#1e293b'
                             }}
                         />
+
+                        {/* Clear Button (X) - Improved UX like Google */}
+                        {query && (
+                            <button
+                                onClick={() => {
+                                    setQuery('');
+                                    document.querySelector('input[placeholder="Search crops, mandi rates, or weather..."]').focus();
+                                }}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '0 8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#64748b',
+                                    fontSize: '1.2rem',
+                                    height: '100%',
+                                    outline: 'none'
+                                }}
+                                title="Clear search"
+                                onMouseDown={(e) => e.preventDefault()} // Prevent losing focus on click
+                            >
+                                ×
+                            </button>
+                        )}
+
+                        {/* Voice Search - Desktop Only */}
+                        <button
+                            onClick={() => {
+                                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                                recognition.lang = 'hi-IN';
+                                recognition.onstart = () => { setQuery('Listening...'); };
+                                recognition.onresult = (event) => {
+                                    const transcript = event.results[0][0].transcript;
+                                    setQuery(transcript);
+                                    handleSearchRaw(transcript);
+                                };
+                                recognition.start();
+                            }}
+                            className="voice-search-desktop"
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '0 12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'color 0.2s',
+                                borderLeft: '1px solid #e2e8f0',
+                                height: '60%',
+                                alignSelf: 'center',
+                                flexShrink: 0
+                            }}
+                            title="Voice Search"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#2E7D32' }}>
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="23"></line>
+                                <line x1="8" y1="23" x2="16" y2="23"></line>
+                            </svg>
+                        </button>
+
+                        {/* Search Button with Voice on Mobile */}
                         <button
                             onClick={() => handleSearchRaw()}
                             style={{
                                 width: 'auto',
                                 border: 'none',
-                                padding: '0 1rem',
+                                padding: '0 1.2rem',
                                 background: 'var(--color-primary)',
                                 color: 'white',
                                 height: '100%',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
+                                gap: '8px',
                                 cursor: 'pointer',
-                                fontSize: '0.9rem'
+                                fontSize: '1.1rem',
+                                transition: 'background-color 0.2s',
+                                flexShrink: 0
                             }}
-                        >🔍</button>
+                            onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                            onMouseLeave={(e) => e.target.style.opacity = '1'}
+                        >
+                            <span className="search-icon">🔍</span>
+                            <span
+                                className="voice-icon-mobile"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                                    recognition.lang = 'hi-IN';
+                                    recognition.onstart = () => { setQuery('Listening...'); };
+                                    recognition.onresult = (event) => {
+                                        const transcript = event.results[0][0].transcript;
+                                        setQuery(transcript);
+                                        handleSearchRaw(transcript);
+                                    };
+                                    recognition.start();
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </span>
+                        </button>
                     </div>
 
                     {/* Suggestions Dropdown */}
-                    {suggestions.length > 0 && (
+                    {(isSearchFocused && suggestions.length > 0) && (
                         <div style={{
                             position: 'absolute',
                             top: '40px',
@@ -390,7 +520,7 @@ const Header = () => {
                                     key={idx}
                                     onClick={() => {
                                         setSearchMode(s.type);
-                                        handleSearchRaw(s.term, s.type); // This will clear query automatically
+                                        handleSearchRaw(s.term, s.type, s.subtype, s.modeOverride); // Pass modeOverride
                                     }}
                                     style={{
                                         padding: '10px 15px',
@@ -436,8 +566,8 @@ const Header = () => {
                     <div className="nav-item dropdown">
                         <span
                             onClick={() => isMobileMenuOpen && toggleMobileSubmenu('buyer')}
-                            style={{ paddingBottom: isMobileMenuOpen ? '2px' : '10px', display: 'block', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: isMobileMenuOpen ? 'space-between' : 'flex-start', alignItems: 'center' }}>
-                            Buyer Section (खरीदार)
+                            style={{ paddingBottom: isMobileMenuOpen ? '2px' : '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: isMobileMenuOpen ? 'space-between' : 'flex-start', alignItems: 'center' }}>
+                            {t('buyer_section')}
                             <span>{isMobileMenuOpen ? (activeMobileSubmenu === 'buyer' ? '▴' : '▾') : '▾'}</span>
                         </span>
                         <div className="dropdown-content" style={{
@@ -446,9 +576,9 @@ const Header = () => {
                             border: isMobileMenuOpen ? 'none' : '1px solid #eee',
                             display: isMobileMenuOpen ? (activeMobileSubmenu === 'buyer' ? 'block' : 'none') : undefined // Let CSS handle desktop hover, JS handle mobile
                         }}>
-                            <Link to="/sell?type=Buy" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>Request Crop (फसल मांगें)</Link>
-                            <Link to="/marketplace?filter=my-requests" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>My Requests (मेरी मांगें)</Link>
-                            <Link to="/sellers" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>View Sellers Directory</Link>
+                            <Link to="/sell?type=Buy" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>{t('request_crop')}</Link>
+                            <Link to="/my-products" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>{t('my_posts')}</Link>
+                            <Link to="/sellers" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>{t('view_sellers')}</Link>
                         </div>
                     </div>
 
@@ -456,8 +586,8 @@ const Header = () => {
                     <div className="nav-item dropdown">
                         <span
                             onClick={() => isMobileMenuOpen && toggleMobileSubmenu('seller')}
-                            style={{ paddingBottom: isMobileMenuOpen ? '2px' : '10px', display: 'block', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: isMobileMenuOpen ? 'space-between' : 'flex-start', alignItems: 'center' }}>
-                            Seller Section (विक्रेता)
+                            style={{ paddingBottom: isMobileMenuOpen ? '2px' : '10px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', justifyContent: isMobileMenuOpen ? 'space-between' : 'flex-start', alignItems: 'center' }}>
+                            {t('seller_section')}
                             <span>{isMobileMenuOpen ? (activeMobileSubmenu === 'seller' ? '▴' : '▾') : '▾'}</span>
                         </span>
                         <div className="dropdown-content" style={{
@@ -466,53 +596,20 @@ const Header = () => {
                             border: isMobileMenuOpen ? 'none' : '1px solid #eee',
                             display: isMobileMenuOpen ? (activeMobileSubmenu === 'seller' ? 'block' : 'none') : undefined
                         }}>
-                            <Link to="/sell?type=Sell" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>List Your Product For Sale</Link>
-                            <Link to="/my-products" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>📋 My Products (मेरी पोस्ट)</Link>
-                            <Link to="/marketplace" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>View Buyers</Link>
+                            <Link to="/sell?type=Sell" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>{t('list_product')}</Link>
+                            <Link to="/my-products" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>{t('my_products')}</Link>
+                            <Link to="/marketplace?type=Buy" onClick={closeMenu} style={{ padding: isMobileMenuOpen ? '0.5rem 0 0.5rem 1rem' : '12px 16px' }}>{t('view_buyers')}</Link>
                         </div>
                     </div>
 
-                    {/* Today Rates */}
-                    <Link to="/rates" onClick={closeMenu} className="nav-link">
-                        <span className="nav-label-en">Today Rates</span>
-                        <span className="nav-label-hi">(मंडी भाव)</span>
-                    </Link>
 
-                    {/* News */}
-                    <Link to="/news" onClick={closeMenu} className="nav-link">
-                        <span className="nav-label-en">News</span>
-                        <span className="nav-label-hi">(समाचार)</span>
-                    </Link>
 
-                    {/* Weather */}
-                    <Link to="/weather" onClick={closeMenu} className="nav-link">
-                        <span className="nav-label-en">Weather</span>
-                        <span className="nav-label-hi">(मौसम)</span>
-                    </Link>
 
-                    {/* Farming Services */}
-                    <Link to="/transport" onClick={closeMenu} className="nav-link">
-                        <span className="nav-label-en">Farming Services</span>
-                        <span className="nav-label-hi">(कृषि सेवाएँ)</span>
-                    </Link>
 
-                    {/* Chaupal */}
-                    <Link to="/chaupal" onClick={closeMenu} className="nav-link">
-                        <span className="nav-label-en">Chaupal</span>
-                        <span className="nav-label-hi">(चौपाल)</span>
-                    </Link>
 
-                    {/* Advisory */}
-                    <Link to="/advisory" onClick={closeMenu} className="nav-link">
-                        <span className="nav-label-en">Advisory</span>
-                        <span className="nav-label-hi">(सलाह)</span>
-                    </Link>
 
-                    {/* Animal Husbandry */}
-                    <Link to="/pashu-palan" onClick={closeMenu} className="nav-link">
-                        <span className="nav-label-en">Animal Husbandry</span>
-                        <span className="nav-label-hi">(पशुपालन)</span>
-                    </Link>
+
+
 
                     {/* "Help" Link Removed as requested (already in Footer) */}
                     {/* "Sign In" Removed as requested */}

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import BackToHomeButton from '../components/BackToHomeButton';
 
 const Chaupal = () => {
     const { user, login } = useAuth();
+    const { t, language } = useLanguage();
 
     // Initial Seed Data
     const seedQuestions = [
@@ -36,15 +39,25 @@ const Chaupal = () => {
     const [showAskForm, setShowAskForm] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null); // ID of question being replied to
     const [visibleCount, setVisibleCount] = useState(5); // Pagination Limit
-    const [replyText, setReplyText] = useState("");
+    // replyText needs to be an object to handle multiple reply inputs if needed, 
+    // or at least match the usage logic { [id]: text }
+    const [replyText, setReplyText] = useState({});
     const [selectedImage, setSelectedImage] = useState(null); // For new question
     const [replyImage, setReplyImage] = useState(null); // For reply
+    const questionInputRef = React.useRef(null);
 
     // Auth & Admin State
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [loginPhone, setLoginPhone] = useState("");
     const [loginOtp, setLoginOtp] = useState("");
     const [isAdminMode, setIsAdminMode] = useState(false);
+
+    // Helper to get localized content
+    const getContent = (item, field) => {
+        if (language === 'hi' && item[`${field}Hindi`]) return item[`${field}Hindi`];
+        if (language === 'mr' && item[`${field}Marathi`]) return item[`${field}Marathi`];
+        return item[field];
+    };
 
     // Helper to convert file to Base64
     const handleImageChange = (e, isReply = false) => {
@@ -104,7 +117,12 @@ const Chaupal = () => {
     const handlePostQuestion = (e) => {
         e.preventDefault();
         if (!checkAuth()) return;
-        if (!newQuestion.trim()) return;
+
+        if (!newQuestion.trim()) {
+            // Standard Criteria: Auto-focus instead of popup
+            questionInputRef.current?.focus();
+            return;
+        }
 
         const newQ = {
             id: Date.now(), // Unique ID based on timestamp
@@ -125,7 +143,7 @@ const Chaupal = () => {
         setShowAskForm(false);
     };
 
-    const handleVote = (id, type) => {
+    const handleVote = (id) => {
         if (!checkAuth()) return;
         const updatedQuestions = questions.map(q => {
             if (q.id === id) {
@@ -136,15 +154,15 @@ const Chaupal = () => {
         setQuestions(updatedQuestions);
     };
 
-    const handleReplySubmit = (e, questionId) => {
-        e.preventDefault();
+    const handleReplySubmit = (questionId) => {
         if (!checkAuth()) return;
-        if (!replyText.trim()) return;
+        const text = replyText[questionId] || "";
+        if (!text.trim()) return;
 
         const newReply = {
             id: Date.now(),
             author: user.name,
-            text: replyText,
+            text: text,
             image: replyImage,
             textHindi: ""
         };
@@ -157,7 +175,7 @@ const Chaupal = () => {
         });
 
         setQuestions(updatedQuestions);
-        setReplyText("");
+        setReplyText({ ...replyText, [questionId]: "" });
         setReplyImage(null);
         setReplyingTo(null);
     };
@@ -172,241 +190,131 @@ const Chaupal = () => {
         <div className="container fade-in" style={{ padding: '2rem 1rem', maxWidth: '800px', margin: '0 auto', minHeight: '80vh' }}>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                 <h1 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>
-                    Kisan Chaupal (किसान चौपाल)
+                    {t('chaupal_title')}
                 </h1>
                 <p style={{ color: '#666', fontSize: '1.1rem' }}>
-                    Ask questions, share knowledge, and help fellow farmers.<br />
-                    (प्रश्न पूछें, ज्ञान साझा करें और साथी किसानों की मदद करें)
+                    {t('chaupal_subtitle')}
                 </p>
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
                     <button className="btn btn-outline" onClick={() => { localStorage.removeItem('kisan_chaupal_questions'); window.location.reload(); }} style={{ fontSize: '0.8rem' }}>
-                        ⚠️ Reset Demo Data
+                        ⚠️ {t('reset_demo')}
                     </button>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.9rem', cursor: 'pointer', userSelect: 'none' }}>
                         <input type="checkbox" checked={isAdminMode} onChange={e => setIsAdminMode(e.target.checked)} />
-                        🛡️ Admin Mode
+                        🛡️ {t('admin_mode')}
                     </label>
                 </div>
             </div>
 
-            {/* Ask Question Button */}
-            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                {!showAskForm ? (
+            {/* Ask Box */}
+            <div className="card" style={{ padding: '1.5rem', marginBottom: '2rem', borderTop: '4px solid var(--color-secondary)' }}>
+                <h3 style={{ marginBottom: '1rem' }}>{t('ask_question')}</h3>
+                <textarea
+                    ref={questionInputRef}
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                    placeholder={t('type_question')}
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', minHeight: '80px', marginBottom: '1rem' }}
+                />
+                <input
+                    type="file"
+                    id="questionImageInput"
+                    style={{ display: 'none' }}
+                    accept="image/*"
+                    onChange={(e) => handleImageChange(e, false)}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <button
-                        onClick={() => checkAuth() && setShowAskForm(true)}
-                        className="btn btn-primary"
-                        style={{ fontSize: '1.1rem', padding: '0.8rem 2rem', borderRadius: '30px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                        className="btn btn-outline"
+                        style={{ fontSize: '0.9rem' }}
+                        onClick={() => document.getElementById('questionImageInput').click()}
                     >
-                        ➕ Ask a Question (प्रश्न पूछें)
+                        📷 {selectedImage ? "Image Selected" : t('upload_image')}
                     </button>
-                ) : (
-                    <form onSubmit={handlePostQuestion} className="card fade-in" style={{ textAlign: 'left', padding: '1.5rem', border: '2px solid var(--color-primary)' }}>
-                        <h3 style={{ marginTop: 0, color: 'var(--color-primary)' }}>New Question</h3>
-                        <textarea
-                            value={newQuestion}
-                            onChange={(e) => setNewQuestion(e.target.value)}
-                            placeholder="Type your question here... (अपना प्रश्न यहाँ लिखें...)"
-                            style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid #ddd', minHeight: '100px', marginBottom: '1rem', fontSize: '1rem' }}
-                            required
-                        />
-
-                        {/* Image Upload Input */}
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '5px' }}>📷 Upload Image (Optional)</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageChange(e, false)}
-                                style={{ fontSize: '0.9rem' }}
-                            />
-                            {selectedImage && (
-                                <div style={{ marginTop: '10px' }}>
-                                    <img src={selectedImage} alt="Preview" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }} />
-                                    <button type="button" onClick={() => setSelectedImage(null)} style={{ display: 'block', color: 'red', fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer', marginTop: '5px' }}>Remove</button>
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button type="button" onClick={() => setShowAskForm(false)} className="btn btn-outline">Cancel</button>
-                            <button type="submit" className="btn btn-primary">Post Question</button>
-                        </div>
-                    </form>
-                )}
+                    <button className="btn btn-primary" onClick={handlePostQuestion}>{t('post_question')}</button>
+                </div>
             </div>
 
-            {/* Questions List */}
+            {/* Questions Feed */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {questions.slice(0, visibleCount).map(q => (
+                {questions.map(q => (
                     <div key={q.id} className="card" style={{ padding: '0', overflow: 'hidden' }}>
                         <div style={{ padding: '1.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{ fontWeight: 'bold', color: '#333' }}>👤 {q.author}</span>
-                                    <span>📍 {q.district}</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span>🕒 {q.timestamp}</span>
-                                    {isAdminMode && (
-                                        <button onClick={() => handleDelete(q.id)} style={{ background: 'red', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 8px', cursor: 'pointer' }}>
-                                            Delete
-                                        </button>
-                                    )}
-                                </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <span style={{ fontWeight: 'bold', color: '#555' }}>👤 {q.author}</span>
+                                {isAdminMode && <button onClick={() => handleDelete(q.id)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>{t('delete')}</button>}
                             </div>
 
-                            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#222' }}>{q.question}</h3>
-                            {q.questionHindi && (
-                                <p className="text-hindi" style={{ fontSize: '1.1rem', color: '#555', marginBottom: '1rem' }}>
-                                    {q.questionHindi}
-                                </p>
-                            )}
+                            {/* Question Text in Localized Language */}
+                            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#222' }}>
+                                {getContent(q, 'question')}
+                            </h3>
+
                             {q.image && (
-                                <div style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
-                                    <img
-                                        src={q.image}
-                                        alt="User Upload"
-                                        style={{
-                                            maxWidth: '100%',
-                                            maxHeight: '400px',
-                                            objectFit: 'contain', // Ensure full image is visible
-                                            borderRadius: '8px',
-                                            border: '1px solid #eee',
-                                            backgroundColor: '#f8f9fa' // Background for transparency
-                                        }}
-                                    />
-                                </div>
+                                <img src={q.image} alt="Crop issue" style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1rem' }} />
                             )}
 
-                            <div style={{ display: 'flex', gap: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem', marginTop: '1rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
                                 <button
                                     onClick={() => handleVote(q.id)}
-                                    className="btn-outline"
-                                    style={{ border: 'none', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', backgroundColor: q.likes > 0 ? '#e8f5e9' : 'transparent', color: q.likes > 0 ? 'green' : 'inherit' }}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}
                                 >
-                                    👍 {q.likes} Likes
-                                </button>
-                                <button className="btn-outline" style={{ border: 'none', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                    💬 {q.replies.length} Replies
+                                    👍 {q.likes} {t('likes')}
                                 </button>
                                 <button
-                                    onClick={() => checkAuth() && setReplyingTo(replyingTo === q.id ? null : q.id)}
-                                    className="btn-outline"
-                                    style={{ border: 'none', padding: '0.5rem', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--color-primary)', cursor: 'pointer' }}
+                                    onClick={() => setReplyingTo(replyingTo === q.id ? null : q.id)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '5px' }}
                                 >
-                                    ↩️ {replyingTo === q.id ? 'Cancel Reply' : 'Reply'}
+                                    💬 {q.replies.length} {t('replies')}
                                 </button>
                             </div>
-
-                            {/* Reply Form */}
-                            {replyingTo === q.id && (
-                                <div style={{ marginTop: '1rem' }}>
-                                    <form onSubmit={(e) => handleReplySubmit(e, q.id)} style={{ display: 'flex', gap: '10px' }}>
-                                        <input
-                                            type="text"
-                                            value={replyText}
-                                            onChange={(e) => setReplyText(e.target.value)}
-                                            placeholder="Write a reply..."
-                                            style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
-                                            required
-                                            autoFocus
-                                        />
-                                        {/* Mini Image Upload for Reply */}
-                                        <label style={{ cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }} title="Upload Image">
-                                            📷
-                                            <input type="file" accept="image/*" onChange={(e) => handleImageChange(e, true)} style={{ display: 'none' }} />
-                                        </label>
-                                        <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>Post</button>
-                                    </form>
-                                    {replyImage && (
-                                        <div style={{ marginTop: '5px', marginLeft: '10px' }}>
-                                            <span style={{ fontSize: '0.8rem', color: 'green' }}>Image selected</span>
-                                            <button type="button" onClick={() => setReplyImage(null)} style={{ marginLeft: '10px', color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>❌</button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
                         </div>
 
                         {/* Replies Section */}
-                        {q.replies.length > 0 && (
+                        {(replyingTo === q.id || q.replies.length > 0) && (
                             <div style={{ backgroundColor: '#f9f9f9', padding: '1rem 1.5rem', borderTop: '1px solid #eee' }}>
-                                {q.replies.map(reply => (
-                                    <div key={reply.id} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #eee' }}>
-                                        <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--color-secondary)', marginBottom: '0.2rem' }}>
-                                            {reply.author}
+                                {q.replies.map(r => (
+                                    <div key={r.id} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #eee' }}>
+                                        <div style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#444' }}>{r.author}</div>
+                                        <div style={{ fontSize: '0.95rem', color: '#333' }}>
+                                            {getContent(r, 'text')}
                                         </div>
-                                        <div style={{ fontSize: '0.95rem' }}>{reply.text}</div>
-                                        {reply.image && (
-                                            <div style={{ marginTop: '8px' }}>
-                                                <img
-                                                    src={reply.image}
-                                                    alt="Reply Upload"
-                                                    style={{
-                                                        width: '100%',
-                                                        maxWidth: '300px', // Increased from 150px
-                                                        height: 'auto',
-                                                        borderRadius: '8px',
-                                                        border: '1px solid #ddd',
-                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                                                    }}
-                                                />
-                                            </div>
-                                        )}
-                                        {reply.textHindi && <div className="text-hindi" style={{ fontSize: '0.9rem', color: '#666' }}>{reply.textHindi}</div>}
                                     </div>
                                 ))}
+
+                                {replyingTo === q.id && (
+                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '10px' }}>
+                                        <input
+                                            type="text"
+                                            value={replyText[q.id] || ''}
+                                            onChange={(e) => setReplyText({ ...replyText, [q.id]: e.target.value })}
+                                            placeholder={t('write_reply')}
+                                            style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                        />
+                                        <button className="btn btn-sm btn-primary" onClick={() => handleReplySubmit(q.id)}>{t('reply')}</button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 ))}
-
-                {/* Load More Button */}
-                {questions.length > visibleCount && (
-                    <button
-                        onClick={() => setVisibleCount(prev => prev + 5)}
-                        className="btn btn-outline"
-                        style={{ margin: '1rem auto', display: 'block' }}
-                    >
-                        Load More Questions (⬇️)
-                    </button>
-                )}
             </div>
 
             {/* Login Modal */}
             {showLoginModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setShowLoginModal(false)}>
-                    <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '12px', maxWidth: '400px', width: '100%', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                        <h2>Login Required</h2>
-                        <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-                            Please login to ask questions or reply.<br />
-                            (कृपया प्रश्न पूछने या उत्तर देने के लिए लॉग इन करें)
-                        </p>
-                        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <input
-                                type="tel"
-                                placeholder="Mobile Number"
-                                value={loginPhone}
-                                onChange={e => setLoginPhone(e.target.value)}
-                                style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
-                                required
-                            />
-                            <input
-                                type="password"
-                                placeholder="OTP (Enter 1234)"
-                                value={loginOtp}
-                                onChange={e => setLoginOtp(e.target.value)}
-                                style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
-                                required
-                            />
-                            <button type="submit" className="btn btn-primary" style={{ padding: '10px' }}>Login</button>
-                        </form>
-                        <button style={{ marginTop: '1rem', background: 'none', border: 'none', color: '#666', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowLoginModal(false)}>
-                            Cancel
-                        </button>
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ maxWidth: '300px', textAlign: 'center' }}>
+                        <h3>{t('login_required')}</h3>
+                        <p>{t('login_to_ask')}</p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
+                            <button className="btn btn-primary" onClick={() => login('9876543210', '1234').then(() => setShowLoginModal(false))}>Login as Demo User</button>
+                            <button className="btn btn-outline" onClick={() => setShowLoginModal(false)}>{t('cancel_reply')}</button>
+                        </div>
                     </div>
                 </div>
             )}
+
+            <BackToHomeButton />
         </div>
     );
 };

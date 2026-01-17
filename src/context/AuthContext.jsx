@@ -17,19 +17,35 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = (phone, otp) => {
+    const login = (phone, otp, requestedRole = 'Farmer', city = '') => {
         // MOCK LOGIN LOGIC
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 if (otp === '1234') {
+                    let role = requestedRole;
+                    let name = "Kishan Kumar";
+                    let avatar = "4CAF50";
+
+                    // Admin Backdoor
+                    if (phone.toLowerCase() === 'admin') {
+                        role = 'Admin';
+                        name = "Administrator";
+                        avatar = "000000";
+                    } else if (requestedRole === 'FPO') {
+                        name = "Malwa FPO Association";
+                        avatar = "2196F3";
+                    }
+
                     const mockUser = {
-                        name: "Kishan Kumar",
+                        name: name,
                         phone: phone,
                         village: "Palakhedi, Indore",
-                        landSize: "5 Acres",
+                        city: city, // Store the city/samiti name
+                        landSize: role === 'FPO' ? "500+ Acres (Aggregated)" : "5 Acres",
                         crops: ["Wheat", "Soybean"],
                         isVerified: true,
-                        avatar: "https://ui-avatars.com/api/?name=Kishan+Kumar&background=4CAF50&color=fff"
+                        role: role,
+                        avatar: `https://ui-avatars.com/api/?name=${name.replace(/ /g, '+')}&background=${avatar}&color=fff`
                     };
                     setUser(mockUser);
                     localStorage.setItem('kisan_user', JSON.stringify(mockUser));

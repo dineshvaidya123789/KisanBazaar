@@ -208,68 +208,390 @@ export const commodityMapping = {
     'jute': 'patshan',
     'patshan': 'jute',
 
-    // --- DEVANAGARI MAPPINGS (Hinglish -> Hindi) ---
-    // Enables searching with Hindi typing (e.g. "गेहूं")
-    'gehu': 'गेहूं',
-    'chawal': 'चावल',
-    'dhaan': 'धान',
-    'makka': 'मक्का',
-    'soya': 'सोयाबीन',
-    'bajra': 'बाजरा',
-    'jowar': 'ज्वार',
-    'jau': 'जौ',
+    // --- DEVANAGARI MAPPINGS (Removed to avoid duplicates) ---
+    // 'gehu': 'गेहूं', etc. removed.
+    // Ensure we map Hindi Script -> English instead.
+    'गेहूं': 'wheat',
+    'चावल': 'rice',
+    'धान': 'rice',
+    'मक्का': 'maize',
+    'सोयाबीन': 'soybean',
+    'बाजरा': 'millet',
+    'ज्वार': 'sorghum',
+    'जौ': 'barley',
+    'चना': 'gram',
+    'अरहर': 'pigeon pea',
+    'मसूर': 'lentil',
+    'उड़द': 'black gram',
+    'मूंग': 'green gram',
+    'सरसों': 'mustard',
+    'मूंगफली': 'groundnut',
+    'सूरजमुखी': 'sunflower',
+    'तिल': 'sesame',
+    'अलसी': 'linseed',
+    'प्याज': 'onion',
+    'आलू': 'potato',
+    'टमाटर': 'tomato',
+    'लहसुन': 'garlic',
+    'अदरक': 'ginger',
+    'मिर्च': 'chilli',
+    'पत्तागोभी': 'cabbage',
+    'फूलगोभी': 'cauliflower',
+    'बैंगन': 'brinjal',
+    'भिंडी': 'lady finger',
+    'मटर': 'pea',
+    'गाजर': 'carrot',
+    'मूली': 'radish',
+    'पालक': 'spinach',
+    'मेथी': 'fenugreek',
+    'लौकी': 'bottle gourd',
+    'करेला': 'bitter gourd',
+    'कद्दू': 'pumpkin',
+    'खीरा': 'cucumber',
+    'ककड़ी': 'cucumber',
+    'केला': 'banana',
+    'आम': 'mango',
+    'सेब': 'apple',
+    'अनार': 'pomegranate',
+    'संतरा': 'orange',
+    'अंगूर': 'grapes',
+    'पपीता': 'papaya',
+    'अमरूद': 'guava',
+    'तरबूज': 'watermelon',
+    'खरबूजा': 'muskmelon',
+    'नींबू': 'lemon',
+    'कपास': 'cotton',
+    'गन्ना': 'sugarcane',
+    'हल्दी': 'turmeric',
+    'धनिया': 'coriander',
+    // --- MARATHI MAPPINGS (Extensive) ---
+    // 1. Vegetables (भाज्या)
+    // 'kanda': 'onion', (Duplicate of line 86)
+    'kaanda': 'onion',
+    'कांदा': 'onion',
 
-    'chana': 'चना',
-    'arhar': 'अरहर',
-    'masoor': 'मसूर',
-    'urad': 'उड़द',
-    'moong': 'मूंग',
+    'lasun': 'garlic',
+    'lason': 'garlic',
+    'लसूण': 'garlic',
 
-    'sarson': 'सरसों',
-    'moongfali': 'मूंगफली',
-    'surajmukhi': 'सूरजमुखी',
-    'til': 'तिल',
-    'alsi': 'अलसी',
+    'bhendi': 'lady finger',
+    'भेंडी': 'lady finger',
 
-    'pyaz': 'प्याज',
-    'aloo': 'आलू',
-    'tamatar': 'टमाटर',
-    'lahsun': 'लहसुन',
-    'adrak': 'अदरक',
-    'mirch': 'मिर्च',
-    'patta gobhi': 'पत्तागोभी',
-    'phool gobhi': 'फूलगोभी',
-    'baingan': 'बैंगन',
-    'bhindi': 'भिंडी',
-    'matar': 'मटर',
-    'gajar': 'गाजर',
-    'mooli': 'मूली',
-    'palak': 'पालक',
-    'methi': 'मेथी',
-    'lauki': 'लौकी',
-    'karela': 'करेला',
-    'kaddu': 'कद्दू',
-    'kheera': 'खीरा',
-    'kakdi': 'ककड़ी',
+    'बटाटा': 'potato',
 
-    'kela': 'केला',
-    'aam': 'आम',
-    'seb': 'सेब',
-    'anar': 'अनार',
-    'santra': 'संतरा',
-    'angoor': 'अंगूर',
-    'papita': 'पपीता',
-    'amrood': 'अमरूद',
-    'tarbooz': 'तरबूज',
-    'kharbuja': 'खरबूजा',
-    'nimbu': 'नींबू',
+    'vange': 'brinjal',
+    'wangy': 'brinjal',
+    'वांगे': 'brinjal',
 
-    'kapas': 'कपास',
-    'ganna': 'गन्ना',
-    'haldi': 'हल्दी',
-    'dhaniya': 'धनिया',
-    'jeera': 'जीरा',
-    'paan': 'पान'
+    // 'tomato': 'tomato', (Duplicate of line 93)
+    'टोमॅटो': 'tomato',
+
+    'phul-kobi': 'cauliflower',
+    'phulkobi': 'cauliflower',
+    'flower': 'cauliflower',
+    'फुलकोबी': 'cauliflower',
+    'फ्लॉवर': 'cauliflower',
+
+    'kobi': 'cabbage',
+    'कोबी': 'cabbage',
+
+    'karale': 'bitter gourd',
+    'कारले': 'bitter gourd',
+
+    'dudhi bhopla': 'bottle gourd',
+    'दुधी भोपळा': 'bottle gourd',
+
+    'dodka': 'ridge gourd',
+    'tura': 'ridge gourd',
+    'दोडका': 'ridge gourd',
+
+    'vatana': 'peas',
+    'वाटाणा': 'peas',
+
+    // 'palak': 'spinach', (Duplicate)
+    // 'पालक': 'spinach', (Duplicate of line 245)
+
+    // 'methi': 'fenugreek', (Duplicate)
+    // 'मेथी': 'fenugreek', (Duplicate of line 246)
+
+    // 2. Grains & Cereals (तृणधान्ये)
+    'tandul': 'rice',
+    'bhat': 'rice',
+    'taandul': 'rice',
+    'तांदूळ': 'rice',
+    'भात': 'rice',
+
+    'gahu': 'wheat',
+    'गहू': 'wheat',
+
+    'jowari': 'sorghum',
+    'jwari': 'sorghum',
+    'ज्वारी': 'sorghum',
+
+    'bajri': 'millet',
+    // 'bajra': 'millet', (Duplicate)
+    'बाजरी': 'millet',
+
+    'maka': 'maize',
+    // 'makka': 'maize', (Duplicate)
+    // 'corn': 'maize', (Duplicate)
+    'मका': 'maize',
+
+    'nachni': 'finger millet',
+    'nagli': 'finger millet',
+    'ragi': 'finger millet',
+    'नाचणी': 'finger millet',
+    'नागली': 'finger millet',
+
+    // 3. Pulses & Legumes (कडधान्ये)
+    // 3. Pulses & Legumes (कडधान्ये)
+    // 'tur' maps to pigeon pea (duplicate removed)
+    'तूर': 'pigeon pea',
+
+    'udid': 'black gram',
+    'उडीद': 'black gram',
+
+    'mug': 'green gram',
+    'मूग': 'green gram',
+
+    'harbara': 'chickpea',
+    'हरभरा': 'chickpea',
+    'चणा': 'chickpea',
+
+    'chavli': 'cowpea',
+    'lobia': 'cowpea',
+    'चवळी': 'cowpea',
+
+    // 4. Fruits (फळे)
+    'amba': 'mango',
+    'hapus': 'mango',
+    'आंबा': 'mango',
+
+    'kele': 'banana',
+    'keli': 'banana',
+    'केळे': 'banana',
+    'केळी': 'banana',
+
+    'draksha': 'grapes',
+    'draksh': 'grapes',
+    'द्राक्षे': 'grapes',
+
+    'dalimb': 'pomegranate',
+    'डाळिंब': 'pomegranate',
+
+    'sitaphal': 'custard apple',
+    'custard apple': 'custard apple',
+    'सिताफळ': 'custard apple',
+
+    'papai': 'papaya',
+    'पपई': 'papaya',
+
+    // 5. General Terms (Might be useful for future/broader search)
+    'krishi': 'agriculture',
+    'sheti': 'agriculture',
+    'कृषी': 'agriculture',
+    'शेती': 'agriculture',
+
+    'pike': 'crops',
+    'pik': 'crop',
+    'पिके': 'crops',
+
+    'kapani': 'harvest',
+    'कापणी': 'harvest',
+
+    'perani': 'sowing',
+    'pearni': 'sowing',
+    'पेरणी': 'sowing',
+
+    'sinchan': 'irrigation',
+    'सिंचन': 'irrigation',
+
+    'khat': 'fertilizer',
+    'khata': 'fertilizer',
+    'खत': 'fertilizer',
+
+    'mati': 'soil',
+    'maati': 'soil',
+    'माती': 'soil',
+
+    'shetkari': 'farmer',
+    'kisan': 'farmer',
+    'शेतकरी': 'farmer',
+
+    // --- NEW MARATHI & HINDI ADDITIONS (Dynamic) ---
+    // Sugarcane
+    'oos': 'sugarcane',
+    'us': 'sugarcane',
+    'ऊस': 'sugarcane',
+    'ganna': 'sugarcane',
+
+    // Turmeric
+    'halad': 'turmeric',
+    'haldi': 'turmeric',
+    'हळद': 'turmeric',
+    'हल्दी': 'turmeric', // Hindi
+
+    // Ginger
+    'ale': 'ginger',
+    'aal': 'ginger',
+    'आले': 'ginger',
+    'अद्रक': 'ginger',
+
+    // Cotton
+    'kapus': 'cotton',
+    'kaapus': 'cotton',
+    'कापूस': 'cotton',
+
+    // Groundnut
+    'bhuimug': 'groundnut',
+    'shingdana': 'groundnut',
+    'भुईमूग': 'groundnut',
+    'शेंगदाणा': 'groundnut',
+
+    // Pomegranate
+    'dalimb': 'pomegranate',
+    'डाळिंब': 'pomegranate',
+
+    // Grapes
+    'draksh': 'grapes',
+    'द्राक्षे': 'grapes',
+
+    // Onion
+    'kanda': 'onion',
+    'kaanda': 'onion',
+    'कांदा': 'onion',
+
+    // Potato
+    'batata': 'potato',
+    'बटाटा': 'potato',
+
+    // Tomato
+    'tomato': 'tomato',
+    'टोमॅटो': 'tomato',
+
+    // Soybean
+    'soyabin': 'soybean',
+    'सोयाबीन': 'soybean',
+
+    // Maize
+    'maka': 'maize',
+    'makka': 'maize',
+    'मका': 'maize',
+
+    // Wheat
+    'gahu': 'wheat',
+    'gahhu': 'wheat',
+    'गहू': 'wheat',
+
+    // Rice
+    'tandul': 'rice',
+    'taandul': 'rice',
+    'तांदूळ': 'rice',
+    'bhaat': 'rice',
+    'भात': 'rice',
+
+    // Gram
+    'harbhara': 'gram',
+    'chana': 'gram',
+    'हरभरा': 'gram',
+    'चना': 'gram',
+
+    // Pigeon Pea (Tur)
+    'tur': 'pigeon pea',
+    'toor': 'pigeon pea',
+    'twar': 'pigeon pea',
+    'तूर': 'pigeon pea',
+
+    // Chili
+    'mirchi': 'chilli',
+    'mirch': 'chilli',
+    'मिर्ची': 'chilli',
+    'मिरची': 'chilli',
+
+    // Garlic
+    'lasun': 'garlic',
+    'lason': 'garlic',
+    'लसूण': 'garlic',
+
+    // Coriander
+    'kothimbir': 'coriander',
+    'dhaniya': 'coriander',
+    'कोथिंबीर': 'coriander',
+    'धनिया': 'coriander',
+
+    // Fenugreek
+    'methi': 'fenugreek',
+    'मेथी': 'fenugreek',
+
+    // Additional Script Mappings (Robustness)
+    'कांदा': 'onion',
+    'बटाटा': 'potato',
+    'टोमॅटो': 'tomato',
+    'लसूण': 'garlic',
+    'आले': 'ginger',
+    'अद्रक': 'ginger',
+    'मिरची': 'chilli',
+    'कोथिंबीर': 'coriander',
+    'वांगे': 'brinjal',
+    'भेन्डी': 'lady finger',
+    'भेंडी': 'lady finger',
+    'फ्लॉवर': 'cauliflower',
+    'कोबी': 'cabbage',
+    'गवार': 'cluster beans',
+    'शेवगा': 'drumstick',
+    'कारले': 'bitter gourd',
+    'दुधी भोपळा': 'bottle gourd',
+    'दोडका': 'ridge gourd',
+    'घोसाळे': 'sponge gourd',
+    'चवळी': 'cowpea',
+    'wal': 'field beans',
+    'वाल': 'field beans',
+    'पावट': 'field beans',
+    'घेवडा': 'french beans',
+    'मका': 'maize',
+    'ज्वारी': 'sorghum',
+    'बाजरी': 'millet',
+    'नाचणी': 'finger millet',
+    'वरई': 'little millet',
+    'सावा': 'little millet',
+    'राजगिरा': 'amaranth',
+    'कुळीथ': 'horse gram',
+    'मठ': 'moth bean',
+    'तूर': 'pigeon pea',
+    'मूग': 'green gram',
+    'उडीद': 'black gram',
+    'मसूर': 'lentil',
+    'हरभरा': 'chickpea',
+    'चणा': 'chickpea',
+    'वाटाणा': 'pea',
+    'शेंगदाणा': 'groundnut',
+    'भुईमूग': 'groundnut',
+    'सुर्यफूल': 'sunflower',
+    'करडई': 'safflower',
+    'जवस': 'linseed',
+    'तीळ': 'sesame',
+    'मोहरी': 'mustard',
+    'सोयाबीन': 'soybean',
+    'कापूस': 'cotton',
+    'ऊस': 'sugarcane',
+    'हळद': 'turmeric',
+    'आंबा': 'mango',
+    'केळी': 'banana',
+    'द्राक्षे': 'grapes',
+    'डाळिंब': 'pomegranate',
+    'पपई': 'papaya',
+    'सीताफळ': 'custard apple',
+    'पेरू': 'guava',
+    'चिकू': 'sapota',
+    'सफरचंद': 'apple',
+    'संत्र': 'orange',
+    'मोसंबी': 'sweet lime',
+    'लिंबू': 'lemon',
+    'कलिंगड': 'watermelon',
+    'खरबूज': 'muskmelon',
+    'नारळ': 'coconut',
+    'सुपारी': 'arecanut',
+    'काजू': 'cashew nut',
 };
 
 /**

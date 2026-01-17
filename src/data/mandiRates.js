@@ -1,54 +1,36 @@
-// Comprehensive list of Major Districts in Madhya Pradesh
-export const mandiList = [
-    "Indore (इन्दौर)",
-    "Bhopal (भोपाल)",
-    "Ujjain (उज्जैन)",
-    "Gwalior (ग्वालियर)",
-    "Jabalpur (जबलपुर)",
-    "Sagar (सागर)",
-    "Satna (सतना)",
-    "Ratlam (रतलाम)",
-    "Mandsaur (मंदसौर)",
-    "Neemuch (नीमच)",
-    "Dewas (देवास)",
-    "Khandwa (खंडवा)",
-    "Burhanpur (बुरहानपुर)",
-    "Khargone (खरगोन)",
-    "Vidisha (विदिशा)",
-    "Sehore (सीहोर)",
-    "Hoshangabad (होशंगाबाद)",
-    "Betul (बैतूल)",
-    "Chhindwara (छिंदवाड़ा)",
-    "Rewa (रीवा)",
-    "Morena (मुरैना)",
-    "Bhind (भिंड)",
-    "Shivpuri (शिवपुरी)",
-    "Guna (गुना)",
-    "Dhar (धार)",
-    "Raisen (रायसेन)",
-    "Rajgarh (राजगढ़)",
-    "Hard (हरदा)",
-    "Damoh (दमोह)",
-    "Chhatarpur (छतरपुर)"
-];
+import { getDistricts, getDistrictData } from './locationData.js';
+
+// Base List of Crops for generation
+// In a real app, this would come from an API based on the Mandi ID
+export const getMandiRates = (mandiName) => {
+    // If no mandi name is provided, fallback to generating rates with a default name
+    if (!mandiName) {
+        return generateRates('default');
+    }
+    return generateRates(mandiName);
+};
 
 // Base Crop Data (Prices in ?/Quintal)
-const baseCrops = [
+export const baseCrops = [
     { name: 'Wheat (गेहूं)', icon: '🌾', category: 'Grains', basePrice: 2200, variance: 300 },
     { name: 'Soybean (सोयाबीन)', icon: '🌱', category: 'Pulses', basePrice: 4200, variance: 600 },
     { name: 'Cotton (कपास)', icon: '☁️', category: 'Others', basePrice: 6500, variance: 500 },
     { name: 'Gram (Chana/चना)', icon: '🟤', category: 'Pulses', basePrice: 5800, variance: 400 },
     { name: 'Maize (मक्का)', icon: '🌽', category: 'Grains', basePrice: 1800, variance: 250 },
-    { name: 'Onion (प्याज)', icon: '🧅', category: 'Vegetables', basePrice: 1200, variance: 800 }, // High volatility
+    { name: 'Onion (प्याज)', icon: '🧅', category: 'Vegetables', basePrice: 2000, variance: 800 }, // High volatility, increased base
     { name: 'Potato (आलू)', icon: '🥔', category: 'Vegetables', basePrice: 800, variance: 300 },
     { name: 'Tomato (टमाटर)', icon: '🍅', category: 'Vegetables', basePrice: 1500, variance: 600 },
-    { name: 'Garlic (लहसुन)', icon: '🧄', category: 'Vegetables', basePrice: 8500, variance: 2000 },
+    { name: 'Garlic (लहसुन)', icon: '🧄', category: 'Vegetables', basePrice: 12500, variance: 2000 }, // Current high trend
     { name: 'Mustard (सरसों)', icon: '🟡', category: 'Pulses', basePrice: 5200, variance: 400 },
     { name: 'Tur (अरहर)', icon: '🥣', category: 'Pulses', basePrice: 9500, variance: 800 },
     { name: 'Moong (मूंग)', icon: '💚', category: 'Pulses', basePrice: 7200, variance: 600 },
     { name: 'Banana (केला)', icon: '🍌', category: 'Fruits', basePrice: 1200, variance: 400 },
     { name: 'Pomegranate (अनार)', icon: '🍎', category: 'Fruits', basePrice: 6000, variance: 1500 },
     { name: 'Orange (संतरा)', icon: '🍊', category: 'Fruits', basePrice: 2500, variance: 800 },
+    { name: 'Grapes (अंगूर)', icon: '🍇', category: 'Fruits', basePrice: 6000, variance: 1200 },
+    { name: 'Apple (सेब)', icon: '🍎', category: 'Fruits', basePrice: 8000, variance: 1500 },
+    { name: 'Watermelon (तरबूज)', icon: '🍉', category: 'Fruits', basePrice: 1500, variance: 400 },
+    { name: 'Mango (आम)', icon: '🥭', category: 'Fruits', basePrice: 5000, variance: 1000 },
 ];
 
 // Simple Seeded Random Number Generator
