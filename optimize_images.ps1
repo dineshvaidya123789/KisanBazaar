@@ -10,9 +10,15 @@ function Optimize-Image {
     )
 
     Write-Host "Optimizing $InputFile to $OutputFile..."
+    $FullPathInput = (Convert-Path $InputFile)
+    $FullPathOutput = $OutputFile -as [string]
+    if (-not (Test-Path $FullPathOutput)) {
+        $null = New-Item -ItemType File -Path $FullPathOutput -Force
+    }
+    $FullPathOutput = (Convert-Path $FullPathOutput)
 
     try {
-        $image = [System.Drawing.Image]::FromFile($InputFile)
+        $image = [System.Drawing.Image]::FromFile($FullPathInput)
         
         # Encoder parameter for quality
         $myEncoder = [System.Drawing.Imaging.Encoder]::Quality
@@ -26,7 +32,7 @@ function Optimize-Image {
         }
         elseif ($Format -eq "PNG") {
             # PNG compression is harder to control with System.Drawing, mainly just re-saving
-             $image.Save($OutputFile, [System.Drawing.Imaging.ImageFormat]::Png)
+            $image.Save($OutputFile, [System.Drawing.Imaging.ImageFormat]::Png)
         }
 
         $image.Dispose()
@@ -39,6 +45,7 @@ function Optimize-Image {
 
 # Optimize Hero
 Optimize-Image -InputFile "public/images/hero.png" -OutputFile "public/images/hero_opt.jpg" -Format "JPEG" -Quality 70
+Optimize-Image -InputFile "public/images/video_thumb.jpg" -OutputFile "public/images/video_thumb_opt.jpg" -Format "JPEG" -Quality 70
 
 # Optimize Pattern (Backgrounds usually fine as JPEG if no transparency needed, or just keep PNG)
 # pattern.png likely has transparency, so better leave or re-save

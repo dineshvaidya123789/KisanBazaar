@@ -17,7 +17,7 @@ const KnowledgeCenterSection = () => {
                 {/* Video / Media Card */}
                 <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                     <div style={{ height: '200px', backgroundColor: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', position: 'relative' }}>
-                        <img src="/images/video_thumb.jpg" alt="Kisan TV" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
+                        <img src="/images/video_thumb_opt.jpg" alt="Kisan TV" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
                             onError={(e) => { e.target.style.display = 'none' }} />
                         <div style={{ position: 'absolute', zIndex: 2, textAlign: 'center' }}>
                             <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>▶️</div>
