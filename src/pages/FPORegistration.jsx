@@ -4,6 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import BackToHomeButton from '../components/BackToHomeButton';
 
 const FPORegistration = () => {
+    // Helper to convert Hindi/Marathi numerals to English
+    const normalizeNumerals = (str) => {
+        return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
+    };
+
     const navigate = useNavigate();
     const { login } = useAuth();
     const [formData, setFormData] = useState({
@@ -128,7 +133,10 @@ const FPORegistration = () => {
                                 name="memberCount"
                                 required
                                 value={formData.memberCount}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    const val = normalizeNumerals(e.target.value);
+                                    setFormData(prev => ({ ...prev, memberCount: val }));
+                                }}
                                 placeholder="Number of farmers"
                                 style={inputStyle}
                             />
@@ -172,7 +180,10 @@ const FPORegistration = () => {
                                 name="phone"
                                 required
                                 value={formData.phone}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    const val = normalizeNumerals(e.target.value);
+                                    setFormData(prev => ({ ...prev, phone: val.replace(/\D/g, '') }));
+                                }}
                                 placeholder="10 Digit Number"
                                 style={inputStyle}
                             />

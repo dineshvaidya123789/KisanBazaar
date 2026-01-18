@@ -3,6 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
+    // Helper to convert Hindi/Marathi numerals to English
+    const normalizeNumerals = (str) => {
+        return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
+    };
+
     const { user, logout, updateProfile } = useAuth();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
@@ -100,7 +105,10 @@ const Profile = () => {
                                     <input
                                         type="text"
                                         value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = normalizeNumerals(e.target.value);
+                                            setFormData({ ...formData, phone: val });
+                                        }}
                                         style={{ width: '100%', padding: '0.6rem', borderRadius: '4px', border: '1px solid #ccc' }}
                                     />
                                 </div>

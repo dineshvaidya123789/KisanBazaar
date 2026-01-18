@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import BackToHomeButton from '../components/BackToHomeButton';
 
+// Helper to convert Hindi/Marathi numerals to English
+const normalizeNumerals = (str) => {
+    return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
+};
+
 const Partner = () => {
     const { t } = useLanguage();
     const [formData, setFormData] = useState({
@@ -168,7 +173,8 @@ const Partner = () => {
                                     value={formData.phone}
                                     onChange={(e) => {
                                         // Only allow numbers
-                                        const val = e.target.value.replace(/\D/g, '');
+                                        const normalized = normalizeNumerals(e.target.value);
+                                        const val = normalized.replace(/\D/g, '');
                                         if (val.length <= 10) handleChange({ target: { name: 'phone', value: val } });
                                     }}
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ccc' }}

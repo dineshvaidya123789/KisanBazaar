@@ -5,6 +5,11 @@ import { useLanguage } from '../context/LanguageContext';
 import LocationSelector from '../components/LocationSelector';
 import BackToHomeButton from '../components/BackToHomeButton';
 
+// Helper to convert Hindi/Marathi numerals to English
+const normalizeNumerals = (str) => {
+    return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
+};
+
 const Transport = () => {
     const { t } = useLanguage();
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -386,7 +391,10 @@ const Transport = () => {
                                         required
                                         placeholder="Ex: 500"
                                         value={adFormData.price}
-                                        onChange={e => setAdFormData({ ...adFormData, price: e.target.value })}
+                                        onChange={e => {
+                                            const val = normalizeNumerals(e.target.value);
+                                            setAdFormData({ ...adFormData, price: val });
+                                        }}
                                         style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc' }}
                                     />
                                 </div>
@@ -432,7 +440,10 @@ const Transport = () => {
                                         placeholder=""
                                         maxLength="10"
                                         value={adFormData.phone}
-                                        onChange={e => setAdFormData({ ...adFormData, phone: e.target.value.replace(/\D/g, '') })}
+                                        onChange={e => {
+                                            const val = normalizeNumerals(e.target.value);
+                                            setAdFormData({ ...adFormData, phone: val.replace(/\D/g, '') });
+                                        }}
                                         style={{ flex: 1, padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc' }}
                                     />
                                 </div>
