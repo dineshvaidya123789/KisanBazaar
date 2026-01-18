@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useLanguage } from './LanguageContext';
+import { db } from '../firebase';
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, updateDoc, doc } from 'firebase/firestore';
 
 const MarketContext = createContext();
 
@@ -7,10 +9,10 @@ export const useMarket = () => useContext(MarketContext);
 
 export const MarketProvider = ({ children }) => {
     const { t } = useLanguage();
-    // Initial Mock Data (used only if localStorage is empty)
+    // Initial Mock Data (Fallback)
     const initialMockData = [
         {
-            id: 1,
+            id: 'mock-1',
             title: 'Fresh Tomato',
             title_hi: 'ताज़ा टमाटर',
             title_mr: 'ताजे टोमॅटो',
@@ -26,10 +28,11 @@ export const MarketProvider = ({ children }) => {
             image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=300&q=80',
             description: 'Desi tomato, fully organic.',
             description_hi: 'देसी टमाटर, पूरी तरह से जैविक।',
-            description_mr: 'गावरान टोमॅटो, पूर्णपणे सेंद्रिय.'
+            description_mr: 'गावरान टोमॅटो, पूर्णपणे सेंद्रिय.',
+            timestamp: Date.now()
         },
         {
-            id: 2,
+            id: 'mock-2',
             title: 'Basmati Rice',
             title_hi: 'बासमती चावल',
             title_mr: 'बासमती तांदूळ',
@@ -45,10 +48,11 @@ export const MarketProvider = ({ children }) => {
             image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80',
             description: 'High quality Basmati rice.',
             description_hi: 'उच्च गुणवत्ता वाला बासमती चावल।',
-            description_mr: 'उच्च दर्जाचे बासमती तांदूळ.'
+            description_mr: 'उच्च दर्जाचे बासमती तांदूळ.',
+            timestamp: Date.now()
         },
         {
-            id: 3,
+            id: 'mock-3',
             title: 'Banana',
             title_hi: 'केला',
             title_mr: 'केळी',
@@ -64,10 +68,11 @@ export const MarketProvider = ({ children }) => {
             image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=300&q=80',
             description: 'Sweet and fresh bananas.',
             description_hi: 'मिठास से भरपूर ताजे केले।',
-            description_mr: 'गोड आणि ताजी केळी.'
+            description_mr: 'गोड आणि ताजी केळी.',
+            timestamp: Date.now()
         },
         {
-            id: 4,
+            id: 'mock-4',
             title: 'Need Tomato',
             title_hi: 'टमाटर चाहिए',
             title_mr: 'टोमॅटो पाहिजे',
@@ -82,123 +87,77 @@ export const MarketProvider = ({ children }) => {
             contactMobile: '919876543213',
             description: 'Looking for bulk tomatoes.',
             description_hi: 'थोक में टमाटर चाहिए।',
-            description_mr: 'मोठ्या प्रमाणात टोमॅटो हवे आहेत.'
-        },
-        {
-            id: 5,
-            title: 'Sona Tomato Sellers',
-            title_hi: 'सोना टमाटर',
-            title_mr: 'सोना टोमॅटो',
-            commodity: 'tomato',
-            type: 'Sell',
-            category: 'Vegetables',
-            price: '22',
-            unit: 'kg',
-            quantity: '1000',
-            location: 'Dhar',
-            seller: 'Vikram Singh',
-            contactMobile: '919876543214',
-            description: 'High quality hybrid tomatoes.',
-            description_hi: 'उच्च गुणवत्ता वाले हाइब्रिड टमाटर।',
-            description_mr: 'उच्च दर्जाचे संकरित टोमॅटो.'
-        },
-        {
-            id: 6,
-            title: 'Premium Banana',
-            title_hi: 'प्रीमियम केला',
-            title_mr: 'प्रीमियम केळी',
-            commodity: 'banana',
-            type: 'Sell',
-            category: 'Fruits',
-            price: '1600',
-            unit: 'quintal',
-            quantity: '100',
-            location: 'Buranpur',
-            seller: 'Anil Gupta',
-            contactMobile: '919876543215',
-            description: 'Grade A bananas for export.',
-            description_hi: 'निर्यात गुणवत्ता वाले ए-ग्रेड केले।',
-            description_mr: 'निर्यात दर्जाची ए-ग्रेड केळी.'
-        },
-        {
-            id: 7,
-            title: 'Banana Buyer (bulk)',
-            title_hi: 'केला खरीदार (थोक)',
-            title_mr: 'केळी खरेदीदार (मोठ्या प्रमाणात)',
-            commodity: 'banana',
-            type: 'Buy',
-            category: 'Fruits',
-            price: '1400',
-            unit: 'quintal',
-            quantity: '500',
-            location: 'Mumbai',
-            seller: 'Fruit Co.',
-            contactMobile: '919876543216',
-            description: 'Buying bananas in bulk.',
-            description_hi: 'थोक में केले खरीद रहे हैं।',
-            description_mr: 'मोठ्या प्रमाणात केळी खरेदी करत आहे.'
+            description_mr: 'मोठ्या प्रमाणात टोमॅटो हवे आहेत.',
+            timestamp: Date.now()
         }
     ];
 
-    // Initialize and Normalize State from LocalStorage or fallback to mock data
-    const [listings, setListings] = useState(() => {
-        try {
-            const savedListings = localStorage.getItem('kisan_listings');
-            const data = savedListings ? JSON.parse(savedListings) : initialMockData;
+    const [listings, setListings] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-            // Defense: Handle null or non-array data
-            if (!data || !Array.isArray(data)) {
-                console.warn("MarketProvider: Data is not an array, falling back to mock data");
-                return initialMockData;
-            }
-
-            // Normalize: Ensure all listings have 'images' array and other required fields
-            const normalized = data.map(item => {
-                // Feature: Enrich legacy data with new translations (Use loose ID match)
-                const mockMatch = initialMockData.find(m => String(m.id) === String(item.id));
-                const enrichedItem = mockMatch ? { ...item, ...mockMatch } : item;
-
-                return {
-                    ...enrichedItem,
-                    images: Array.isArray(enrichedItem.images) ? enrichedItem.images : (enrichedItem.image ? [enrichedItem.image] : []),
-                    title: enrichedItem.title || enrichedItem.commodity || 'Unknown Product',
-                    location: enrichedItem.location || enrichedItem.district || 'Unknown Location'
-                };
-            });
-
-            // Sort by ID descending (Latest on Top)
-            const sorted = normalized.sort((a, b) => (b.id || 0) - (a.id || 0));
-            return sorted;
-        } catch (error) {
-            console.error("Failed to load from local storage", error);
-            return initialMockData;
-        }
-    });
-
-    // Save to LocalStorage whenever listings change
+    // --- Firebase Integration ---
     useEffect(() => {
+        const q = query(collection(db, 'listings'), orderBy('timestamp', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const firebaseData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // If DB is empty, show mock data (UI only, don't write to DB to save quota)
+            if (firebaseData.length === 0) {
+                setListings(initialMockData);
+            } else {
+                setListings(firebaseData);
+            }
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching listings:", error);
+            // Fallback to mock data on error (e.g. offline/permission)
+            setListings(initialMockData);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const addListing = async (newListing) => {
         try {
-            localStorage.setItem('kisan_listings', JSON.stringify(listings));
-        } catch (error) {
-            console.error("Failed to save to local storage", error);
+            const docRef = await addDoc(collection(db, 'listings'), {
+                ...newListing,
+                timestamp: Date.now()
+            });
+            console.log("Document written with ID: ", docRef.id);
+        } catch (e) {
+            console.error("Error adding document: ", e);
+            alert("Error saving listing. Please check your connection.");
         }
-    }, [listings]);
-
-    const addListing = (newListing) => {
-        setListings(prev => [{
-            id: Date.now(), // simple unique id
-            ...newListing
-        }, ...prev]);
     };
 
-    const updateListing = (id, updatedData) => {
-        setListings(prev => prev.map(listing =>
-            listing.id === id ? { ...listing, ...updatedData } : listing
-        ));
+    const updateListing = async (id, updatedData) => {
+        // If it's a mock item (string ID starting with 'mock-'), don't try to update DB
+        if (typeof id === 'string' && id.startsWith('mock-')) return;
+
+        try {
+            const listingRef = doc(db, 'listings', id);
+            await updateDoc(listingRef, updatedData);
+        } catch (e) {
+            console.error("Error updating document: ", e);
+        }
     };
 
-    const deleteListing = (id) => {
-        setListings(prev => prev.filter(listing => listing.id !== id));
+    const deleteListing = async (id) => {
+        // If it's a mock item, just filter it out locally (or ignore)
+        if (typeof id === 'string' && id.startsWith('mock-')) {
+            setListings(prev => prev.filter(l => l.id !== id));
+            return;
+        }
+
+        try {
+            await deleteDoc(doc(db, 'listings', id));
+        } catch (e) {
+            console.error("Error deleting document: ", e);
+        }
     };
 
     const getUserListings = (mobileNumber) => {
@@ -260,7 +219,7 @@ export const MarketProvider = ({ children }) => {
         const duplicatesWithin7Days = otherListings.filter(l => {
             if (!l) return false;
             const lCommodity = (l.commodity || '').toLowerCase().trim();
-            const lTimestamp = new Date(l.timestamp).getTime();
+            const lTimestamp = new Date(l.timestamp || l.id).getTime(); // Handle both timestamp formats
             return lCommodity === normalizedCommodity && lTimestamp > sevenDaysAgo;
         });
 
@@ -305,7 +264,8 @@ export const MarketProvider = ({ children }) => {
             isRestrictedMode,
             toggleRestriction,
             getUniqueSellers,
-            checkListingEligibility
+            checkListingEligibility,
+            loading
         }}>
             {children}
         </MarketContext.Provider>

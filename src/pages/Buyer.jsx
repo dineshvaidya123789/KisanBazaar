@@ -196,7 +196,7 @@ const ProductCard = React.memo(({ product }) => {
 });
 
 const Buyer = () => {
-    const { buyerPosts, sellerListings } = useMarket();
+    const { buyerPosts, sellerListings, loading } = useMarket();
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('buy'); // 'buy' (I want to buy) or 'sell' (I want to sell)
     const [searchTerm, setSearchTerm] = useState('');
@@ -443,23 +443,43 @@ const Buyer = () => {
                 )}
 
                 {/* Listings Grid */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 'var(--spacing-lg)'
-                }}>
-                    {filteredItems.length === 0 ? (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem 2rem', color: '#666' }}>
-                            <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>🍃</div>
-                            <h3>{t('no_posts_found')}</h3>
-                            <p>{t('try_adjusting_filters')}</p>
-                        </div>
-                    ) : (
-                        filteredItems.map(item => (
-                            <ProductCard key={item.id} product={item} />
-                        ))
-                    )}
-                </div>
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
+                        <div className="spinner"></div>
+                        <style>{`
+                            .spinner {
+                                border: 4px solid #f3f3f3;
+                                border-top: 4px solid var(--color-primary);
+                                border-radius: 50%;
+                                width: 40px;
+                                height: 40px;
+                                animation: spin 1s linear infinite;
+                            }
+                            @keyframes spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                        `}</style>
+                    </div>
+                ) : (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                        gap: 'var(--spacing-lg)'
+                    }}>
+                        {filteredItems.length === 0 ? (
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem 2rem', color: '#666' }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>🍃</div>
+                                <h3>{t('no_posts_found')}</h3>
+                                <p>{t('try_adjusting_filters')}</p>
+                            </div>
+                        ) : (
+                            filteredItems.map(item => (
+                                <ProductCard key={item.id} product={item} />
+                            ))
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
