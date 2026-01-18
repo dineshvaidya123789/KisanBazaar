@@ -1,1 +1,0 @@
-import{j as n}from"./index-af9fd638.js";const t=()=>n.jsxs("div",{className:"container fade-in",style:{padding:"var(--spacing-xl) 0"},children:[n.jsx("h1",{children:"संपर्क (Contact)"}),n.jsx("p",{children:"हमसे संपर्क करने के लिए फार्म भरें। (Coming Soon)"})]});export{t as default};
