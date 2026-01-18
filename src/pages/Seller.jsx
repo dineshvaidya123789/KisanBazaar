@@ -15,6 +15,11 @@ const Seller = () => {
     const location = useLocation();
     const { language, t } = useLanguage();
 
+    // Helper to convert Hindi/Marathi numerals to English
+    const normalizeNumerals = (str) => {
+        return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
+    };
+
     // Check for edit mode
     const [editMode, setEditMode] = useState(false);
     const [editListingId, setEditListingId] = useState(null);
@@ -600,10 +605,7 @@ const Seller = () => {
                             placeholder={t('placeholder_name')}
                             value={firstName}
                             onChange={(e) => {
-                                // Only allow alphabets and spaces
-                                if (/^[a-zA-Z\s]*$/.test(e.target.value)) {
-                                    setFirstName(e.target.value);
-                                }
+                                setFirstName(e.target.value);
                             }}
                             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
                         />
@@ -618,7 +620,10 @@ const Seller = () => {
                                 placeholder="9876543210"
                                 maxLength="10"
                                 value={mobileNumber}
-                                onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
+                                onChange={(e) => {
+                                    const val = normalizeNumerals(e.target.value);
+                                    setMobileNumber(val.replace(/\D/g, ''));
+                                }}
                                 style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}
                             />
                         </div>
@@ -789,7 +794,8 @@ const Seller = () => {
                                         placeholder="e.g. 100"
                                         value={formData.quantity}
                                         onChange={(e) => {
-                                            let value = e.target.value.replace(/[^0-9]/g, '');
+                                            const normalized = normalizeNumerals(e.target.value);
+                                            let value = normalized.replace(/[^0-9]/g, '');
                                             // Remove leading zeros
                                             if (value.length > 1 && value.startsWith('0')) {
                                                 value = value.replace(/^0+/, '');
@@ -915,7 +921,8 @@ const Seller = () => {
                                                 placeholder="Enter price"
                                                 value={formData.targetPrice}
                                                 onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                    const normalized = normalizeNumerals(e.target.value);
+                                                    const value = normalized.replace(/[^0-9]/g, '');
                                                     handleChange({ target: { name: 'targetPrice', value } });
                                                 }}
                                                 className="premium-input"
@@ -1316,7 +1323,7 @@ const Seller = () => {
                                     maxLength="10"
                                     value={mobileNumber} // Using same mobile number for now
                                     onChange={(e) => {
-                                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        const val = normalizeNumerals(e.target.value).replace(/\D/g, '').slice(0, 10);
                                         setMobileNumber(val);
                                         localStorage.setItem('kisan_user_mobile', val);
                                     }}
