@@ -333,6 +333,8 @@ export const translations = {
         cant_find_item: "Can't find what you need?",
         close: "Close",
         submit_request: "Post Request",
+        view_buyer_leads: "View Buyer Leads",
+        buyer_leads_desc: "See what buyers are looking for today!",
 
         // Pashu Palan
         pashu_title: "Animal Husbandry",
@@ -452,6 +454,8 @@ export const translations = {
         posted: "Posted",
         reported_for_review: "Reported for review!",
         no_services_found: "No services found.",
+        page_not_found: "Page Not Found",
+        page_not_found_desc: "Oops! The page you are looking for does not exist.",
         adjust_filters_suggestion: "Try adjusting your search or filters.",
 
         // Crop Advisory
@@ -904,6 +908,8 @@ export const translations = {
         cant_find_item: "क्या आपको अपनी जरूरत का सामान नहीं मिल रहा?",
         close: "बंद करें",
         submit_request: "मांग पोस्ट करें",
+        view_buyer_leads: "खरीदारों की मांग देखें",
+        buyer_leads_desc: "देखें कि आज खरीदार क्या ढूंढ रहे हैं!",
 
         // Pashu Palan
         pashu_title: "पशुपालन",
@@ -1058,6 +1064,8 @@ export const translations = {
         posted: "पोस्ट किया",
         reported_for_review: "समीक्षा के लिए रिपोर्ट किया गया!",
         no_services_found: "कोई सेवा नहीं मिली।",
+        page_not_found: "पेज नहीं मिला",
+        page_not_found_desc: "क्षमा करें! आप जो पेज खोज रहे हैं वह मौजूद नहीं है।",
         adjust_filters_suggestion: "अपनी खोज या फ़िल्टर समायोजित करने का प्रयास करें।",
 
         // Crop Advisory
@@ -1354,6 +1362,8 @@ export const translations = {
         cant_find_item: "तुम्हाला जे हवे आहे ते सापडत नाही?",
         close: "बंद करा",
         submit_request: "मागणी पोस्ट करा",
+        view_buyer_leads: "खरेदीदारांच्या मागण्या पहा",
+        buyer_leads_desc: "आज खरेदीदार काय शोधत आहेत ते पहा!",
 
         // Pashu Palan
         pashu_title: "पशुपालन",
@@ -1708,6 +1718,8 @@ export const translations = {
         location_timeout: "स्थान विनंतीची वेळ संपली. कृपया पुन्हा प्रयत्न करा किंवा स्वतः निवडा.",
         location_unavailable: "स्थान शोधण्यात अक्षम. कृपया स्वतः निवडा.",
         no_services_found: "कोणत्याही सेवा आढळल्या नाहीत.",
+        page_not_found: "पृष्ठ सापडले नाही",
+        page_not_found_desc: "क्षमस्व! आपण शोधत असलेले पृष्ठ अस्तित्वात नाही.",
         adjust_filters_suggestion: "तुमचा शोध किंवा फिल्टर समायोजित करण्याचा प्रयत्न करा.",
 
         // Crop Advisory

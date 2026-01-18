@@ -704,6 +704,45 @@ const Seller = () => {
                     </span>
                 </div>
 
+                {/* Buyer Leads Promo Card - Only for Sellers */}
+                {!editMode && formData.type === 'Sell' && (
+                    <div className="card fade-in" style={{
+                        padding: '1.5rem',
+                        marginBottom: 'var(--spacing-lg)',
+                        background: 'linear-gradient(to right, #f0fdf4, #fff)',
+                        borderLeft: '5px solid var(--color-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '1rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                    }}>
+                        <div>
+                            <h3 style={{ margin: 0, color: 'var(--color-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                📢 {t('view_buyer_leads')}
+                            </h3>
+                            <p style={{ margin: '6px 0 0', color: '#555', fontSize: '0.95rem' }}>
+                                {t('buyer_leads_desc')}
+                            </p>
+                        </div>
+                        <Link
+                            to="/buyer?tab=sell"
+                            className="btn"
+                            style={{
+                                backgroundColor: 'white',
+                                color: 'var(--color-secondary)',
+                                border: '1px solid var(--color-secondary)',
+                                fontWeight: '600',
+                                padding: '0.6rem 1.2rem',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                            }}
+                        >
+                            {t('view_buyers')} →
+                        </Link>
+                    </div>
+                )}
+
                 <div className="glass-card" style={{ padding: '2.5rem' }}>
                     <form onSubmit={handlePreSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 

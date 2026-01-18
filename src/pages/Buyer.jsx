@@ -199,7 +199,9 @@ const ProductCard = React.memo(({ product }) => {
 const Buyer = () => {
     const { buyerPosts, sellerListings, loading } = useMarket();
     const { t } = useLanguage();
-    const [activeTab, setActiveTab] = useState('buy'); // 'buy' (I want to buy) or 'sell' (I want to sell)
+    const [searchParams] = useSearchParams();
+    const initialTab = searchParams.get('tab') === 'sell' ? 'sell' : 'buy';
+    const [activeTab, setActiveTab] = useState(initialTab); // 'buy' (I want to buy) or 'sell' (I want to sell)
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
@@ -291,24 +293,48 @@ const Buyer = () => {
                     {t('buy_sell_hub')}
                 </p>
 
-                <button
-                    onClick={() => setShowRequestForm(true)}
-                    className="btn fade-in"
-                    style={{
-                        marginTop: '1rem',
-                        background: 'rgba(255, 255, 255, 0.2)',
-                        backdropFilter: 'blur(5px)',
-                        border: '1px solid rgba(255,255,255,0.4)',
-                        color: 'white',
-                        padding: '8px 16px',
-                        borderRadius: '20px',
-                        fontSize: '0.9rem',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                    }}
-                >
-                    📝 {t('post_buyer_request') || 'Post a Request'}
-                </button>
+                {/* Contextual Action Button */}
+                {activeTab === 'buy' ? (
+                    <button
+                        onClick={() => setShowRequestForm(true)}
+                        className="btn fade-in"
+                        style={{
+                            marginTop: '1rem',
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(5px)',
+                            border: '1px solid rgba(255,255,255,0.4)',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            fontSize: '0.9rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        📝 {t('post_buyer_request') || 'Post a Request'}
+                    </button>
+                ) : (
+                    <Link
+                        to="/sell"
+                        className="btn fade-in"
+                        style={{
+                            marginTop: '1rem',
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(5px)',
+                            border: '1px solid rgba(255,255,255,0.4)',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            fontSize: '0.9rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            textDecoration: 'none',
+                            display: 'inline-block'
+                        }}
+                    >
+                        📸 {t('list_product') || 'List Your Crop'}
+                    </Link>
+                )}
 
                 {/* Main Toggle Switch */}
                 <div style={{

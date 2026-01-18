@@ -224,6 +224,29 @@ const Transport = () => {
                     <div key={service.id} className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s' }}>
                         <div style={{ height: '160px', backgroundColor: '#eee', position: 'relative' }}>
                             <img src={service.image} alt={service.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            {/* Report Button moved to top-left */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); alert(t('reported_for_review')); }}
+                                style={{
+                                    position: 'absolute',
+                                    top: '10px',
+                                    left: '10px',
+                                    background: 'rgba(255, 255, 255, 0.9)',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '30px',
+                                    height: '30px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    zIndex: 2
+                                }}
+                                title="Report"
+                            >
+                                🚩
+                            </button>
+
                             {service.verified && (
                                 <span style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', color: 'green', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     ✅ {t('verified')}
@@ -261,9 +284,8 @@ const Transport = () => {
                             </div>
 
                             <div style={{ marginTop: 'auto', display: 'flex', gap: '10px' }}>
-                                <a href={`tel:${service.phone}`} className="btn btn-outline" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}>📞 {t('call')}</a>
-                                <button className="btn btn-outline" style={{ padding: '0 10px', color: '#d32f2f', borderColor: '#d32f2f' }} onClick={() => alert(t('reported_for_review'))}>🚩</button>
-                                <a href="#" className="btn" style={{ flex: 1, textAlign: 'center', textDecoration: 'none', backgroundColor: '#25D366', color: 'white', border: 'none' }}>💬 {t('whatsapp')}</a>
+                                <a href={`tel:${service.phone}`} className="btn btn-outline" style={{ flex: 1, textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📞 {t('call')}</a>
+                                <a href="#" className="btn" style={{ flex: 1, textAlign: 'center', textDecoration: 'none', backgroundColor: '#25D366', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>💬 {t('whatsapp')}</a>
                             </div>
                         </div>
                     </div>

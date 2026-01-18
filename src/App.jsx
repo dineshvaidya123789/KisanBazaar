@@ -75,6 +75,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/marketplace" element={<Buyer />} />
+              <Route path="/buyer" element={<Buyer />} />
               <Route path="/sell" element={<Seller />} />
               <Route path="/my-products" element={<MyProducts />} />
               <Route path="/products" element={<Products />} />
