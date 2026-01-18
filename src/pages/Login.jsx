@@ -18,6 +18,11 @@ const Login = () => {
 
     const from = location.state?.from?.pathname || '/';
 
+    // Helper to convert Hindi/Marathi numerals to English
+    const normalizeNumerals = (str) => {
+        return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
+    };
+
     const handleSendOtp = (e) => {
         e.preventDefault();
         if (phone.length !== 10) {
@@ -81,7 +86,10 @@ const Login = () => {
                                 <input
                                     type="tel"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))} // Only numbers
+                                    onChange={(e) => {
+                                        const val = normalizeNumerals(e.target.value);
+                                        setPhone(val.replace(/\D/g, ''));
+                                    }}
                                     placeholder={t('placeholder_phone')}
                                     maxLength="10"
                                     style={{ flex: 1, padding: '0.8rem', borderRadius: '0 4px 4px 0', border: '1px solid #ccc', fontSize: '1rem' }}
@@ -110,7 +118,10 @@ const Login = () => {
                             <input
                                 type="text"
                                 value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
+                                onChange={(e) => {
+                                    const val = normalizeNumerals(e.target.value);
+                                    setOtp(val);
+                                }}
                                 placeholder={t('placeholder_otp')}
                                 style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1.2rem', textAlign: 'center', letterSpacing: '5px' }}
                                 required
