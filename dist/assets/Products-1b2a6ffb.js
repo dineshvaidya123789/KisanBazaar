@@ -1,1 +1,0 @@
-import{j as s}from"./index-0a5bacdf.js";const r=()=>s.jsxs("div",{className:"container fade-in",style:{padding:"var(--spacing-xl) 0"},children:[s.jsx("h1",{children:"उत्पाद (Products)"}),s.jsx("p",{children:"सब्जियां, फल, दूध, और अन्य कृषि उत्पाद। (Coming Soon)"})]});export{r as default};
