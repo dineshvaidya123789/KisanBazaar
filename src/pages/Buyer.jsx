@@ -8,9 +8,11 @@ import { getSearchSynonyms, commodityMapping } from '../utils/searchMapping';
 import LocationSelector from '../components/LocationSelector';
 
 const ProductCard = React.memo(({ product }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage(); // Get language
     // Handle both old format and new format
-    const title = product.title || product.commodity || 'Unknown Product';
+    const title = product[`title_${language}`] || product[`title_${language === 'hi' ? 'hi' : 'en'}`] || product.title || product.commodity || 'Unknown Product';
+    // Fallback logic: Try current language -> Try English (or default) -> fallback to title
+
     const location = product.location || product.district || 'Unknown Location';
     const price = product.price || product.targetPrice || '0';
     const unit = product.unit || product.priceUnit || 'unit';
@@ -22,7 +24,7 @@ const ProductCard = React.memo(({ product }) => {
     const displayImages = hasImages ? product.images : (hasOldImage ? [product.image] : []);
     const mainImg = displayImages.length > 0 ? displayImages[0] : null;
 
-    const description = product.description || product.comments || 'No description available';
+    const description = product[`description_${language}`] || product.description || product.comments || 'No description available';
     const category = product.category || 'Others';
 
     return (

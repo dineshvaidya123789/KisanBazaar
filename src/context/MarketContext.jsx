@@ -11,7 +11,9 @@ export const MarketProvider = ({ children }) => {
     const initialMockData = [
         {
             id: 1,
-            title: 'ताज़ा टमाटर (Fresh Tomato)',
+            title: 'Fresh Tomato',
+            title_hi: 'ताज़ा टमाटर',
+            title_mr: 'ताजे टोमॅटो',
             commodity: 'tomato',
             type: 'Sell',
             category: 'Vegetables',
@@ -22,11 +24,15 @@ export const MarketProvider = ({ children }) => {
             seller: 'Ramesh Kumar',
             contactMobile: '919876543210',
             image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=300&q=80',
-            description: 'देसी टमाटर, पूरी तरह से जैविक।'
+            description: 'Desi tomato, fully organic.',
+            description_hi: 'देसी टमाटर, पूरी तरह से जैविक।',
+            description_mr: 'गावरान टोमॅटो, पूर्णपणे सेंद्रिय.'
         },
         {
             id: 2,
-            title: 'बासमती चावल (Basmati Rice)',
+            title: 'Basmati Rice',
+            title_hi: 'बासमती चावल',
+            title_mr: 'बासमती तांदूळ',
             commodity: 'rice',
             type: 'Sell',
             category: 'Grains',
@@ -37,11 +43,15 @@ export const MarketProvider = ({ children }) => {
             seller: 'Suresh Patel',
             contactMobile: '919876543211',
             image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80',
-            description: 'उच्च गुणवत्ता वाला बासमती चावल।'
+            description: 'High quality Basmati rice.',
+            description_hi: 'उच्च गुणवत्ता वाला बासमती चावल।',
+            description_mr: 'उच्च दर्जाचे बासमती तांदूळ.'
         },
         {
             id: 3,
-            title: 'केला (Banana)',
+            title: 'Banana',
+            title_hi: 'केला',
+            title_mr: 'केळी',
             commodity: 'banana',
             type: 'Sell',
             category: 'Fruits',
@@ -52,11 +62,15 @@ export const MarketProvider = ({ children }) => {
             seller: 'Mukesh Bhai',
             contactMobile: '919876543212',
             image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=300&q=80',
-            description: 'मिठास से भरपूर ताजे केले।'
+            description: 'Sweet and fresh bananas.',
+            description_hi: 'मिठास से भरपूर ताजे केले।',
+            description_mr: 'गोड आणि ताजी केळी.'
         },
         {
             id: 4,
-            title: 'टमाटर चाहिए (Need Tomato)',
+            title: 'Need Tomato',
+            title_hi: 'टमाटर चाहिए',
+            title_mr: 'टोमॅटो पाहिजे',
             commodity: 'tomato',
             type: 'Buy',
             category: 'Vegetables',
@@ -66,11 +80,15 @@ export const MarketProvider = ({ children }) => {
             location: 'Indore',
             seller: 'Rahul Singh',
             contactMobile: '919876543213',
-            description: 'Looking for bulk tomatoes.'
+            description: 'Looking for bulk tomatoes.',
+            description_hi: 'थोक में टमाटर चाहिए।',
+            description_mr: 'मोठ्या प्रमाणात टोमॅटो हवे आहेत.'
         },
         {
             id: 5,
             title: 'Sona Tomato Sellers',
+            title_hi: 'सोना टमाटर',
+            title_mr: 'सोना टोमॅटो',
             commodity: 'tomato',
             type: 'Sell',
             category: 'Vegetables',
@@ -80,11 +98,15 @@ export const MarketProvider = ({ children }) => {
             location: 'Dhar',
             seller: 'Vikram Singh',
             contactMobile: '919876543214',
-            description: 'High quality hybrid tomatoes.'
+            description: 'High quality hybrid tomatoes.',
+            description_hi: 'उच्च गुणवत्ता वाले हाइब्रिड टमाटर।',
+            description_mr: 'उच्च दर्जाचे संकरित टोमॅटो.'
         },
         {
             id: 6,
-            title: 'Premium Kela (Banana)',
+            title: 'Premium Banana',
+            title_hi: 'प्रीमियम केला',
+            title_mr: 'प्रीमियम केळी',
             commodity: 'banana',
             type: 'Sell',
             category: 'Fruits',
@@ -94,11 +116,15 @@ export const MarketProvider = ({ children }) => {
             location: 'Buranpur',
             seller: 'Anil Gupta',
             contactMobile: '919876543215',
-            description: 'Grade A bananas for export.'
+            description: 'Grade A bananas for export.',
+            description_hi: 'निर्यात गुणवत्ता वाले ए-ग्रेड केले।',
+            description_mr: 'निर्यात दर्जाची ए-ग्रेड केळी.'
         },
         {
             id: 7,
             title: 'Banana Buyer (bulk)',
+            title_hi: 'केला खरीदार (थोक)',
+            title_mr: 'केळी खरेदीदार (मोठ्या प्रमाणात)',
             commodity: 'banana',
             type: 'Buy',
             category: 'Fruits',
@@ -108,7 +134,9 @@ export const MarketProvider = ({ children }) => {
             location: 'Mumbai',
             seller: 'Fruit Co.',
             contactMobile: '919876543216',
-            description: 'Buying bananas in bulk.'
+            description: 'Buying bananas in bulk.',
+            description_hi: 'थोक में केले खरीद रहे हैं।',
+            description_mr: 'मोठ्या प्रमाणात केळी खरेदी करत आहे.'
         }
     ];
 
@@ -125,12 +153,18 @@ export const MarketProvider = ({ children }) => {
             }
 
             // Normalize: Ensure all listings have 'images' array and other required fields
-            const normalized = data.map(item => ({
-                ...item,
-                images: Array.isArray(item.images) ? item.images : (item.image ? [item.image] : []),
-                title: item.title || item.commodity || 'Unknown Product',
-                location: item.location || item.district || 'Unknown Location'
-            }));
+            const normalized = data.map(item => {
+                // Feature: Enrich legacy data with new translations if ID matches mock data
+                const mockMatch = initialMockData.find(m => m.id === item.id);
+                const enrichedItem = mockMatch ? { ...item, ...mockMatch } : item;
+
+                return {
+                    ...enrichedItem,
+                    images: Array.isArray(enrichedItem.images) ? enrichedItem.images : (enrichedItem.image ? [enrichedItem.image] : []),
+                    title: enrichedItem.title || enrichedItem.commodity || 'Unknown Product',
+                    location: enrichedItem.location || enrichedItem.district || 'Unknown Location'
+                };
+            });
 
             // Sort by ID descending (Latest on Top)
             const sorted = normalized.sort((a, b) => (b.id || 0) - (a.id || 0));
