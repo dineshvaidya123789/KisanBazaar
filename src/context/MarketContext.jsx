@@ -154,8 +154,8 @@ export const MarketProvider = ({ children }) => {
 
             // Normalize: Ensure all listings have 'images' array and other required fields
             const normalized = data.map(item => {
-                // Feature: Enrich legacy data with new translations if ID matches mock data
-                const mockMatch = initialMockData.find(m => m.id === item.id);
+                // Feature: Enrich legacy data with new translations (Use loose ID match)
+                const mockMatch = initialMockData.find(m => String(m.id) === String(item.id));
                 const enrichedItem = mockMatch ? { ...item, ...mockMatch } : item;
 
                 return {
