@@ -8,19 +8,23 @@ import { MarketProvider } from './context/MarketContext'
 import './index.css'
 import App from './App.jsx'
 
+import { HelmetProvider } from 'react-helmet-async';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <LanguageProvider>
-          <AlertProvider>
-            <MarketProvider>
-              <App />
-            </MarketProvider>
-          </AlertProvider>
-        </LanguageProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <LanguageProvider>
+            <AlertProvider>
+              <MarketProvider>
+                <App />
+              </MarketProvider>
+            </AlertProvider>
+          </LanguageProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   </StrictMode>,
 )
 

@@ -1,19 +1,37 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kisan Bazaar | Direct Farmer-to-Buyer Marketplace</title>
-    <meta name="description" content="Connect directly with farmers and buyers. Sell crops, check mandi rates, and get weather updates on Kisan Bazaar. No middlemen, just fair trade." />
-    <meta name="keywords" content="kisan bazaar, farmer marketplace, mandi rates, sell crops, buy crops, agriculture India, farmer app" />
+    <meta name="description"
+        content="Connect directly with farmers and buyers. Sell crops, check mandi rates, and get weather updates on Kisan Bazaar. No middlemen, just fair trade." />
+    <meta name="keywords"
+        content="kisan bazaar, farmer marketplace, mandi rates, sell crops, buy crops, agriculture India, farmer app" />
     <meta property="og:title" content="Kisan Bazaar | Direct Farmer-to-Buyer Marketplace" />
-    <meta property="og:description" content="Connect directly with farmers and buyers. Sell crops, check mandi rates, and get weather updates on Kisan Bazaar." />
+    <meta property="og:description"
+        content="Connect directly with farmers and buyers. Sell crops, check mandi rates, and get weather updates on Kisan Bazaar." />
     <meta property="og:image" content="/images/hero_opt.jpg" />
     <meta property="og:url" content="https://kisanbazzar.co.in/" />
     <meta property="og:type" content="website" />
-  </head>
-  <body>
+
+    <!-- Google Search Console Verification (Replace content with your code) -->
+    <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE" />
+
+    <!-- Google Analytics (Replace G-XXXXXXXXXX with your ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7X53874Z4R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-7X53874Z4R');
+    </script>
+</head>
+
+<body>
     <div id="root">
         <style>
             .app-loader {
@@ -28,18 +46,36 @@
                 text-align: center;
                 padding: 20px;
             }
-            .app-loader h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #166534; }
-            .app-loader p { color: #64748b; }
+
+            .app-loader h1 {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+                color: #166534;
+            }
+
+            .app-loader p {
+                color: #64748b;
+            }
+
             .spinner {
-                width: 40px; 
-                height: 40px; 
-                border: 4px solid #f3f3f3; 
-                border-top: 4px solid #166534; 
-                border-radius: 50%; 
+                width: 40px;
+                height: 40px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #166534;
+                border-radius: 50%;
                 animation: spin 1s linear infinite;
                 margin-bottom: 20px;
             }
-            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
         </style>
         <div class="app-loader">
             <div class="spinner"></div>
@@ -54,5 +90,6 @@
         </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
-  </body>
+</body>
+
 </html>

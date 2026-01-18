@@ -7,6 +7,7 @@ import getCommodityImage from '../utils/commodityImages';
 import LocationSelector from '../components/LocationSelector';
 import PriceAdvisor from '../components/PriceAdvisor';
 import CommodityAutosuggest from '../components/CommodityAutosuggest';
+import SEO from '../components/SEO';
 import { searchCommodities, getRecommendedUnit } from '../data/commodities';
 
 const Seller = () => {
@@ -659,6 +660,10 @@ const Seller = () => {
             minHeight: '90vh',
             padding: 'var(--spacing-xl) 0'
         }}>
+            <SEO
+                title={formData.type === 'Buy' ? t('i_want_buy') : t('list_product')}
+                description={t('hero_subtitle')}
+            />
             <div className="container fade-in" style={{ maxWidth: '800px' }}>
                 <Link to="/" style={{
                     display: 'inline-flex',
@@ -1123,11 +1128,19 @@ const Seller = () => {
                             <textarea
                                 name="comments"
                                 rows="3"
-                                placeholder="I want to buy good quality commodity."
+                                placeholder={t('placeholder_suggestion') || "Describe your crop..."}
                                 value={formData.comments}
                                 onChange={handleChange}
                                 style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc' }}
                             />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.85rem' }}>
+                                <span style={{ color: '#16a34a', fontWeight: '500' }}>
+                                    {t('description_tip')}
+                                </span>
+                                <span style={{ color: formData.comments.length < 50 ? '#ef4444' : '#64748b' }}>
+                                    {formData.comments.length} / 200 chars
+                                </span>
+                            </div>
                         </div>
 
                         {/* Image Upload - Only for Sellers */}

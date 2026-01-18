@@ -22,6 +22,7 @@ export const translations = {
         notifications: "Notifications",
         buyer_section: "Buyer Section",
         seller_section: "Seller Section",
+        seller_section: "Seller Section",
         request_crop: "Request Crop",
         my_posts: "My Posts",
         view_sellers: "View Sellers Directory",
@@ -29,6 +30,12 @@ export const translations = {
         my_products: "My Products",
         view_buyers: "View Buyers",
         verified_sellers: "Verified Sellers",
+
+        // Install Prompt
+        install_app_title: "Install App",
+        install_app_desc: "Get better experience & offline access",
+        install: "Install",
+        close: "Close",
 
         // Actions
         login: "Login",
@@ -82,6 +89,7 @@ export const translations = {
         // Footer
         app_name: "Kisan Bazaar",
         footer_desc: "A modern platform for farmers. Sell your crop and adopt new technology.",
+        description_tip: "💡 Tip: Write details like variety (e.g. Lokwan), harvest date, and quality to get 3x more calls.",
         important_links: "Important Links",
         about_us: "About Us",
         integrated_farming: "Integrated Farming",
@@ -313,6 +321,19 @@ export const translations = {
 
 
 
+        // Onboarding
+        welcome: "Welcome!",
+        what_interested_in: "What are you interested in buying?",
+        continue: "Continue",
+        filter_flowers: "Flowers",
+        filter_spices: "Spices",
+
+        // Buyers Request
+        post_buyer_request: "Post a Request",
+        cant_find_item: "Can't find what you need?",
+        close: "Close",
+        submit_request: "Post Request",
+
         // Pashu Palan
         pashu_title: "Animal Husbandry",
         pashu_subtitle: "Expert tips for Dairy, Goat, and Poultry farming.",
@@ -372,6 +393,16 @@ export const translations = {
         report: "Report",
         load_more_services: "Load More Services",
         posted_ad_success: "Ad Posted Successfully!",
+
+        // Promo / Post Ad Modal
+        post_ad_free_title: "Post Ad for Free",
+        free_listing_offer_text: "We are currently offering free listings for all farmers and service providers!",
+        offer_benefit_1: "1. Get unlimited leads.",
+        offer_benefit_2: "2. Show \"Verified\" badge.",
+        offer_benefit_3: "3. Help other farmers.",
+        free_label: "Free",
+        limited_time_offer_text: "Limited Time Offer",
+        post_ad_now: "Post Ad Now",
 
         // Transport Form
         service_details: "Service Details",
@@ -533,6 +564,42 @@ export const translations = {
         placeholder_otp: "e.g. 1234",
         mock_otp_msg: "(Use mock OTP: 1234)",
 
+        // Profile
+        login_view_profile: "Please Login to view your profile.",
+        verified_farmer_badge: "✅ Verified Farmer",
+        farm_details_title: "Farm Details",
+        cnt_edit_profile: "✏️ Edit Profile",
+        label_profile_name: "Name",
+        label_profile_phone: "Phone",
+        label_profile_village: "Village",
+        label_profile_land: "Land Size",
+        label_profile_crops: "Crops (comma separated)",
+        save_changes: "Save Changes",
+        label_land_size: "Land Size",
+        not_set: "Not Set",
+        label_major_crops: "Major Crops",
+        label_member_since: "Member Since",
+        notifications_title: "🔔 Notifications",
+        status_active: "Active ✅",
+        btn_enable_notifications: "Enable Push Notifications",
+        status_enabling: "Enabling...",
+        btn_logout: "Log Out",
+
+        // Chaupal Extras
+        image_selected: "Image Selected",
+        just_now: "Just Now",
+        login_demo_user: "Login as Demo User",
+        confirm_delete_question: "Are you sure you want to delete this question?",
+
+        // Weather Extras
+        you_are_offline: "⚠️ YOU ARE OFFLINE",
+        live_data_unavailable: "⚠️ LIVE DATA UNAVAILABLE",
+        using_cached_data: " | Using cached/demo data | ",
+        refresh: "Refresh",
+        location_permission_denied: "Location permission denied. Please allow location access",
+        location_timeout: "Location request timed out. Please try again or select manually.",
+        location_unavailable: "Unable to detect location. Please select manually.",
+
         // Trade Area
         trade_area_title: "Trade Area: Satara, Maharashtra",
         trade_area_desc: "Exclusive marketplace for Satara district. Connect with local buyers and sellers.",
@@ -584,6 +651,12 @@ export const translations = {
         photo_speed_tip: "फोटो डालने से जल्दी खरीदार मिलेगा",
         show_advanced: "अधिक उन्नत विकल्प",
 
+        // Install Prompt
+        install_app_title: "ऐप इंस्टॉल करें",
+        install_app_desc: "बेहतर अनुभव और ऑफलाइन सुविधा के लिए",
+        install: "इंस्टॉल",
+        close: "बंद करें",
+
         // Home Hero
         hero_title: "किसानों के लिए तेज़ और विश्वसनीय बाज़ार",
         hero_subtitle: "किसानों और खरीदारों के बीच सीधा संपर्क। कोई बिचौलिया नहीं।",
@@ -621,6 +694,7 @@ export const translations = {
         // Footer
         app_name: "किसान बाज़ार",
         footer_desc: "किसानों के लिए एक आधुनिक मंच। अपनी फसल बेचें और नई तकनीक अपनाएं।",
+        description_tip: "💡 टिप: किस्म (जैसे लोकवन), कटाई की तारीख और गुणवत्ता जैसी जानकारी लिखें। इससे आपको 3 गुना ज्यादा कॉल आएंगे।",
         important_links: "महत्वपूर्ण लिंक",
         about_us: "हमारे बारे में",
         integrated_farming: "एकीकृत खेती",
@@ -768,6 +842,16 @@ export const translations = {
         about_built_for: "भारत के किसानों के लिए बनाया गया",
         about_team_desc: "हम डेवलपर्स और कृषि उत्साहियों की एक टीम हैं जो हर खेत में डिजिटल क्रांति लाने के लिए काम कर रहे हैं।",
 
+        // Promo / Post Ad Modal
+        post_ad_free_title: "मुफ्त में विज्ञापन पोस्ट करें",
+        free_listing_offer_text: "हम वर्तमान में सभी किसानों और सेवा प्रदाताओं के लिए मुफ्त लिस्टिंग की पेशकश कर रहे हैं!",
+        offer_benefit_1: "1. असीमित लीड प्राप्त करें।",
+        offer_benefit_2: "2. \"सत्यापित\" बैज दिखाएं।",
+        offer_benefit_3: "3. अन्य किसानों की मदद करें।",
+        free_label: "मुफ्त",
+        limited_time_offer_text: "सीमित समय की पेशकश",
+        post_ad_now: "अभी विज्ञापन पोस्ट करें",
+
         // Partner Page
         partner_title: "हमसे जुड़े",
         partner_subtitle: "किसान बाज़ार के साथ जुड़ें और आगे बढ़ें",
@@ -807,6 +891,19 @@ export const translations = {
         help_submit: "जानकारी भेजें",
         help_success: "धन्यवाद! आपका अनुरोध प्राप्त हुआ है।",
 
+
+        // Onboarding
+        welcome: "स्वागत है!",
+        what_interested_in: "आप क्या खरीदना चाहते हैं?",
+        continue: "आगे बढ़ें",
+        filter_flowers: "फूल",
+        filter_spices: "मसाले",
+
+        // Buyers Request
+        post_buyer_request: "मांग पोस्ट करें",
+        cant_find_item: "क्या आपको अपनी जरूरत का सामान नहीं मिल रहा?",
+        close: "बंद करें",
+        submit_request: "मांग पोस्ट करें",
 
         // Pashu Palan
         pashu_title: "पशुपालन",
@@ -1044,6 +1141,42 @@ export const translations = {
         label_enter_otp: "ओटीपी दर्ज करें",
         placeholder_otp: "उदाहरण: 1234",
         mock_otp_msg: "(मॉक ओटीपी का उपयोग करें: 1234)",
+
+        // Profile
+        login_view_profile: "कृपया अपनी प्रोफाइल देखने के लिए लॉगिन करें।",
+        verified_farmer_badge: "✅ सत्यापित किसान (Verified Farmer)",
+        farm_details_title: "खेती की जानकारी (Farm Details)",
+        cnt_edit_profile: "✏️ प्रोफाइल संपादित करें",
+        label_profile_name: "नाम (Name)",
+        label_profile_phone: "फ़ोन (Phone)",
+        label_profile_village: "गाँव (Village)",
+        label_profile_land: "ज़मीन (Land Size)",
+        label_profile_crops: "फसलें (Crops)",
+        save_changes: "परिवर्तन सहेजें",
+        label_land_size: "ज़मीन का आकार",
+        not_set: "सेट नहीं है",
+        label_major_crops: "प्रमुख फसलें",
+        label_member_since: "सदस्यता तिथि",
+        notifications_title: "🔔 सूचनाएं (Notifications)",
+        status_active: "सक्रिय ✅",
+        btn_enable_notifications: "पुश नोटिफिकेशन सक्षम करें",
+        status_enabling: "सक्षम किया जा रहा है...",
+        btn_logout: "लॉग आउट करें",
+
+        // Chaupal Extras
+        image_selected: "छवि चयनित",
+        just_now: "अभी अभी",
+        login_demo_user: "डेमो यूजर के रूप में लॉगिन करें",
+        confirm_delete_question: "क्या आप वाकई इस प्रश्न को हटाना चाहते हैं?",
+
+        // Weather Extras
+        you_are_offline: "⚠️ आप ऑफ़लाइन हैं",
+        live_data_unavailable: "⚠️ लाइव डेटा उपलब्ध नहीं है",
+        using_cached_data: " | सहेजे गए डेटा का उपयोग कर रहा है | ",
+        refresh: "रीफ्रेश करें",
+        location_permission_denied: "स्थान अनुमति अस्वीकृत। कृपया स्थान एक्सेस की अनुमति दें",
+        location_timeout: "स्थान अनुरोध का समय समाप्त। कृपया पुनः प्रयास करें या मैन्युअल रूप से चुनें।",
+        location_unavailable: "स्थान का पता लगाने में असमर्थ। कृपया मैन्युअल रूप से चुनें।",
     },
     mr: {
         // Navigation
@@ -1209,6 +1342,19 @@ export const translations = {
         verify_warning: "कृपया वरील तपशील तपासा. चुकीच्या माहितीमुळे खाते निलंबित होऊ शकते.",
 
 
+        // Onboarding
+        welcome: "स्वागत आहे!",
+        what_interested_in: "तुम्हाला काय खरेदी करायचे आहे?",
+        continue: "पुढे जा",
+        filter_flowers: "फुले",
+        filter_spices: "मसाले",
+
+        // Buyers Request
+        post_buyer_request: "मागणी पोस्ट करा",
+        cant_find_item: "तुम्हाला जे हवे आहे ते सापडत नाही?",
+        close: "बंद करा",
+        submit_request: "मागणी पोस्ट करा",
+
         // Pashu Palan
         pashu_title: "पशुपालन",
         pashu_subtitle: "डेअरी, शेळी आणि पोल्ट्री फार्मिंगसाठी तज्ञांच्या टिप्स.",
@@ -1337,6 +1483,16 @@ export const translations = {
         report: "रिपोर्ट",
         load_more_services: "आणखी सेवा लोड करा",
         posted_ad_success: "जाहिरात यशस्वीरित्या पोस्ट केली!",
+
+        // Promo / Post Ad Modal
+        post_ad_free_title: "मोफत जाहिरात पोस्ट करा",
+        free_listing_offer_text: "आम्ही सध्या सर्व शेतकरी आणि सेवा प्रदात्यांसाठी विनामूल्य सूची देत आहोत!",
+        offer_benefit_1: "१. अमर्यादित लीड्स मिळवा.",
+        offer_benefit_2: "२. \"सत्यापित\" बॅज दाखवा.",
+        offer_benefit_3: "३. इतर शेतकऱ्यांना मदत करा.",
+        free_label: "मोफत",
+        limited_time_offer_text: "मर्यादित कालावधीची ऑफर",
+        post_ad_now: "आत्ताच जाहिरात पोस्ट करा",
 
         // Transport Form (Marathi)
         service_details: "सेवा तपशील",
@@ -1509,6 +1665,48 @@ export const translations = {
         quick_news: "बातम्या आणि योजना",
         quick_chaupal: "चौपाल",
         quick_trade_area: "व्यापार क्षेत्र (सातारा)",
+
+        // Install Prompt
+        install_app_title: "ॲप इंस्टॉल करा",
+        install_app_desc: "चांगल्या अनुभवासाठी आणि ऑफलाइन प्रवेशासाठी",
+        install: "इंस्टॉल",
+        close: "बंद करा",
+
+        // Profile
+        login_view_profile: "कृपया प्रोफाइल पाहण्यासाठी लॉगिन करा.",
+        verified_farmer_badge: "✅ सत्यापित शेतकरी (Verified Farmer)",
+        farm_details_title: "शेती तपशील (Farm Details)",
+        cnt_edit_profile: "✏️ प्रोफाइल संपादित करा",
+        label_profile_name: "नाव (Name)",
+        label_profile_phone: "फोन (Phone)",
+        label_profile_village: "गाव (Village)",
+        label_profile_land: "जमीन आकार (Land Size)",
+        label_profile_crops: "पिके (Crops)",
+        save_changes: "बदल जतन करा",
+        label_land_size: "जमीन आकार",
+        not_set: "सेट नाही",
+        label_major_crops: "प्रमुख पिके",
+        label_member_since: "सदस्यता तारीख",
+        notifications_title: "🔔 सूचना (Notifications)",
+        status_active: "सक्रिय ✅",
+        btn_enable_notifications: "पुश सूचना सक्षम करा",
+        status_enabling: "सक्षम करत आहे...",
+        btn_logout: "लॉग आउट",
+
+        // Chaupal Extras
+        image_selected: "प्रतिमा निवडली",
+        just_now: "आत्ताच",
+        login_demo_user: "डेमो वापरकर्ता म्हणून लॉगिन करें",
+        confirm_delete_question: "तुम्हाला नक्की हा प्रश्न हटवायचा आहे का?",
+
+        // Weather Extras
+        you_are_offline: "⚠️ तुम्ही ऑफलाइन आहात",
+        live_data_unavailable: "⚠️ थेट डेटा उपलब्ध नाही",
+        using_cached_data: " | जतन केलेला डेटा वापरत आहे | ",
+        refresh: "रीफ्रेश करा",
+        location_permission_denied: "स्थान परवानगी नाकारली. कृपया स्थान प्रवेशास अनुमती द्या",
+        location_timeout: "स्थान विनंतीची वेळ संपली. कृपया पुन्हा प्रयत्न करा किंवा स्वतः निवडा.",
+        location_unavailable: "स्थान शोधण्यात अक्षम. कृपया स्वतः निवडा.",
         no_services_found: "कोणत्याही सेवा आढळल्या नाहीत.",
         adjust_filters_suggestion: "तुमचा शोध किंवा फिल्टर समायोजित करण्याचा प्रयत्न करा.",
 

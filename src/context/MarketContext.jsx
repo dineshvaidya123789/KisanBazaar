@@ -93,6 +93,7 @@ export const MarketProvider = ({ children }) => {
     ];
 
     const [listings, setListings] = useState([]);
+    const [buyerRequests, setBuyerRequests] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // --- Firebase Integration ---
@@ -121,6 +122,21 @@ export const MarketProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
+    // --- Fetch Buyer Requests ---
+    useEffect(() => {
+        const q = query(collection(db, 'buyerRequests'), orderBy('timestamp', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const requests = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setBuyerRequests(requests);
+        }, (error) => {
+            console.error("Error fetching buyer requests:", error);
+        });
+        return () => unsubscribe();
+    }, []);
+
     const addListing = async (newListing) => {
         try {
             const docRef = await addDoc(collection(db, 'listings'), {
@@ -131,6 +147,18 @@ export const MarketProvider = ({ children }) => {
         } catch (e) {
             console.error("Error adding document: ", e);
             alert("Error saving listing. Please check your connection.");
+        }
+    };
+
+    const addBuyerRequest = async (request) => {
+        try {
+            await addDoc(collection(db, 'buyerRequests'), {
+                ...request,
+                timestamp: Date.now()
+            });
+        } catch (e) {
+            console.error("Error adding buyer request: ", e);
+            throw e;
         }
     };
 
@@ -265,6 +293,8 @@ export const MarketProvider = ({ children }) => {
             toggleRestriction,
             getUniqueSellers,
             checkListingEligibility,
+            buyerRequests,
+            addBuyerRequest,
             loading
         }}>
             {children}

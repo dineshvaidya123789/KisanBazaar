@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
+import { getToken } from "firebase/messaging";
+import { messaging } from "../firebase";
 
 const Profile = () => {
     // Helper to convert Hindi/Marathi numerals to English
@@ -8,9 +11,37 @@ const Profile = () => {
         return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
     };
 
+    const { t } = useLanguage();
     const { user, logout, updateProfile } = useAuth();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
+
+    // Notification State
+    const [notificationStatus, setNotificationStatus] = useState(Notification.permission);
+    const [fcmToken, setFcmToken] = useState(null);
+
+    const handleEnableNotifications = async () => {
+        if (!messaging) {
+            alert("Messaging not supported on this device/browser.");
+            return;
+        }
+
+        try {
+            setNotificationStatus('loading');
+            const permission = await Notification.requestPermission();
+            setNotificationStatus(permission);
+
+            if (permission === 'granted') {
+                const token = await getToken(messaging);
+                console.log("FCM Token:", token);
+                setFcmToken(token);
+                // TODO: Save token to Firestore user profile
+            }
+        } catch (error) {
+            console.error("Error enabling notifications:", error);
+            setNotificationStatus('error');
+        }
+    };
 
     // Form State
     const [formData, setFormData] = useState({
@@ -41,8 +72,8 @@ const Profile = () => {
     if (!user) {
         return (
             <div className="container" style={{ textAlign: 'center', padding: '4rem' }}>
-                <h2>Please Login to view your profile.</h2>
-                <button className="btn btn-primary" onClick={() => navigate('/login')}>Login</button>
+                <h2>{t('login_view_profile')}</h2>
+                <button className="btn btn-primary" onClick={() => navigate('/login')}>{t('login')}</button>
             </div>
         );
     }
@@ -73,7 +104,7 @@ const Profile = () => {
                     <p style={{ color: '#666', margin: 0 }}>📍 {user.village} | 📞 {user.phone}</p>
                     {user.isVerified && (
                         <div style={{ marginTop: '10px', display: 'inline-block', backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '4px 12px', borderRadius: '15px', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                            ✅ Verified Farmer (सत्यापित किसान)
+                            {t('verified_farmer_badge')}
                         </div>
                     )}
                 </div>
@@ -82,9 +113,9 @@ const Profile = () => {
 
                 <div style={{ padding: '2rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ margin: 0 }}>Farm Details (खेती की जानकारी)</h3>
+                        <h3 style={{ margin: 0 }}>{t('farm_details_title')}</h3>
                         {!isEditing && (
-                            <button className="btn btn-outline" onClick={() => setIsEditing(true)}>✏️ Edit Profile</button>
+                            <button className="btn btn-outline" onClick={() => setIsEditing(true)}>{t('cnt_edit_profile')}</button>
                         )}
                     </div>
 
@@ -92,7 +123,7 @@ const Profile = () => {
                         <form onSubmit={handleSave}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Name (नाम)</label>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{t('label_profile_name')}</label>
                                     <input
                                         type="text"
                                         value={formData.name}
@@ -101,7 +132,7 @@ const Profile = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Phone (फ़ोन)</label>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{t('label_profile_phone')}</label>
                                     <input
                                         type="text"
                                         value={formData.phone}
@@ -113,7 +144,7 @@ const Profile = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Village (गाँव)</label>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{t('label_profile_village')}</label>
                                     <input
                                         type="text"
                                         value={formData.village}
@@ -122,7 +153,7 @@ const Profile = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Land Size (ज़मीन)</label>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{t('label_profile_land')}</label>
                                     <input
                                         type="text"
                                         value={formData.landSize}
@@ -131,7 +162,7 @@ const Profile = () => {
                                     />
                                 </div>
                                 <div style={{ gridColumn: '1 / -1' }}>
-                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Crops (फसलें - comma separated)</label>
+                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{t('label_profile_crops')}</label>
                                     <input
                                         type="text"
                                         value={formData.crops}
@@ -141,28 +172,51 @@ const Profile = () => {
                                 </div>
                             </div>
                             <div style={{ marginTop: '2rem', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                                <button type="button" className="btn btn-outline" onClick={() => setIsEditing(false)}>Cancel</button>
-                                <button type="submit" className="btn btn-primary">Save Changes</button>
+                                <button type="button" className="btn btn-outline" onClick={() => setIsEditing(false)}>{t('cancel')}</button>
+                                <button type="submit" className="btn btn-primary">{t('save_changes')}</button>
                             </div>
                         </form>
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
                             <div style={{ padding: '1rem', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '0.9rem', color: '#666' }}>Land Size</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{user.landSize || 'Not Set'}</div>
+                                <div style={{ fontSize: '0.9rem', color: '#666' }}>{t('label_land_size')}</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{user.landSize || t('not_set')}</div>
                             </div>
                             <div style={{ padding: '1rem', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '0.9rem', color: '#666' }}>Major Crops</div>
+                                <div style={{ fontSize: '0.9rem', color: '#666' }}>{t('label_major_crops')}</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                                    {user.crops && user.crops.length > 0 ? user.crops.join(', ') : 'Not Set'}
+                                    {user.crops && user.crops.length > 0 ? user.crops.join(', ') : t('not_set')}
                                 </div>
                             </div>
                             <div style={{ padding: '1rem', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '0.9rem', color: '#666' }}>Member Since</div>
+                                <div style={{ fontSize: '0.9rem', color: '#666' }}>{t('label_member_since')}</div>
                                 <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Dec 2023</div>
                             </div>
                         </div>
                     )}
+                </div>
+
+                <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: 0 }} />
+
+                {/* Notifications Section */}
+                <div style={{ padding: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                        <h3 style={{ margin: 0 }}>{t('notifications_title')}</h3>
+                        {notificationStatus === 'granted' ? (
+                            <span style={{ color: 'green', fontWeight: 'bold', fontSize: '0.9rem' }}>{t('status_active')}</span>
+                        ) : (
+                            <button
+                                onClick={handleEnableNotifications}
+                                className="btn btn-primary"
+                                style={{ padding: '6px 12px', fontSize: '0.9rem' }}
+                                disabled={notificationStatus === 'loading'}
+                            >
+                                {notificationStatus === 'loading' ? t('status_enabling') : t('btn_enable_notifications')}
+                            </button>
+                        )}
+                    </div>
+
+                    {/* FCM Token Display Removed for Production */}
                 </div>
 
                 <div style={{ padding: '2rem', paddingTop: '0' }}>
@@ -180,7 +234,7 @@ const Profile = () => {
                             width: '100%'
                         }}
                     >
-                        Log Out (लॉग आउट करें)
+                        {t('btn_logout')}
                     </button>
                 </div>
             </div>

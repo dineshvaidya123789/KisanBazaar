@@ -133,7 +133,7 @@ const Chaupal = () => {
             image: selectedImage,
             likes: 0,
             replies: [],
-            timestamp: "Just Now"
+            timestamp: t('just_now')
         };
 
         const updatedQuestions = [newQ, ...questions];
@@ -181,7 +181,7 @@ const Chaupal = () => {
     };
 
     const handleDelete = (id) => {
-        if (window.confirm("Are you sure you want to delete this question?")) {
+        if (window.confirm(t('confirm_delete_question'))) {
             setQuestions(questions.filter(q => q.id !== id));
         }
     };
@@ -229,7 +229,7 @@ const Chaupal = () => {
                         style={{ fontSize: '0.9rem' }}
                         onClick={() => document.getElementById('questionImageInput').click()}
                     >
-                        📷 {selectedImage ? "Image Selected" : t('upload_image')}
+                        📷 {selectedImage ? t('image_selected') : t('upload_image')}
                     </button>
                     <button className="btn btn-primary" onClick={handlePostQuestion}>{t('post_question')}</button>
                 </div>
@@ -301,21 +301,23 @@ const Chaupal = () => {
             </div>
 
             {/* Login Modal */}
-            {showLoginModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content" style={{ maxWidth: '300px', textAlign: 'center' }}>
-                        <h3>{t('login_required')}</h3>
-                        <p>{t('login_to_ask')}</p>
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
-                            <button className="btn btn-primary" onClick={() => login('9876543210', '1234').then(() => setShowLoginModal(false))}>Login as Demo User</button>
-                            <button className="btn btn-outline" onClick={() => setShowLoginModal(false)}>{t('cancel_reply')}</button>
+            {
+                showLoginModal && (
+                    <div className="modal-overlay">
+                        <div className="modal-content" style={{ maxWidth: '300px', textAlign: 'center' }}>
+                            <h3>{t('login_required')}</h3>
+                            <p>{t('login_to_ask')}</p>
+                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
+                                <button className="btn btn-primary" onClick={() => login('9876543210', '1234').then(() => setShowLoginModal(false))}>{t('login_demo_user')}</button>
+                                <button className="btn btn-outline" onClick={() => setShowLoginModal(false)}>{t('cancel_reply')}</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             <BackToHomeButton />
-        </div>
+        </div >
     );
 };
 

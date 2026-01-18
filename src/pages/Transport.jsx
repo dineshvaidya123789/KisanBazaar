@@ -294,28 +294,28 @@ const Transport = () => {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setShowPaymentModal(false)}>
                     <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '12px', maxWidth: '500px', width: '100%', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
-                        <h2>Post Ad for Free (मुफ्त विज्ञापन)</h2>
+                        <h2>{t('post_ad_free_title')}</h2>
                         <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-                            We are currently offering free listings for all farmers and service providers!
+                            {t('free_listing_offer_text')}
                             <br /><br />
-                            1. Get unlimited leads.<br />
-                            2. Show "Verified" badge.<br />
-                            3. Help other farmers.
+                            {t('offer_benefit_1')}<br />
+                            {t('offer_benefit_2')}<br />
+                            {t('offer_benefit_3')}
                         </p>
 
                         <div style={{ border: '2px solid var(--color-primary)', borderRadius: '8px', padding: '1rem', marginBottom: '2rem', backgroundColor: '#e8f5e9' }}>
-                            <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>Free (मुफ्त)</h3>
-                            <span style={{ fontSize: '0.9rem', color: '#555' }}>Limited Time Offer</span>
+                            <h3 style={{ margin: 0, color: 'var(--color-primary)' }}>{t('free_label')}</h3>
+                            <span style={{ fontSize: '0.9rem', color: '#555' }}>{t('limited_time_offer_text')}</span>
                         </div>
 
                         <button className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }} onClick={() => {
                             setShowPaymentModal(false);
                             setShowAdForm(true);
                         }}>
-                            Post Ad Now (अभी पोस्ट करें)
+                            {t('post_ad_now')}
                         </button>
                         <button style={{ marginTop: '1rem', background: 'none', border: 'none', color: '#666', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setShowPaymentModal(false)}>
-                            Cancel
+                            {t('cancel')}
                         </button>
                     </div>
                 </div>

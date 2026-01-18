@@ -32,10 +32,11 @@ const Login = lazy(() => import('./pages/Login'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Help = lazy(() => import('./pages/Help'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Admin = lazy(() => import('./pages/Admin'));
 const FPORegistration = lazy(() => import('./pages/FPORegistration'));
 const TradeArea = lazy(() => import('./pages/TradeArea'));
 import ConsentBanner from './components/ConsentBanner';
+import InstallPrompt from './components/InstallPrompt';
 
 // Loading component
 const PageLoader = () => (
@@ -91,10 +92,10 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route
-                path="/admin/dashboard"
+                path="/admin"
                 element={
                   <ProtectedRoute allowedRole="Admin">
-                    <AdminDashboard />
+                    <Admin />
                   </ProtectedRoute>
                 }
               />
@@ -109,6 +110,7 @@ function App() {
         <VoiceNavigation />
         <MobileNav />
         <ConsentBanner />
+        <InstallPrompt />
         <NetworkStatus />
         <Footer />
       </div>

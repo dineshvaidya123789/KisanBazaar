@@ -189,9 +189,9 @@ const Weather = () => {
             },
             (error) => {
                 setIsDetectingLocation(false);
-                let errorMsg = 'Unable to detect location. Please select manually.';
-                if (error.code === 1) errorMsg = 'Location permission denied. Please allow location access (स्थान की अनुमति नहीं मिली, कृपया अनुमति दें)';
-                if (error.code === 3) errorMsg = 'Location request timed out. Please try again or select manually.';
+                let errorMsg = t('location_unavailable');
+                if (error.code === 1) errorMsg = t('location_permission_denied');
+                if (error.code === 3) errorMsg = t('location_timeout');
 
                 alert(errorMsg);
                 console.error('Geolocation error:', error);
@@ -348,10 +348,10 @@ const Weather = () => {
                         <span>
                             {(isOffline || weatherData.isFallback) && (
                                 <span style={{ color: '#FF9800', fontWeight: 'bold' }}>
-                                    {isOffline ? '⚠️ YOU ARE OFFLINE' : '⚠️ LIVE DATA UNAVAILABLE'}
+                                    {isOffline ? t('you_are_offline') : t('live_data_unavailable')}
                                 </span>
                             )}
-                            {(isOffline || weatherData.isFallback) && ' | Using cached/demo data | '}
+                            {(isOffline || weatherData.isFallback) && t('using_cached_data')}
                             {t('last_updated')}: {lastUpdated}
                         </span>
                         <button
@@ -359,7 +359,7 @@ const Weather = () => {
                             className="btn-outline"
                             style={{ fontSize: '0.9rem', padding: '0.4rem 0.8rem' }}
                         >
-                            🔄 {t('refresh') || 'Refresh'}
+                            🔄 {t('refresh')}
                         </button>
                     </div>
 

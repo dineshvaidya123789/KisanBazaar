@@ -3,7 +3,10 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+import SEO from '../components/SEO';
+
 const Login = () => {
+    // ... hooks ...
     const [step, setStep] = useState(1); // 1: Phone, 2: OTP
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
@@ -11,8 +14,11 @@ const Login = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const { login } = useAuth();
+    const [confirmResult, setConfirmResult] = useState(null); // Store Firebase confirmation result
+
+    const { login, verifyOtp, setupRecaptcha } = useAuth();
     const { t } = useLanguage();
+
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -23,20 +29,28 @@ const Login = () => {
         return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
     };
 
-    const handleSendOtp = (e) => {
+    const handleSendOtp = async (e) => {
         e.preventDefault();
+        setError('');
         if (phone.length !== 10) {
             setError("Please enter a valid 10-digit number.");
             return;
         }
+
         setIsLoading(true);
-        // Simulate SMS API delay
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            // Initialize Recaptcha
+            const appVerifier = setupRecaptcha(phone);
+            // Send OTP
+            const confirmation = await login(phone, appVerifier);
+            setConfirmResult(confirmation);
             setStep(2);
-            setError('');
-            // In a real app, this would trigger the SMS
-        }, 800);
+        } catch (err) {
+            console.error(err);
+            setError(err.message || "Failed to send OTP. Try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleVerifyOtp = async (e) => {
@@ -44,10 +58,12 @@ const Login = () => {
         setIsLoading(true);
         setError('');
         try {
-            await login(phone, otp, 'Farmer', city); // Pass city to login
+            await verifyOtp(confirmResult, otp);
+            // Login successful, AuthContext listener will update state
             navigate(from, { replace: true });
         } catch (err) {
-            setError(err);
+            console.error(err);
+            setError("Invalid OTP. Please check via SMS.");
         } finally {
             setIsLoading(false);
         }
@@ -55,6 +71,10 @@ const Login = () => {
 
     return (
         <div className="container fade-in" style={{ padding: 'var(--spacing-xl) 0', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+            <SEO
+                title={t('login_title')}
+                description="Secure login for farmers and buyers."
+            />
             <div className="card" style={{ maxWidth: '400px', width: '100%', padding: '2rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                     <h1 style={{ color: 'var(--color-primary)' }}>{t('login_title')}</h1>
@@ -66,6 +86,9 @@ const Login = () => {
                         {error}
                     </div>
                 )}
+
+                {/* Invisible Recaptcha Container */}
+                <div id="recaptcha-container"></div>
 
                 {step === 1 ? (
                     <form onSubmit={handleSendOtp}>
@@ -126,9 +149,6 @@ const Login = () => {
                                 style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1.2rem', textAlign: 'center', letterSpacing: '5px' }}
                                 required
                             />
-                            <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: '#888' }}>
-                                {t('mock_otp_msg')}
-                            </div>
                         </div>
                         <button
                             type="submit"

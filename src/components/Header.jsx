@@ -611,8 +611,24 @@ const Header = () => {
 
 
 
-                    {/* "Help" Link Removed as requested (already in Footer) */}
-                    {/* "Sign In" Removed as requested */}
+                    {/* Admin Link - Only visible to Admins */}
+                    {user && user.role === 'Admin' && (
+                        <Link
+                            to="/admin"
+                            onClick={closeMenu}
+                            className={isActive('/admin')}
+                            style={{
+                                color: 'var(--color-primary)',
+                                fontWeight: 'bold',
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}
+                        >
+                            👑 Admin
+                        </Link>
+                    )}
 
                 </nav>
             </div>

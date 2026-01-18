@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import getCommodityImage from '../utils/commodityImages';
 import { getSearchSynonyms, commodityMapping } from '../utils/searchMapping';
 import LocationSelector from '../components/LocationSelector';
+import BuyerRequestForm from '../components/BuyerRequestForm';
 
 const ProductCard = React.memo(({ product }) => {
     const { t, language } = useLanguage(); // Get language
@@ -203,6 +204,7 @@ const Buyer = () => {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
     const [showFilters, setShowFilters] = useState(false);
+    const [showRequestForm, setShowRequestForm] = useState(false); // Toggle for Request Form
 
     // Scroll to top on mount
     useEffect(() => {
@@ -262,12 +264,51 @@ const Buyer = () => {
                 textAlign: 'center',
                 borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
                 marginBottom: 'var(--spacing-lg)',
-                boxShadow: '0 4px 20px rgba(46, 125, 50, 0.2)'
+                boxShadow: '0 4px 20px rgba(46, 125, 50, 0.2)',
+                position: 'relative' // Added for absolute positioning
             }}>
+                {/* Top Back Link */}
+                <Link to="/" style={{
+                    position: 'absolute',
+                    top: '20px',
+                    left: '20px',
+                    color: 'white',
+                    textDecoration: 'none',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    background: 'rgba(255,255,255,0.2)',
+                    padding: '5px 10px',
+                    borderRadius: '20px',
+                    fontSize: '0.9rem'
+                }}>
+                    ← {t('back_to_home') || 'Home'}
+                </Link>
+
                 <h1 style={{ marginBottom: '8px', fontSize: '2rem' }}>{t('marketplace_title')}</h1>
                 <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.1rem' }}>
                     {t('buy_sell_hub')}
                 </p>
+
+                <button
+                    onClick={() => setShowRequestForm(true)}
+                    className="btn fade-in"
+                    style={{
+                        marginTop: '1rem',
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        backdropFilter: 'blur(5px)',
+                        border: '1px solid rgba(255,255,255,0.4)',
+                        color: 'white',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        fontSize: '0.9rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                    }}
+                >
+                    📝 {t('post_buyer_request') || 'Post a Request'}
+                </button>
 
                 {/* Main Toggle Switch */}
                 <div style={{
@@ -327,6 +368,18 @@ const Buyer = () => {
             </div>
 
             <div className="container">
+                {/* Request Form Modal/Collapse */}
+                {showRequestForm && (
+                    <div style={{ marginBottom: '2rem' }}>
+                        <BuyerRequestForm onSuccess={() => setShowRequestForm(false)} />
+                        <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                            <button onClick={() => setShowRequestForm(false)} style={{ background: 'none', border: 'none', color: '#666', textDecoration: 'underline', cursor: 'pointer' }}>
+                                {t('close') || 'Close'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Search & Filter Bar */}
                 <div style={{
                     display: 'flex',
@@ -462,23 +515,39 @@ const Buyer = () => {
                         `}</style>
                     </div>
                 ) : (
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        gap: 'var(--spacing-lg)'
-                    }}>
-                        {filteredItems.length === 0 ? (
-                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem 2rem', color: '#666' }}>
-                                <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>🍃</div>
-                                <h3>{t('no_posts_found')}</h3>
-                                <p>{t('try_adjusting_filters')}</p>
-                            </div>
-                        ) : (
-                            filteredItems.map(item => (
-                                <ProductCard key={item.id} product={item} />
-                            ))
-                        )}
-                    </div>
+                    <>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                            gap: 'var(--spacing-lg)'
+                        }}>
+                            {filteredItems.length === 0 ? (
+                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem 2rem', color: '#666' }}>
+                                    <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>🍃</div>
+                                    <h3>{t('no_posts_found')}</h3>
+                                    <p>{t('try_adjusting_filters')}</p>
+
+                                    <div style={{ marginTop: '2rem', maxWidth: '500px', margin: '2rem auto' }}>
+                                        <p style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                                            {t('cant_find_item') || "Can't find what you need?"}
+                                        </p>
+                                        <BuyerRequestForm initialCommodity={searchTerm} />
+                                    </div>
+                                </div>
+                            ) : (
+                                filteredItems.map(item => (
+                                    <ProductCard key={item.id} product={item} />
+                                ))
+                            )}
+                        </div>
+
+                        {/* Bottom Back Button */}
+                        <div style={{ textAlign: 'center', marginTop: '3rem', marginBottom: '1rem' }}>
+                            <Link to="/" className="btn btn-outline" style={{ padding: '0.8rem 2rem', fontSize: '1rem' }}>
+                                🏠 {t('back_to_home') || 'Back to Home'}
+                            </Link>
+                        </div>
+                    </>
                 )}
             </div>
         </div>

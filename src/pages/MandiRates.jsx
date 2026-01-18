@@ -3,6 +3,7 @@ import LocationSelector from '../components/LocationSelector';
 import { getMandiRates } from '../data/mandiRates';
 import { useLanguage } from '../context/LanguageContext';
 import BackToHomeButton from '../components/BackToHomeButton';
+import SEO from '../components/SEO';
 
 const MandiRates = () => {
     const { t } = useLanguage();
@@ -69,12 +70,6 @@ const MandiRates = () => {
 
     // ... (renderContent and handleAutoDetectLocation omitted for brevity, assuming they are unchanged in this block or managed carefully) ...
 
-
-
-
-
-    // ... (rest of logic)
-
     // Render logic for main content area
     const renderContent = () => {
         if (loading) {
@@ -105,6 +100,10 @@ const MandiRates = () => {
                 </div>
             );
         }
+
+        const filteredRates = rates.filter(rate =>
+            rate.crop.toLowerCase().includes(searchCrop.toLowerCase())
+        );
 
         return (
             <div className="card" style={{ overflow: 'hidden', padding: 0 }}>
@@ -271,8 +270,34 @@ const MandiRates = () => {
         rate.crop.toLowerCase().includes(searchCrop.toLowerCase())
     );
 
+    // structured data for Google
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "Table",
+        "about": `Mandi Rates for ${selectedMandi || selectedDistrict || 'Madhya Pradesh'}`,
+        "mainEntity": filteredRates.map(rate => ({
+            "@type": "Product",
+            "name": rate.crop,
+            "offers": {
+                "@type": "Ofter",
+                "price": rate.avg,
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock",
+                "seller": {
+                    "@type": "Organization",
+                    "name": `${selectedMandi || selectedDistrict} Mandi`
+                }
+            }
+        }))
+    };
+
     return (
         <div className="container fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+            <SEO
+                title={t('todays_rates') + (selectedMandi ? ` - ${selectedMandi}` : '')}
+                description="Check daily mandi rates for all crops."
+                schema={schema}
+            />
             <h1 style={{ textAlign: 'center', marginBottom: 'var(--spacing-md)', color: 'var(--color-primary)' }}>
                 {t('todays_rates')}
             </h1>

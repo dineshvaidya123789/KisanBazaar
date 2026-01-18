@@ -3,14 +3,30 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 // import SafetyBanner from '../components/SafetyBanner';
+import InterestsModal from '../components/InterestsModal';
 
+
+import SEO from '../components/SEO';
 
 const Home = () => {
     const { t } = useLanguage();
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
+
+    // Onboarding State
+    const showOnboarding = user && !user.onboardingCompleted;
+
+    const handleOnboardingComplete = () => {
+        // Optimistically update local state to hide modal immediately
+        updateProfile({ onboardingCompleted: true });
+    };
 
     return (
         <div className="fade-in">
+            {showOnboarding && <InterestsModal onClose={handleOnboardingComplete} />}
+            <SEO
+                title={t('hero_title')}
+                description={t('hero_subtitle')}
+            />
             {/* <SafetyBanner /> */}
             {/* Hero Section */}
             <section style={{
