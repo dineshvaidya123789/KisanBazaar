@@ -30,7 +30,7 @@ const Login = () => {
         };
     }, []);
 
-    const { login, verifyOtp, setupRecaptcha } = useAuth();
+    const { login, verifyOtp, setupRecaptcha, createUser } = useAuth();
     const { t } = useLanguage();
 
     const navigate = useNavigate();
@@ -38,41 +38,24 @@ const Login = () => {
 
     const from = location.state?.from?.pathname || '/';
 
-    // Helper to convert Hindi/Marathi numerals to English
-    const normalizeNumerals = (str) => {
-        return str.replace(/[०-९]/g, d => "०१२३४५६७८९".indexOf(d));
-    };
+    // ... helper ...
 
-    const handleSendOtp = async (e) => {
-        e.preventDefault();
-        setError('');
-        if (phone.length !== 10) {
-            setError("Please enter a valid 10-digit number.");
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            // Initialize Recaptcha
-            const appVerifier = setupRecaptcha(phone);
-            // Send OTP
-            const confirmation = await login(phone, appVerifier);
-            setConfirmResult(confirmation);
-            setStep(2);
-        } catch (err) {
-            console.error(err);
-            setError(err.message || "Failed to send OTP. Try again.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // ... handleSendOtp ...
 
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
         try {
-            await verifyOtp(confirmResult, otp);
+            const user = await verifyOtp(confirmResult, otp);
+
+            // Create or update user profile in Firestore
+            await createUser(user.uid, {
+                phone: phone,
+                city: city, // Capture city/samiti entered during login
+                role: 'Farmer' // Default role, can be updated later
+            });
+
             // Login successful, AuthContext listener will update state
             navigate(from, { replace: true });
         } catch (err) {

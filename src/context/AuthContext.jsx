@@ -120,10 +120,27 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const updateProfile = (updatedData) => {
-        // In a real app, update this in Firestore
-        // For now, update local state
-        setUser(prev => ({ ...prev, ...updatedData }));
+    const createUser = async (uid, userData) => {
+        try {
+            const userRef = doc(db, 'users', uid);
+            const docSnap = await getDoc(userRef);
+
+            if (!docSnap.exists()) {
+                const newUser = {
+                    ...userData,
+                    uid,
+                    createdAt: new Date().getTime(), // Using timestamp number for easier sorting
+                    role: userData.role || 'Farmer',
+                    isVerified: false,
+                    onboardingCompleted: false
+                };
+                await setDoc(userRef, newUser);
+                setUser(prev => ({ ...prev, ...newUser })); // Update local state immediately
+            }
+        } catch (error) {
+            console.error("Error creating user profile:", error);
+            // Don't throw, just log. Login should still succeed.
+        }
     };
 
     return (
@@ -134,9 +151,11 @@ export const AuthProvider = ({ children }) => {
             verifyOtp,
             logout,
             updateProfile,
+            createUser,
             loading
         }}>
             {!loading && children}
         </AuthContext.Provider>
     );
 };
+
