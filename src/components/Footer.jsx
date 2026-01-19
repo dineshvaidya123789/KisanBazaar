@@ -33,7 +33,7 @@ const Footer = () => {
                         <li style={{ marginBottom: '8px' }}><Link to="/fpo-registration" style={{ color: 'white', textDecoration: 'none' }}>{t('fpo')}</Link></li>
                         <li style={{ marginBottom: '8px' }}><Link to="/help" style={{ color: 'white', textDecoration: 'none' }}>{t('help')}</Link></li>
                         <li style={{ marginBottom: '8px' }}><Link to="/privacy" style={{ color: 'white', textDecoration: 'none' }}>{t('privacy_policy')}</Link></li>
-                        <li style={{ marginBottom: '8px' }}><Link to="/admin/dashboard" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '0.8rem' }}>Admin Dashboard</Link></li>
+                        <li style={{ marginBottom: '8px' }}><Link to="/admin" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '0.8rem' }}>Admin Dashboard</Link></li>
                     </ul>
                 </div>
 
