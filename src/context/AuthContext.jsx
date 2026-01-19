@@ -6,7 +6,7 @@ import {
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from '../firebase';
 
 const AuthContext = createContext();
@@ -36,8 +36,30 @@ export const AuthProvider = ({ children }) => {
                 const userRef = doc(db, 'users', firebaseUser.uid);
 
                 // Fetch profile
-                getDoc(userRef).then(docSnap => {
-                    const profileData = docSnap.exists() ? docSnap.data() : {};
+                getDoc(userRef).then(async (docSnap) => {
+                    let profileData = {};
+
+                    if (docSnap.exists()) {
+                        profileData = docSnap.data();
+                    } else {
+                        // Profile doesn't exist (e.g. existing user or admin), create it now
+                        console.log("Creating missing user profile for:", phoneNumber);
+                        const newUser = {
+                            uid: firebaseUser.uid,
+                            phone: phoneNumber,
+                            createdAt: new Date().getTime(),
+                            role: role,
+                            name: role === 'Admin' ? "Administrator" : "Kisan User",
+                            isVerified: false,
+                            onboardingCompleted: false
+                        };
+                        try {
+                            await setDoc(userRef, newUser);
+                            profileData = newUser;
+                        } catch (err) {
+                            console.error("Error auto-creating profile:", err);
+                        }
+                    }
 
                     setUser({
                         uid: firebaseUser.uid,
