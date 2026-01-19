@@ -118,9 +118,28 @@ const ProductCard = React.memo(({ product }) => {
                     </span>
                 </div>
 
-                <p style={{ color: 'var(--color-text-light)', fontSize: '0.9rem', marginBottom: 'var(--spacing-md)', flex: 1 }}>
+                <p style={{ color: 'var(--color-text-light)', fontSize: '0.9rem', marginBottom: '8px', flex: 1 }}>
                     {description}
                 </p>
+
+                {/* Seller Name with Verified Badge */}
+                <div style={{ marginBottom: 'var(--spacing-md)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                        👤 {seller}
+                    </span>
+                    {product.sellerVerified && (
+                        <span style={{
+                            fontSize: '0.75rem',
+                            color: '#4CAF50',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '2px'
+                        }}>
+                            ✓ {t('verified')}
+                        </span>
+                    )}
+                </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
                     <div>
@@ -207,6 +226,31 @@ const Buyer = () => {
     const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
     const [showFilters, setShowFilters] = useState(false);
     const [showRequestForm, setShowRequestForm] = useState(false); // Toggle for Request Form
+    const { addAlert } = useMarket(); // Import addAlert
+    const [alertLoading, setAlertLoading] = useState(false);
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const [alertCrop, setAlertCrop] = useState('');
+
+    const handleCreateAlert = async (crop) => {
+        if (!crop) return;
+        setAlertLoading(true);
+        try {
+            await addAlert({
+                commodity: crop,
+                maxPrice: priceRange.max,
+                userId: localStorage.getItem('userMobile') || 'anonymous',
+                type: 'sell_alert', // Alert when someone sells this
+                channel: 'app'
+            });
+            alert(t('alert_set_success').replace('{crop}', crop));
+            setAlertCrop('');
+            setShowAlertModal(false);
+        } catch (error) {
+            alert(t('error_general'));
+        } finally {
+            setAlertLoading(false);
+        }
+    };
 
     // Scroll to top on mount
     useEffect(() => {
@@ -449,6 +493,35 @@ const Buyer = () => {
                             fontSize: '1.2rem',
                             color: '#666'
                         }}>🔍</span>
+
+                        {/* Notify Me Bell */}
+                        <button
+                            onClick={() => {
+                                if (searchTerm) {
+                                    handleCreateAlert(searchTerm);
+                                } else {
+                                    setShowAlertModal(true);
+                                }
+                            }}
+                            title={t('notify_me_tooltip')}
+                            style={{
+                                position: 'absolute',
+                                right: '10px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'transparent',
+                                border: 'none',
+                                fontSize: '1.2rem',
+                                cursor: 'pointer',
+                                padding: '5px',
+                                borderRadius: '50%',
+                                transition: 'background 0.2s'
+                            }}
+                            onMouseOver={(e) => e.target.style.background = '#f0f0f0'}
+                            onMouseOut={(e) => e.target.style.background = 'transparent'}
+                        >
+                            🔔
+                        </button>
                     </div>
 
                     <button
@@ -574,6 +647,33 @@ const Buyer = () => {
                             </Link>
                         </div>
                     </>
+                )}
+
+                {/* Simple Alert Modal */}
+                {showAlertModal && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }} onClick={() => setShowAlertModal(false)}>
+                        <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', width: '90%', maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
+                            <h3>🔔 {t('set_alert_title')}</h3>
+                            <p>{t('set_alert_desc')}</p>
+                            <input
+                                type="text"
+                                placeholder={t('search_placeholder')}
+                                value={alertCrop}
+                                onChange={(e) => setAlertCrop(e.target.value)}
+                                style={{ width: '100%', padding: '10px', marginBottom: '1rem', borderRadius: '8px', border: '1px solid #ccc' }}
+                            />
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button onClick={() => handleCreateAlert(alertCrop)} className="btn btn-primary" style={{ flex: 1 }} disabled={!alertCrop || alertLoading}>
+                                    {alertLoading ? t('loading') : t('set_alert_btn')}
+                                </button>
+                                <button onClick={() => setShowAlertModal(false)} className="btn btn-outline" style={{ flex: 1 }}>{t('cancel')}</button>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

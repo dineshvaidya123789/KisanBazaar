@@ -29,6 +29,7 @@ export const MarketProvider = ({ children }) => {
             description: 'Desi tomato, fully organic.',
             description_hi: 'देसी टमाटर, पूरी तरह से जैविक।',
             description_mr: 'गावरान टोमॅटो, पूर्णपणे सेंद्रिय.',
+            sellerVerified: true, // Demo verified seller
             timestamp: Date.now()
         },
         {
@@ -94,6 +95,7 @@ export const MarketProvider = ({ children }) => {
 
     const [listings, setListings] = useState([]);
     const [buyerRequests, setBuyerRequests] = useState([]);
+    const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // --- Firebase Integration ---
@@ -158,6 +160,18 @@ export const MarketProvider = ({ children }) => {
             });
         } catch (e) {
             console.error("Error adding buyer request: ", e);
+            throw e;
+        }
+    };
+
+    const addAlert = async (alertData) => {
+        try {
+            await addDoc(collection(db, 'alerts'), {
+                ...alertData,
+                timestamp: Date.now()
+            });
+        } catch (e) {
+            console.error("Error adding alert: ", e);
             throw e;
         }
     };
@@ -295,6 +309,8 @@ export const MarketProvider = ({ children }) => {
             checkListingEligibility,
             buyerRequests,
             addBuyerRequest,
+            alerts,
+            addAlert,
             loading
         }}>
             {children}

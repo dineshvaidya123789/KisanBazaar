@@ -317,7 +317,14 @@ export const translations = {
         quantity: 'Quantity',
         contact_seller: 'Contact Seller',
         contact_buyer: 'Contact Buyer',
+        contact_seller: 'Contact Seller',
+        contact_buyer: 'Contact Buyer',
         needed: 'Needed',
+        notify_me_tooltip: "Notify me for new listings",
+        set_alert_title: "Set Alert",
+        set_alert_desc: "We will notify you when this crop is listed.",
+        set_alert_btn: "Set Alert",
+        alert_set_success: "Alert set for {crop}!",
 
 
 
@@ -390,6 +397,7 @@ export const translations = {
         service_drone: "Drones",
         service_inputs: "Fertilizers/Seeds",
         verified: "Verified",
+        verified_seller: "Verified Seller",
         // call: "Call", // Duplicate
         // whatsapp: "WhatsApp", // Duplicate
         report: "Report",
@@ -798,6 +806,13 @@ export const translations = {
         found_sellers: "विक्रेता मिले",
         reset_filters: "फिल्टर रीसेट करें",
         deals_in: "उपलब्ध फसलें (Deals In)",
+        notify_me_tooltip: "नई लिस्टिंग के लिए मुझे सूचित करें",
+        set_alert_title: "अलर्ट सेट करें",
+        set_alert_desc: "जब यह फसल सूचीबद्ध होगी तो हम आपको सूचित करेंगे।",
+        set_alert_btn: "अलर्ट सेट करें",
+        alert_set_success: "{crop} के लिए अलर्ट सेट किया गया!",
+        verified: "सत्यापित",
+        verified_seller: "सत्यापित विक्रेता",
         contact_hidden: "संपर्क छिपा हुआ है",
         upgrade_premium: "संपर्क विवरण देखने के लिए प्रीमियम में अपग्रेड करें।",
         unlock_access: "एक्सेस अनलॉक करें",
