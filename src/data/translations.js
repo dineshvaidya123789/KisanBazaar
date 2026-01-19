@@ -1472,6 +1472,15 @@ export const translations = {
         want_to_buy: "खरेदी करायचे आहे",
         want_to_sell: "विक्री करायचे आहे",
 
+        // Alerts (Marathi)
+        notify_me_tooltip: "नवीन लिस्टिंगसाठी मला सूचित करा",
+        set_alert_title: "सूचना सेट करा",
+        set_alert_desc: "जेव्हा हे पीक सूचीबद्ध होईल तेव्हा आम्ही तुम्हाला सूचित करू.",
+        set_alert_btn: "सूचना सेट करा",
+        alert_set_success: "{crop} साठी सूचना सेट केली!",
+        verified: "सत्यापित",
+        verified_seller: "सत्यापित विक्रेता",
+
         // Chaupal
         chaupal_title: "किसान चौपाल",
         chaupal_subtitle: "प्रश्न विचारा, ज्ञान सामायिक करा आणि सहकारी शेतकऱ्यांना मदत करा.",
