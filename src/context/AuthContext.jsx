@@ -64,9 +64,20 @@ export const AuthProvider = ({ children }) => {
 
     const setupRecaptcha = (phoneNumber) => {
         if (window.recaptchaVerifier) {
-            window.recaptchaVerifier.clear();
+            try {
+                window.recaptchaVerifier.clear();
+            } catch (error) {
+                console.warn("Error clearing existing recaptcha:", error);
+            }
             window.recaptchaVerifier = null;
         }
+
+        // Safety check: Manually clear the DOM container content
+        const container = document.getElementById('recaptcha-container');
+        if (container) {
+            container.innerHTML = '';
+        }
+
         const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
             'size': 'invisible',
             'callback': (response) => {

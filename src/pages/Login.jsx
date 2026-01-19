@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -15,6 +15,20 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const [confirmResult, setConfirmResult] = useState(null); // Store Firebase confirmation result
+
+    // Cleanup Recaptcha on unmount
+    useEffect(() => {
+        return () => {
+            if (window.recaptchaVerifier) {
+                try {
+                    window.recaptchaVerifier.clear();
+                } catch (error) {
+                    console.warn("Error clearing recaptcha on unmount:", error);
+                }
+                window.recaptchaVerifier = null;
+            }
+        };
+    }, []);
 
     const { login, verifyOtp, setupRecaptcha } = useAuth();
     const { t } = useLanguage();
