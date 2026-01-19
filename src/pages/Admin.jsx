@@ -10,8 +10,9 @@ const Admin = () => {
     const { user, loading } = useAuth();
     const { listings, deleteListing } = useMarket();
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('listings'); // 'listings' or 'alerts'
+    const [activeTab, setActiveTab] = useState('listings'); // 'listings', 'alerts', or 'users'
     const [alerts, setAlerts] = useState([]);
+    const [users, setUsers] = useState([]);
 
     // Fetch alerts from Firestore
     useEffect(() => {
@@ -22,6 +23,19 @@ const Admin = () => {
                 ...doc.data()
             }));
             setAlerts(alertsData);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    // Fetch users from Firestore
+    useEffect(() => {
+        const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const usersData = snapshot.docs.map(doc => ({
+                uid: doc.id,
+                ...doc.data()
+            }));
+            setUsers(usersData);
         });
         return () => unsubscribe();
     }, []);
@@ -100,6 +114,21 @@ const Admin = () => {
                         }}
                     >
                         🔔 Alerts ({alerts.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('users')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: activeTab === 'users' ? '3px solid #3b82f6' : '3px solid transparent',
+                            color: activeTab === 'users' ? '#3b82f6' : '#64748b',
+                            fontWeight: activeTab === 'users' ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            fontSize: '1rem'
+                        }}
+                    >
+                        👥 Users ({users.length})
                     </button>
                 </div>
 
@@ -231,6 +260,51 @@ const Admin = () => {
                                     <tr>
                                         <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
                                             No active alerts yet. Users can set alerts from the Marketplace page.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {activeTab === 'users' && (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead style={{ background: '#f8fafc', color: '#64748b', fontSize: '0.9rem' }}>
+                                <tr>
+                                    <th style={{ padding: '1rem' }}>Join Date</th>
+                                    <th style={{ padding: '1rem' }}>Name</th>
+                                    <th style={{ padding: '1rem' }}>Phone</th>
+                                    <th style={{ padding: '1rem' }}>Location</th>
+                                    <th style={{ padding: '1rem' }}>Listings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.length > 0 ? (
+                                    users.map(u => (
+                                        <tr key={u.uid} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                            <td style={{ padding: '1rem' }}>
+                                                {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
+                                            </td>
+                                            <td style={{ padding: '1rem', fontWeight: '500' }}>
+                                                {u.name || 'N/A'}
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                {u.phone}
+                                            </td>
+                                            <td style={{ padding: '1rem', color: '#475569' }}>
+                                                {u.city || 'N/A'}
+                                            </td>
+                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                {listings.filter(l => l.userId === u.uid).length}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                                            No users registered yet.
                                         </td>
                                     </tr>
                                 )}
