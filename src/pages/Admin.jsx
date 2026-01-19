@@ -170,6 +170,21 @@ const Admin = () => {
                     >
                         👥 Users ({users.length})
                     </button>
+                    <button
+                        onClick={() => setActiveTab('analytics')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: activeTab === 'analytics' ? '3px solid #3b82f6' : '3px solid transparent',
+                            color: activeTab === 'analytics' ? '#3b82f6' : '#64748b',
+                            fontWeight: activeTab === 'analytics' ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            fontSize: '1rem'
+                        }}
+                    >
+                        📊 Analytics
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
@@ -371,6 +386,88 @@ const Admin = () => {
                             </tbody>
                         </table>
                     </div>
+                ) : activeTab === 'analytics' ? (
+                <div style={{ padding: '2rem' }}>
+                    {/* Key Metrics */}
+                    <h3 style={{ marginBottom: '1.5rem', color: '#1e293b' }}>📊 Key Metrics</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+                        <div style={{ padding: '1.5rem', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Total Users</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1e40af' }}>{users.length}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#16a34a', marginTop: '0.5rem' }}>
+                                ✓ {users.filter(u => u.isVerified).length} Verified
+                            </div>
+                        </div>
+                        <div style={{ padding: '1.5rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Total Listings</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#166534' }}>{listings.length}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
+                                {listings.filter(l => l.type === 'Sell').length} Sell / {listings.filter(l => l.type === 'Buy').length} Buy
+                            </div>
+                        </div>
+                        <div style={{ padding: '1.5rem', background: '#fef3c7', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>Active Alerts</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#92400e' }}>{alerts.length}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
+                                Monitoring crops
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Popular Crops */}
+                    <h3 style={{ marginBottom: '1.5rem', color: '#1e293b' }}>🌾 Popular Crops</h3>
+                    <div style={{ background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
+                        {(() => {
+                            const cropCounts = {};
+                            listings.forEach(l => {
+                                const crop = l.commodity || l.title;
+                                if (crop) {
+                                    cropCounts[crop] = (cropCounts[crop] || 0) + 1;
+                                }
+                            });
+                            const sortedCrops = Object.entries(cropCounts)
+                                .sort((a, b) => b[1] - a[1])
+                                .slice(0, 10);
+
+                            const maxCount = sortedCrops[0]?.[1] || 1;
+
+                            return sortedCrops.length > 0 ? (
+                                <div>
+                                    {sortedCrops.map(([crop, count], index) => (
+                                        <div key={crop} style={{ marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                <span style={{ fontWeight: '500', color: '#334155' }}>
+                                                    {index + 1}. {crop}
+                                                </span>
+                                                <span style={{ color: '#64748b', fontSize: '0.9rem' }}>
+                                                    {count} listing{count > 1 ? 's' : ''}
+                                                </span>
+                                            </div>
+                                            <div style={{
+                                                height: '8px',
+                                                background: '#e2e8f0',
+                                                borderRadius: '4px',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <div style={{
+                                                    height: '100%',
+                                                    width: `${(count / maxCount) * 100}%`,
+                                                    background: `linear-gradient(90deg, #3b82f6, #2563eb)`,
+                                                    borderRadius: '4px',
+                                                    transition: 'width 0.3s ease'
+                                                }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>
+                                    No listings data available
+                                </div>
+                            );
+                        })()}
+                    </div>
+                </div>
                 ) : activeTab === 'users' ? (
                 <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
