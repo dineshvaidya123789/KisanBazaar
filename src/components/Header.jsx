@@ -386,29 +386,24 @@ const Header = () => {
                             onChange={(e) => setQuery(e.target.value)}
                             onFocus={() => setIsSearchFocused(true)}
                             onBlur={() => {
-                                // Increased timeout for mobile touch events
                                 setTimeout(() => setIsSearchFocused(false), 300);
                             }}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearchRaw()}
-                            className="header-search-input"
                             style={{
-                                flex: 1,
-                                border: 'none',
+                                flex: '1',
+                                border: '0',
                                 padding: '0 12px',
-                                outline: 'none',
+                                outline: '0',
                                 fontSize: '16px',
                                 minWidth: '0',
                                 height: '100%',
-                                backgroundColor: '#ffffff',
-                                color: '#000000',
-                                WebkitTextFillColor: '#000000',
-                                textFillColor: '#000000',
+                                background: '#fff',
+                                color: '#000',
+                                fontWeight: '600',
+                                fontFamily: 'Arial, sans-serif',
+                                WebkitTextFillColor: '#000',
                                 WebkitAppearance: 'none',
-                                MozAppearance: 'none',
-                                appearance: 'none',
-                                opacity: 1,
-                                fontWeight: '500',
-                                fontFamily: 'system-ui, -apple-system, sans-serif'
+                                MozAppearance: 'none'
                             }}
                         />
 
