@@ -255,7 +255,7 @@ const QuickCard = ({ title, icon, link, color, children }) => {
     };
 
     return (
-        <a href={link} style={{ textDecoration: 'none', color: 'inherit', height: '100%', display: 'block' }}>
+        <Link to={link} style={{ textDecoration: 'none', color: 'inherit', height: '100%', display: 'block' }}>
             <div className="card" style={{
                 backgroundColor: lightColors[color] || 'white',
                 padding: '1rem',
@@ -277,7 +277,7 @@ const QuickCard = ({ title, icon, link, color, children }) => {
                     </div>
                 )}
             </div>
-        </a>
+        </Link>
     );
 };
 
