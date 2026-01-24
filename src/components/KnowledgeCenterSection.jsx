@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
 const KnowledgeCenterSection = () => {
@@ -50,7 +51,7 @@ const KnowledgeCenterSection = () => {
                             Protect your Wheat and Gram crops from frost and pest attacks this winter.
                         </p>
                     </div>
-                    <a href="/news" className="btn-outline" style={{ display: 'inline-block', width: '100%', textAlign: 'center' }}>{t('read_more')}</a>
+                    <Link to="/news" className="btn-outline" style={{ display: 'inline-block', width: '100%', textAlign: 'center' }}>{t('read_more')}</Link>
                 </div>
 
                 {/* Community / Social Card */}

@@ -219,7 +219,7 @@ const Home = () => {
                                 Protect your Wheat and Gram crops from frost and pest attacks this winter.
                             </p>
                         </div>
-                        <a href="/news" className="btn-outline" style={{ display: 'inline-block', width: '100%', textAlign: 'center' }}>{t('read_more')}</a>
+                        <Link to="/news" className="btn-outline" style={{ display: 'inline-block', width: '100%', textAlign: 'center' }}>{t('read_more')}</Link>
                     </div>
 
                     <div className="card" style={{ padding: '1rem', backgroundColor: '#E8F5E9', border: '1px solid #C8E6C9' }}>
