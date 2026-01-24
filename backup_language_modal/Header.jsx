@@ -18,7 +18,7 @@ const Header = () => {
     const [activeMobileSubmenu, setActiveMobileSubmenu] = useState(null); // Track open submenu on mobile
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const { language, t, changeLanguage, openLanguageModal } = useLanguage();
+    const { language, t, changeLanguage } = useLanguage();
     const { alerts, unreadCount, markAsRead, clearAll } = useAlerts();
 
     const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -34,13 +34,6 @@ const Header = () => {
         setIsMobileMenuOpen(false);
         setActiveMobileSubmenu(null);
         setIsAlertOpen(false); // Close alert dropdown when navigating
-    };
-
-    // Language display mapping
-    const languageDisplay = {
-        'en': 'EN',
-        'hi': 'हिं',
-        'mr': 'मर'
     };
 
     return (
@@ -117,38 +110,31 @@ const Header = () => {
                     </div>
 
                     {/* Right side actions */}
-                    <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                        {/* Clean Language Indicator - Opens Modal */}
-                        <button
-                            onClick={openLanguageModal}
-                            style={{
-                                background: 'linear-gradient(135deg, #f8fafc 0%, #e8f5e9 100%)',
-                                border: '2px solid #c8e6c9',
-                                padding: '6px 12px',
-                                borderRadius: '12px',
-                                cursor: 'pointer',
-                                fontSize: '0.75rem',
-                                fontWeight: 'bold',
-                                color: '#2e7d32',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                transition: 'all 0.2s',
-                                boxShadow: '0 2px 4px rgba(46, 125, 50, 0.1)'
-                            }}
-                            title="Change Language"
-                            onMouseEnter={(e) => {
-                                e.target.style.transform = 'translateY(-2px)';
-                                e.target.style.boxShadow = '0 4px 8px rgba(46, 125, 50, 0.2)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.target.style.transform = 'translateY(0)';
-                                e.target.style.boxShadow = '0 2px 4px rgba(46, 125, 50, 0.1)';
-                            }}
-                        >
-                            <span>🌐</span>
-                            <span>{languageDisplay[language]}</span>
-                        </button>
+                    <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                        {/* Language Switcher */}
+                        <div style={{ display: 'flex', gap: '2px', backgroundColor: '#f1f5f9', padding: '2px', borderRadius: '12px' }}>
+                            {['en', 'hi', 'mr'].map((lang) => (
+                                <button
+                                    key={lang}
+                                    onClick={() => changeLanguage(lang)}
+                                    style={{
+                                        padding: '4px 6px',
+                                        fontSize: '0.6rem',
+                                        fontWeight: '800',
+                                        borderRadius: '10px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        backgroundColor: language === lang ? 'var(--color-primary)' : 'transparent',
+                                        color: language === lang ? 'white' : '#64748b',
+                                        transition: 'all 0.2s',
+                                        textTransform: 'uppercase',
+                                        minWidth: '24px' // Smaller buttons
+                                    }}
+                                >
+                                    {lang === 'en' ? 'EN' : lang === 'hi' ? 'हिं' : 'मरा'}
+                                </button>
+                            ))}
+                        </div>
 
                         {/* Notification Bell */}
                         <div style={{ position: 'relative' }}>
@@ -362,7 +348,7 @@ const Header = () => {
                     flex: '1 1 300px',
                     maxWidth: '500px',
                     margin: '0 auto',
-                    zIndex: 9999
+                    zIndex: 1002
                 }}>
                     <div style={{
                         display: 'flex',
@@ -385,11 +371,9 @@ const Header = () => {
                             onChange={(e) => setQuery(e.target.value)}
                             onFocus={() => setIsSearchFocused(true)}
                             onBlur={() => {
-                                // Increased timeout for mobile touch events
-                                setTimeout(() => setIsSearchFocused(false), 300);
+                                setTimeout(() => setIsSearchFocused(false), 200);
                             }}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearchRaw()}
-                            className="header-search-input"
                             style={{
                                 flex: 1,
                                 border: 'none',
@@ -398,7 +382,8 @@ const Header = () => {
                                 fontSize: '0.95rem',
                                 minWidth: '0',
                                 height: '100%',
-                                backgroundColor: 'transparent'
+                                backgroundColor: 'transparent',
+                                color: '#1e293b'
                             }}
                         />
 
@@ -528,7 +513,7 @@ const Header = () => {
                             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                             border: '1px solid #e2e8f0',
                             overflow: 'hidden',
-                            zIndex: 9998
+                            zIndex: 1003
                         }}>
                             {suggestions.map((s, idx) => (
                                 <div
@@ -537,8 +522,6 @@ const Header = () => {
                                         setSearchMode(s.type);
                                         handleSearchRaw(s.term, s.type, s.subtype, s.modeOverride); // Pass modeOverride
                                     }}
-                                    onMouseDown={(e) => e.preventDefault()} // Prevent input blur on click
-                                    onTouchStart={(e) => e.preventDefault()} // Prevent input blur on touch
                                     style={{
                                         padding: '10px 15px',
                                         cursor: 'pointer',

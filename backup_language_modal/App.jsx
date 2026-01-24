@@ -37,7 +37,6 @@ const FPORegistration = lazy(() => import('./pages/FPORegistration'));
 const TradeArea = lazy(() => import('./pages/TradeArea'));
 import ConsentBanner from './components/ConsentBanner';
 import InstallPrompt from './components/InstallPrompt';
-import LanguageSelectionModal from './components/LanguageSelectionModal';
 
 // Loading component
 const PageLoader = () => (
@@ -69,7 +68,6 @@ function App() {
     <ErrorBoundary>
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header />
-        <LanguageSelectionModal />
         <main style={{ flex: 1 }}>
           <Suspense fallback={<PageLoader />}>
             <Routes>

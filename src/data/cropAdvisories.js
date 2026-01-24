@@ -236,6 +236,33 @@ export const cropDatabase = {
                 messageHindi: 'तेज हवा से लंबे पौधे क्षतिग्रस्त हो सकते हैं। जरूरत पर सहारा दें।'
             }
         }
+    },
+
+    mushroom: {
+        name: 'Mushroom',
+        nameHindi: 'मशरूम',
+        icon: '🍄',
+        optimalTemp: { min: 18, max: 28 },
+        criticalTemp: { min: 10, max: 32 },
+        waterNeeds: 'High (80-90% Humidity)',
+        season: 'Year-round (Controlled)',
+        advisories: {
+            highTemp: {
+                icon: '🌡️',
+                message: 'Temp > 28°C invites Green Mold. Ensure proper ventilation and cooling.',
+                messageHindi: '28°C से ऊपर तापमान से ग्रीन मोल्ड हो सकता है। उचित वेंटिलेशन सुनिश्चित करें।'
+            },
+            humidity: {
+                icon: '💧',
+                message: 'Maintain 80-90% humidity. Low humidity dries out pins. Spray water on floor/walls.',
+                messageHindi: '80-90% नमी बनाए रखें। कम नमी से पिन सूख जाते हैं। फर्श/दीवारों पर पानी छिड़कें।'
+            },
+            general: {
+                icon: '💡',
+                message: 'Harvest 20-30 days after spawning. Maintain hygiene to prevent mites. Pro Tip: Proper air circulation increases yield.',
+                messageHindi: 'स्पॉनिंग के 20-30 दिन बाद कटाई करें। स्वच्छता बनाए रखें। प्रो टिप: हवा का आवागमन उपज बढ़ाता है।'
+            }
+        }
     }
 };
 

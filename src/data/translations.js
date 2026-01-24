@@ -55,6 +55,7 @@ export const translations = {
         // Home Hero
         hero_title: "Fast & Reliable Marketplace for Farmers",
         hero_subtitle: "Direct connection between Farmers & Buyers. No Middlemen.",
+        marketplace_title: "Kisan Marketplace",
         i_am_farmer: "🚜 Sell Your Crop",
         i_am_buyer: "🛒 Buy Fresh Produce",
 
@@ -165,6 +166,11 @@ export const translations = {
         back_to_home: "Back to Home",
 
         // Commodities
+        mushroom: "Mushroom",
+        button_mushroom: "Button Mushroom",
+        oyster_mushroom: "Oyster Mushroom",
+        dry_mushroom: "Dry Mushroom",
+        sweet_watermelon: "Sweet Watermelon",
         wheat: "Wheat",
         listing_type_locked: "Listing type cannot be changed while editing",
         agree_terms: "I agree with Terms And Conditions",
@@ -181,6 +187,11 @@ export const translations = {
         return_home: "🏠 Return to Home",
         clear_all: "Clear All",
         no_new_alerts: "No new alerts",
+
+        // Auth Errors
+        error_send_otp: "Failed to send OTP. Please verify your number and try again.",
+        error_verify_otp: "Invalid OTP. Please check via SMS.",
+        error_invalid_phone: "Please enter a valid 10-digit number.",
 
         // Seller Directory
         find_sellers_desc: "Find buyers & sellers in your district.",
@@ -672,6 +683,7 @@ export const translations = {
         // Home Hero
         hero_title: "किसानों के लिए तेज़ और विश्वसनीय बाज़ार",
         hero_subtitle: "किसानों और खरीदारों के बीच सीधा संपर्क। कोई बिचौलिया नहीं।",
+        marketplace_title: "किसान बाज़ार",
         i_am_farmer: "🚜 अपनी फसल बेचें",
         i_am_buyer: "🛒 फसल खरीदें",
 
@@ -782,6 +794,11 @@ export const translations = {
         back_to_home: "होम पर वापस जाएं",
 
         // Commodities
+        mushroom: "मशरूम",
+        button_mushroom: "बटन मशरूम",
+        oyster_mushroom: "ऑयस्टर मशरूम",
+        dry_mushroom: "सूखा मशरूम",
+        sweet_watermelon: "मीठा तरबूज",
         wheat: "गेहूं",
         listing_type_locked: "संपादन करते समय लिस्टिंग प्रकार नहीं बदला जा सकता",
         agree_terms: "मैं नियमों और शर्तों से सहमत हूँ",
@@ -1200,6 +1217,11 @@ export const translations = {
         location_permission_denied: "स्थान अनुमति अस्वीकृत। कृपया स्थान एक्सेस की अनुमति दें",
         location_timeout: "स्थान अनुरोध का समय समाप्त। कृपया पुनः प्रयास करें या मैन्युअल रूप से चुनें।",
         location_unavailable: "स्थान का पता लगाने में असमर्थ। कृपया मैन्युअल रूप से चुनें।",
+
+        // Auth Errors
+        error_send_otp: "ओटीपी भेजने में विफल। कृपया अपना नंबर जांचें और पुनः प्रयास करें।",
+        error_verify_otp: "अमान्य ओटीपी। कृपया एसएमएस जांचें।",
+        error_invalid_phone: "कृपया एक मान्य 10-अंकीय नंबर दर्ज करें।",
     },
     mr: {
         // Navigation
@@ -1249,6 +1271,7 @@ export const translations = {
         // Home Hero
         hero_title: "शेतकऱ्यांसाठी जलद आणि विश्वसनीय बाजारपेठ",
         hero_subtitle: "शेतकरी आणि खरेदीदार यांच्यात थेट संबंध. कोणताही मध्यस्थ नाही.",
+        marketplace_title: "किसान बाजार",
         i_am_farmer: "🚜 तुमचे पीक विका",
         i_am_buyer: "🛒 ताजे उत्पादन खरेदी करा",
 
@@ -1358,6 +1381,11 @@ export const translations = {
         back_to_home: "होमवर परत जा",
 
         // Commodities
+        mushroom: "मशरूम",
+        button_mushroom: "बटन मशरूम",
+        oyster_mushroom: "ऑयस्टर मशरूम",
+        dry_mushroom: "सुक्या मशरूम",
+        sweet_watermelon: "गोड कलिंगड",
         wheat: "गहू",
         listing_type_locked: "संपादन करताना सूची प्रकार बदलला जाऊ शकत नाही",
         agree_terms: "मी नियम आणि अटींशी सहमत आहे",
@@ -1853,5 +1881,10 @@ export const translations = {
         label_enter_otp: "ओटीपी प्रविष्ट करा",
         placeholder_otp: "उदा. 1234",
         mock_otp_msg: "(मॉक ओटीपी वापरा: 1234)",
+
+        // Auth Errors
+        error_send_otp: "ओटीपी पाठविण्यात अयशस्वी. कृपया आपला नंबर तपासा आणि पुन्हा प्रयत्न करा.",
+        error_verify_otp: "अवैध ओटीपी. कृपया एसएमएस तपासा.",
+        error_invalid_phone: "कृपया एक वैध 10-अंकी क्रमांक प्रविष्ट करा.",
     }
 };

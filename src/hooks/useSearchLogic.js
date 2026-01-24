@@ -91,11 +91,43 @@ export const useSearchLogic = () => {
         const lowerQuery = query.toLowerCase();
         let newSuggestions = [];
 
-        // 1. CROP MATCHING
+        // 1. CROP MATCHING (Dynamic from COMMODITIES)
         const matchedCrops = new Set();
 
-        // Loop through ALL known English crops
+        COMMODITIES.forEach(comm => {
+            // Check En, Hi, Mr, Tags
+            const validTerms = [
+                comm.en,
+                comm.hi,
+                comm.mr,
+                ...(comm.id ? [comm.id] : []), // Also check ID
+                ...(comm.tags || [])
+            ];
+
+            // Also add synonyms from searchMapping for English name
+            const mappedSynonyms = getSearchSynonyms(comm.en);
+            // Merge them into validTerms (avoiding dups if possible, but harmless)
+            // Check if ANY term matches query
+
+            // Combined set of terms to check against query
+            const allTermsToCheck = new Set([...validTerms, ...mappedSynonyms]);
+
+            const isMatch = Array.from(allTermsToCheck).some(term => {
+                if (!term) return false;
+                const t = term.toLowerCase();
+                // Direct inclusion or Fuzzy
+                return t.includes(lowerQuery) || lowerQuery.includes(t) || isFuzzyMatch(lowerQuery, t, 1);
+            });
+
+            if (isMatch) matchedCrops.add(comm.en);
+        });
+
+        // Loop through ALL known English crops (Legacy/Hardcoded support if items are missing in COMMODITIES)
+        // Kept as fallback, but COMMODITIES should be primary.
         EXPANDED_CROPS.forEach(crop => {
+            // Skip if already found via COMMODITIES
+            if (matchedCrops.has(crop)) return;
+
             const cropVariants = getSearchSynonyms(crop);
             const isMatch = cropVariants.some(variant => {
                 const v = variant.toLowerCase();

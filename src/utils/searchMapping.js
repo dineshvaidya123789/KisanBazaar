@@ -592,6 +592,54 @@ export const commodityMapping = {
     'नारळ': 'coconut',
     'सुपारी': 'arecanut',
     'काजू': 'cashew nut',
+
+    // Mushrooms
+    'khumb': 'mushroom',
+    'mashrum': 'mushroom',
+    'dhingri': 'oyster mushroom',
+    'batan mashrum': 'button mushroom',
+    'button': 'button mushroom',
+    'oyster': 'oyster mushroom',
+    'dry mushroom': 'dry mushroom',
+    'sukha mushroom': 'dry mushroom',
+    'सूखा मशरूम': 'dry mushroom',
+    'बटन मशरूम': 'button mushroom',
+    'ऑयस्टर मशरूम': 'oyster mushroom',
+
+    // Grapes
+    'angur': 'grapes',
+    'angoor': 'grapes',
+    'draksh': 'grapes',
+    'draksha': 'grapes',
+    'अंगूर': 'grapes',
+    'द्राक्षे': 'grapes',
+    'grape': 'grapes',
+
+    // Watermelon
+    'tarbuj': 'watermelon',
+    'tarbooz': 'watermelon',
+    'kalingad': 'watermelon',
+    'तरबूज': 'watermelon',
+    'कलिंगड': 'watermelon',
+    'tarbhuj': 'watermelon',
+
+    // Sweet Watermelon
+    'sweet watermelon': 'sweet watermelon',
+    'mitha tarbuj': 'sweet watermelon',
+    'god kalingad': 'sweet watermelon',
+    'मीठा तरबूज': 'sweet watermelon',
+    'गोड कलिंगड': 'sweet watermelon',
+    'sweet tarbuj': 'sweet watermelon',
+
+    // Mango
+    'aam': 'mango',
+    'amba': 'mango',
+    'hapus': 'mango',
+    'alphonso': 'mango',
+    'आम': 'mango',
+    'आंबा': 'mango',
+    'kesar': 'mango',
+    'dasheri': 'mango',
 };
 
 /**

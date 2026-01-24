@@ -39,7 +39,7 @@ const Footer = () => {
 
                 <div>
                     <h4 style={{ color: 'var(--color-secondary)', marginBottom: 'var(--spacing-md)' }}>{t('contact_us')}</h4>
-                    <p style={{ marginBottom: '8px' }}>{t('email')}: support@kisanbazaar.com</p>
+                    <p style={{ marginBottom: '8px' }}>{t('email')}: kisanbazzar.helpdesk@gmail.com</p>
                     <p style={{ marginBottom: '8px' }}>{t('phone')}: +91 99879 17394</p>
                     <p>{t('address')}</p>
                 </div>

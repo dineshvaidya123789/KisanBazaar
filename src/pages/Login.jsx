@@ -16,19 +16,25 @@ const Login = () => {
 
     const [confirmResult, setConfirmResult] = useState(null); // Store Firebase confirmation result
 
-    // Cleanup Recaptcha on unmount
+    // Initialize Recaptcha ONCE on mount
     useEffect(() => {
+        try {
+            setupRecaptcha();
+        } catch (e) {
+            console.warn("Recaptcha Init Warning:", e);
+        }
+
         return () => {
             if (window.recaptchaVerifier) {
                 try {
                     window.recaptchaVerifier.clear();
                 } catch (error) {
-                    console.warn("Error clearing recaptcha on unmount:", error);
+                    console.warn("Recaptcha Cleanup Warning:", error);
                 }
                 window.recaptchaVerifier = null;
             }
         };
-    }, []);
+    }, []); // Run once on mount
 
     const { login, verifyOtp, setupRecaptcha, createUser } = useAuth();
     const { t } = useLanguage();
@@ -38,9 +44,44 @@ const Login = () => {
 
     const from = location.state?.from?.pathname || '/';
 
-    // ... helper ...
+    const normalizeNumerals = (input) => {
+        const devanagari = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+        return input.split('').map(char => {
+            const index = devanagari.indexOf(char);
+            return index > -1 ? index : char;
+        }).join('');
+    };
 
-    // ... handleSendOtp ...
+    const handleSendOtp = async (e) => {
+        e.preventDefault();
+        setError('');
+        if (phone.length < 10) {
+            setError(t('error_invalid_phone') || "Please enter a valid 10-digit number.");
+            return;
+        }
+        setIsLoading(true);
+        try {
+            // Use existing verifier or create if missing
+            let appVerifier = window.recaptchaVerifier;
+            if (!appVerifier) {
+                appVerifier = setupRecaptcha();
+            }
+
+            const confirmation = await login(phone, appVerifier);
+            setConfirmResult(confirmation);
+            setStep(2);
+        } catch (err) {
+            console.error(err);
+            setError(`Error: ${err.code || err.message || "Failed to send OTP"}`);
+            // Don't clear verifier here, keep it for retry. 
+            // Just reset if needed (invisible recaptcha resets auto usually)
+            if (window.recaptchaVerifier && window.recaptchaVerifier.reset) {
+                // usage of reset is vague for invisible, but harmless
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleVerifyOtp = async (e) => {
         e.preventDefault();

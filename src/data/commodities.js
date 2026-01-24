@@ -33,6 +33,7 @@ export const COMMODITIES = [
     { id: 'pomegranate', en: 'Pomegranate', hi: 'अनार', mr: 'डाळिंब', category: 'Fruits', unit: 'Kg', icon: '🍎', tags: ['anaar', 'dalimb', 'pomegranate'] },
     { id: 'papaya', en: 'Papaya', hi: 'पपीता', mr: 'पपई', category: 'Fruits', unit: 'Kg', icon: '🍈', tags: ['papita', 'papai', 'papaya'] },
     { id: 'watermelon', en: 'Watermelon', hi: 'तरबूज', mr: 'टरबूज', category: 'Fruits', unit: 'Kg', icon: '🍉', tags: ['tarbuj', 'tarbhuj', 'watermelon'] },
+    { id: 'sweet_watermelon', en: 'Sweet Watermelon', hi: 'मीठा तरबूज', mr: 'गोड कलिंगड', category: 'Fruits', unit: 'Kg', icon: '🍉', tags: ['sweet watermelon', 'mitha tarbuj', 'god kalingad'] },
     { id: 'guava', en: 'Guava', hi: 'अमरूद', mr: 'पेरू', category: 'Fruits', unit: 'Kg', icon: '🍐', tags: ['amrud', 'peru', 'guava'] },
     { id: 'lemon', en: 'Lemon', hi: 'नींबू', mr: 'लिंबू', category: 'Fruits', unit: 'Kg', icon: '🍋', tags: ['nimbu', 'limbu', 'lemon'] },
 
@@ -56,6 +57,12 @@ export const COMMODITIES = [
     { id: 'groundnut', en: 'Groundnut', hi: 'मूंगफली', mr: 'शेंगदाणा', category: 'Oilseeds', unit: 'Quintal', icon: '🥜', tags: ['mungfali', 'shengdana', 'groundnut', 'peanut'] },
     { id: 'mustard', en: 'Mustard', hi: 'सरसों', mr: 'मोहरी', category: 'Oilseeds', unit: 'Quintal', icon: '🌱', tags: ['sarson', 'mohari', 'mustard'] },
     { id: 'sunflower', en: 'Sunflower', hi: 'सूरजमुखी', mr: 'सूर्यफूल', category: 'Oilseeds', unit: 'Quintal', icon: '🌻', tags: ['surajmukhi', 'suryaphul', 'sunflower'] },
+
+    // Mushrooms
+    { id: 'mushroom', en: 'Mushroom', hi: 'मशरूम', mr: 'मशरूम', category: 'Mushrooms', unit: 'Kg', icon: '🍄', tags: ['mushroom', 'mashrum', 'khumb'] },
+    { id: 'button_mushroom', en: 'Button Mushroom', hi: 'बटन मशरूम', mr: 'बटन मशरूम', category: 'Mushrooms', unit: 'Kg', icon: '🍄', tags: ['button mushroom', 'batan mashrum'] },
+    { id: 'oyster_mushroom', en: 'Oyster Mushroom', hi: 'ऑयस्टर मशरूम', mr: 'ऑयस्टर मशरूम', category: 'Mushrooms', unit: 'Kg', icon: '🍄', tags: ['oyster mushroom', 'dhingri'] },
+    { id: 'dry_mushroom', en: 'Dry Mushroom', hi: 'सूखा मशरूम', mr: 'सुक्या मशरूम', category: 'Mushrooms', unit: 'Kg', icon: '🍄', tags: ['dry mushroom', 'sukha mashrum', 'sukya mashrum'] },
 
     // Cash Crops
     { id: 'cotton', en: 'Cotton', hi: 'कपास', mr: 'कापूस', category: 'Cash Crops', unit: 'Quintal', icon: '☁️', tags: ['kapaas', 'kapus', 'cotton'] },

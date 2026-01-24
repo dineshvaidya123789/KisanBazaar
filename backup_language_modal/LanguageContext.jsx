@@ -8,12 +8,6 @@ export const LanguageProvider = ({ children }) => {
         return localStorage.getItem('kb_language') || 'en';
     });
 
-    // Modal state - show on first visit or when manually triggered
-    const [showLanguageModal, setShowLanguageModal] = useState(() => {
-        const hasSelected = localStorage.getItem('kisan_bazaar_language_selected');
-        return !hasSelected; // Show modal if user hasn't selected language yet
-    });
-
     useEffect(() => {
         localStorage.setItem('kb_language', language);
     }, [language]);
@@ -28,23 +22,8 @@ export const LanguageProvider = ({ children }) => {
         }
     };
 
-    const openLanguageModal = () => {
-        setShowLanguageModal(true);
-    };
-
-    const closeLanguageModal = () => {
-        setShowLanguageModal(false);
-    };
-
     return (
-        <LanguageContext.Provider value={{
-            language,
-            t,
-            changeLanguage,
-            showLanguageModal,
-            openLanguageModal,
-            closeLanguageModal
-        }}>
+        <LanguageContext.Provider value={{ language, t, changeLanguage }}>
             {children}
         </LanguageContext.Provider>
     );

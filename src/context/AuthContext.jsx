@@ -22,8 +22,6 @@ export const AuthProvider = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
                 // User is signed in.
-                // You can fetch additional user details from Firestore here if needed.
-                // For now, we'll create a user object based on the phone number.
                 const phoneNumber = firebaseUser.phoneNumber;
 
                 // Hardcoded Admin Access for your number
@@ -33,9 +31,22 @@ export const AuthProvider = ({ children }) => {
                     role = 'Admin';
                 }
 
-                const userRef = doc(db, 'users', firebaseUser.uid);
+                // 1. Optimistic Update - Unlock UI Immediately
+                setUser({
+                    uid: firebaseUser.uid,
+                    phone: phoneNumber,
+                    role: role,
+                    name: role === 'Admin' ? "Administrator" : "Kisan User",
+                    isVerified: false,
+                    onboardingCompleted: false,
+                    city: '',
+                    interests: [],
+                    avatar: `https://ui-avatars.com/api/?name=${role}&background=${role === 'Admin' ? '000000' : '4CAF50'}&color=fff`
+                });
+                setLoading(false); // <--- CRITICAL: Allow App to Render
 
-                // Fetch profile
+                // 2. Fetch/Create Profile Asynchronously
+                const userRef = doc(db, 'users', firebaseUser.uid);
                 getDoc(userRef).then(async (docSnap) => {
                     let profileData = {};
 
@@ -61,23 +72,29 @@ export const AuthProvider = ({ children }) => {
                         }
                     }
 
-                    setUser({
-                        uid: firebaseUser.uid,
-                        phone: phoneNumber,
-                        name: profileData.name || (role === 'Admin' ? "Administrator" : "Kisan User"),
-                        role: profileData.role || role,
-                        isVerified: true,
-                        city: profileData.city || '',
-                        interests: profileData.interests || [],
-                        onboardingCompleted: profileData.onboardingCompleted || false,
-                        avatar: profileData.avatar || `https://ui-avatars.com/api/?name=${role}&background=${role === 'Admin' ? '000000' : '4CAF50'}&color=fff`
+                    // Update state with rich profile data ensuring we don't overwrite if user logged out
+                    setUser(prev => {
+                        if (!prev || prev.uid !== firebaseUser.uid) return prev;
+                        return {
+                            ...prev,
+                            ...profileData,
+                            // Ensure defaults if missing in DB
+                            name: profileData.name || prev.name,
+                            role: profileData.role || prev.role,
+                            city: profileData.city || prev.city,
+                            interests: profileData.interests || prev.interests
+                        };
                     });
+                }).catch(err => {
+                    console.error("Error fetching user profile:", err);
+                    // No UI action needed, we already showed optimistic state
                 });
+
             } else {
                 // User is signed out.
                 setUser(null);
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         // Cleanup subscription on unmount
@@ -112,7 +129,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = async (phone, appVerifier) => {
-        const formatPh = "+91 " + phone; // Added space to match Console format
+        const formatPh = "+91" + phone; // standardized format (E.164)
         console.log("DEBUG: Sending OTP to:", formatPh); // Debugging log
         try {
             const confirmationResult = await signInWithPhoneNumber(auth, formatPh, appVerifier);
@@ -165,6 +182,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateProfile = (updatedData) => {
+        // In a real app, update this in Firestore
+        // For now, update local state
+        setUser(prev => ({ ...prev, ...updatedData }));
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -180,4 +203,3 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
-
