@@ -121,7 +121,7 @@ const Home = () => {
                     padding: '0 1rem'
                 }}>
                     <QuickCard title={t('quick_todays_rate')} icon="📈" link="/rates" color="#ef6c00">
-                        <div style={{ fontSize: '0.9rem', textAlign: 'left', color: '#555', padding: '0.5rem', borderRadius: '8px', marginTop: '0.3rem' }}>
+                        <div style={{ fontSize: '0.85rem', textAlign: 'left', color: '#555', padding: '0.5rem', borderRadius: '8px', marginTop: '0.3rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
                                 <span>{t('wheat')}</span>
                                 <span style={{ fontWeight: 'bold' }}>₹2450</span>
@@ -135,39 +135,39 @@ const Home = () => {
                                 <span style={{ fontWeight: 'bold' }}>₹1800</span>
                             </div>
                             {!user && (
-                                <div style={{ marginTop: '0.4rem', paddingTop: '0.4rem', borderTop: '1px dashed #ccc', fontSize: '0.8rem', color: '#d32f2f', fontWeight: 'bold' }}>
+                                <div style={{ marginTop: '0.4rem', paddingTop: '0.4rem', borderTop: '1px dashed #ccc', fontSize: '0.75rem', color: '#d32f2f', fontWeight: 'bold' }}>
                                     {t('login_for_rates')}
                                 </div>
                             )}
                         </div>
                     </QuickCard>
                     <QuickCard title={t('quick_weather')} icon="🌦" link="/weather" color="#7b1fa2">
-                        <div style={{ fontSize: '0.75rem', lineHeight: '1.2', color: '#555', padding: '0.5rem', borderRadius: '8px', marginTop: '0.3rem', textAlign: 'left' }}>
+                        <div style={{ fontSize: '0.85rem', lineHeight: '1.3', color: '#555', padding: '0.5rem', borderRadius: '8px', marginTop: '0.3rem', textAlign: 'left' }}>
                             {t('weather_teaser_text')}
                         </div>
                     </QuickCard>
                     <QuickCard title={t('quick_farming_services')} icon="🚜" link="/transport" color="#2e7d32">
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', lineHeight: '1.2' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.3rem', lineHeight: '1.3', padding: '0 0.5rem' }}>
                             {t('desc_services')}
                         </div>
                     </QuickCard>
                     <QuickCard title={t('quick_smart_advisory')} icon="💡" link="/advisory" color="#1565c0">
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', lineHeight: '1.2' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.3rem', lineHeight: '1.3', padding: '0 0.5rem' }}>
                             {t('desc_advisory')}
                         </div>
                     </QuickCard>
                     <QuickCard title={t('quick_news')} icon="📰" link="/news" color="#d32f2f">
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', lineHeight: '1.2' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.3rem', lineHeight: '1.3', padding: '0 0.5rem' }}>
                             {t('desc_news')}
                         </div>
                     </QuickCard>
                     <QuickCard title={t('quick_chaupal')} icon="💬" link="/chaupal" color="#f57c00">
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', lineHeight: '1.2' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.3rem', lineHeight: '1.3', padding: '0 0.5rem' }}>
                             {t('desc_chaupal')}
                         </div>
                     </QuickCard>
                     <QuickCard title={t('quick_trade_area')} icon="🏘️" link="/trade-area" color="#0288d1">
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', lineHeight: '1.2' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.3rem', lineHeight: '1.3', padding: '0 0.5rem' }}>
                             {t('desc_trade_area')}
                         </div>
                     </QuickCard>
