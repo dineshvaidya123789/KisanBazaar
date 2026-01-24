@@ -13,7 +13,7 @@ import { HelmetProvider } from 'react-helmet-async';
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HelmetProvider>
-      <HashRouter>
+      <HashRouter basename="/KisanBazaar">
         <AuthProvider>
           <LanguageProvider>
             <AlertProvider>
