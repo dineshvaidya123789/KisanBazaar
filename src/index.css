@@ -212,21 +212,23 @@ button {
 input.header-search-input,
 header input.header-search-input,
 header input.header-search-input[type="text"] {
-  color: #1e293b !important;
-  -webkit-text-fill-color: #1e293b !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   opacity: 1 !important;
   font-size: 0.95rem !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 .header-search-input::placeholder,
 input.header-search-input::placeholder,
 header input.header-search-input::placeholder {
-  color: #94a3b8 !important;
-  -webkit-text-fill-color: #94a3b8 !important;
-  opacity: 1 !important;
+  color: #666666 !important;
+  -webkit-text-fill-color: #666666 !important;
+  opacity: 0.8 !important;
 }
+
 
 
 
@@ -552,20 +554,23 @@ header input.header-search-input::placeholder {
   .header-search-input,
   header .header-search-input,
   header input.header-search-input[type="text"] {
-    color: #1e293b !important;
-    -webkit-text-fill-color: #1e293b !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
     -webkit-appearance: none !important;
     appearance: none !important;
     opacity: 1 !important;
     font-size: 16px !important;
     /* Prevents zoom on iOS */
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
   }
 
   /* Ensure placeholder is also visible on mobile */
   .header-search-input::placeholder,
   header .header-search-input::placeholder {
-    color: #94a3b8 !important;
-    -webkit-text-fill-color: #94a3b8 !important;
+    color: #666666 !important;
+    -webkit-text-fill-color: #666666 !important;
     opacity: 0.7 !important;
   }
 

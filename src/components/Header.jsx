@@ -378,6 +378,7 @@ const Header = () => {
 
 
 
+
                         <input
                             type="text"
                             placeholder="Search crops, mandi rates, or weather..."
@@ -398,9 +399,17 @@ const Header = () => {
                                 fontSize: '0.95rem',
                                 minWidth: '0',
                                 height: '100%',
-                                backgroundColor: 'transparent'
+                                backgroundColor: 'transparent',
+                                color: '#000000',
+                                WebkitTextFillColor: '#000000',
+                                textFillColor: '#000000',
+                                WebkitAppearance: 'none',
+                                MozAppearance: 'none',
+                                appearance: 'none',
+                                opacity: 1
                             }}
                         />
+
 
                         {/* Clear Button (X) - Improved UX like Google */}
                         {query && (
