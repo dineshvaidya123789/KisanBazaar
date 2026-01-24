@@ -5,6 +5,11 @@ on:
     branches:
       - master
 
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 permissions:
   contents: read
   pages: write
