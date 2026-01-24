@@ -212,12 +212,15 @@ button {
 input.header-search-input,
 header input.header-search-input,
 header input.header-search-input[type="text"] {
+  background-color: #ffffff !important;
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   opacity: 1 !important;
-  font-size: 0.95rem !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  font-family: system-ui, -apple-system, sans-serif !important;
   -webkit-tap-highlight-color: transparent !important;
 }
 
@@ -554,6 +557,7 @@ header input.header-search-input::placeholder {
   .header-search-input,
   header .header-search-input,
   header input.header-search-input[type="text"] {
+    background-color: #ffffff !important;
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
     -webkit-appearance: none !important;
@@ -561,6 +565,8 @@ header input.header-search-input::placeholder {
     opacity: 1 !important;
     font-size: 16px !important;
     /* Prevents zoom on iOS */
+    font-weight: 500 !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
     -webkit-tap-highlight-color: transparent !important;
     -webkit-user-select: text !important;
     user-select: text !important;

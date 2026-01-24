@@ -396,17 +396,19 @@ const Header = () => {
                                 border: 'none',
                                 padding: '0 12px',
                                 outline: 'none',
-                                fontSize: '0.95rem',
+                                fontSize: '16px',
                                 minWidth: '0',
                                 height: '100%',
-                                backgroundColor: 'transparent',
+                                backgroundColor: '#ffffff',
                                 color: '#000000',
                                 WebkitTextFillColor: '#000000',
                                 textFillColor: '#000000',
                                 WebkitAppearance: 'none',
                                 MozAppearance: 'none',
                                 appearance: 'none',
-                                opacity: 1
+                                opacity: 1,
+                                fontWeight: '500',
+                                fontFamily: 'system-ui, -apple-system, sans-serif'
                             }}
                         />
 
