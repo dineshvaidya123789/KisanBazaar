@@ -33,6 +33,26 @@ export const newsData = {
                 image: "https://images.unsplash.com/photo-1599583733072-000c01d90610?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60"
             }
         ],
+        mhNews: [
+            {
+                id: 1,
+                title: "Onion Subsidy of ₹350 Announced",
+                daysAgo: 1,
+                description: "Maharashtra Govt has announced a subsidy of ₹350 per quintal for onion farmers to provide relief. The scheme will be implemented shortly.",
+                summary: "Subsidy of ₹350 per quintal for onion farmers.",
+                source: "Mahasul Vibhag",
+                tag: "New"
+            },
+            {
+                id: 2,
+                title: "Namo Shetkari Mahasanman Nidhi Installment Credited",
+                daysAgo: 2,
+                description: "The state government has started crediting the installment of ₹2000 under 'Namo Shetkari Mahasanman Nidhi' scheme to farmers' bank accounts.",
+                summary: "₹2000 installment of Namo Shetkari Yojana credited.",
+                source: "Maharashtra Govt",
+                tag: "Scheme"
+            }
+        ],
         centralNews: [
             {
                 id: 1,
@@ -86,6 +106,26 @@ export const newsData = {
                 image: "https://images.unsplash.com/photo-1599583733072-000c01d90610?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60"
             }
         ],
+        mhNews: [
+            {
+                id: 1,
+                title: "प्याज उत्पादक किसानों के लिए 350 रुपये अनुदान घोषित",
+                daysAgo: 1,
+                description: "महाराष्ट्र सरकार ने प्याज उत्पादक किसानों को राहत देने के लिए प्रति क्विंटल 350 रुपये अनुदान घोषित किया है। यह योजना जल्द ही लागू होगी।",
+                summary: "प्याज उत्पादकों के लिए प्रति क्विंटल 350 रुपये अनुदान।",
+                source: "Mahasul Vibhag",
+                tag: "New"
+            },
+            {
+                id: 2,
+                title: "नमो शेतकरी महासन्मान निधि की किस्त जमा",
+                daysAgo: 2,
+                description: "राज्य सरकार ने 'नमो शेतकरी महासन्मान निधि' योजना के तहत 2000 रुपये की किस्त किसानों के खातों में जमा करना शुरू कर दिया है।",
+                summary: "नमो शेतकरी योजना की 2000 रुपये की किस्त जमा।",
+                source: "Maharashtra Govt",
+                tag: "Scheme"
+            }
+        ],
         centralNews: [
             {
                 id: 1,
@@ -137,6 +177,26 @@ export const newsData = {
                 source: "Mandi Board",
                 tag: "Market",
                 image: "https://images.unsplash.com/photo-1599583733072-000c01d90610?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60"
+            }
+        ],
+        mhNews: [
+            {
+                id: 1,
+                title: "कांदा उत्पादक शेतकऱ्यांसाठी 350 रुपये अनुदान जाहीर",
+                daysAgo: 1,
+                description: "महाराष्ट्र सरकारने कांदा उत्पादक शेतकऱ्यांना दिलासा देण्यासाठी प्रति क्विंटल 350 रुपये अनुदान जाहीर केले आहे. ही योजना लवकरच लागू होईल.",
+                summary: "कांदा उत्पादकांसाठी प्रति क्विंटल 350 रुपये अनुदान.",
+                source: "Mahasul Vibhag",
+                tag: "New"
+            },
+            {
+                id: 2,
+                title: "नमो शेतकरी महासन्मान निधीचा हप्ता जमा",
+                daysAgo: 2,
+                description: "राज्य सरकारने 'नमो शेतकरी महासन्मान निधी' योजनेअंतर्गत 2000 रुपयांचा हप्ता शेतकऱ्यांच्या खात्यात जमा करण्यास सुरुवात केली आहे.",
+                summary: "नमो शेतकरी योजनेचा 2000 रुपयांचा हप्ता जमा.",
+                source: "Maharashtra Govt",
+                tag: "Scheme"
             }
         ],
         centralNews: [

@@ -46,6 +46,14 @@ const News = () => {
         }));
     }, [currentNews]);
 
+    // Process MH News with dates
+    const mhNews = useMemo(() => {
+        return (currentNews.mhNews || []).map(news => ({
+            ...news,
+            date: formatDate(news.daysAgo)
+        }));
+    }, [currentNews]);
+
     // Process Central News with dates
     const centralNews = useMemo(() => {
         return (currentNews.centralNews || []).map(news => ({
@@ -134,6 +142,13 @@ const News = () => {
                     style={{ flex: '1 1 auto', minWidth: '120px' }}
                 >
                     {t('tab_central_news')}
+                </button>
+                <button
+                    onClick={() => setActiveTab('mh')}
+                    className={`btn ${activeTab === 'mh' ? 'btn-primary' : 'btn-outline'}`}
+                    style={{ flex: '1 1 auto', minWidth: '120px' }}
+                >
+                    {t('tab_mh_news')}
                 </button>
                 <button
                     onClick={() => setActiveTab('schemes')}
@@ -252,6 +267,97 @@ const News = () => {
                                             <div style={{ display: 'flex', gap: '0.5rem', width: '100%', flexWrap: 'nowrap' }}>
                                                 <button
                                                     onClick={() => toggleNews(news.id)}
+                                                    className="btn-outline"
+                                                    style={{ flex: 1, fontSize: '0.8rem', padding: '0.4rem 0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {t('read_more')}
+                                                </button>
+                                                {news.readMoreUrl && (
+                                                    <a
+                                                        href={news.readMoreUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn-outline"
+                                                        style={{
+                                                            flex: 1,
+                                                            fontSize: '0.8rem',
+                                                            padding: '0.4rem 0.2rem',
+                                                            borderColor: 'var(--color-primary)',
+                                                            color: 'var(--color-primary)',
+                                                            textDecoration: 'none',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis'
+                                                        }}>
+                                                        {t('full_article')} 🔗
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {activeTab === 'mh' && (
+                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                        {mhNews.map(news => (
+                            <div key={news.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
+                                <div style={{ padding: '1.5rem' }}>
+                                    <div style={{ marginBottom: '0.5rem' }}>
+                                        <span style={{ backgroundColor: news.tag === 'New' ? '#ffebee' : '#e8f5e9', color: news.tag === 'New' ? '#c62828' : '#2e7d32', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '600' }}>
+                                            {news.tag}
+                                        </span>
+                                        <span style={{ marginLeft: '1rem', fontSize: '0.8rem', color: '#666' }}>{news.date}</span>
+                                    </div>
+                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', lineHeight: '1.4' }}>{news.title}</h3>
+
+                                    {/* Toggleable Content */}
+                                    {expandedNews[`mh-${news.id}`] ? ( // "mh-" prefix to avoid collision
+                                        <div className="fade-in">
+                                            <p style={{ color: '#555', marginBottom: '1rem' }}>{news.description}</p>
+                                            <div style={{ display: 'flex', gap: '0.5rem', width: '100%', flexWrap: 'nowrap' }}>
+                                                <button
+                                                    onClick={() => toggleNews(`mh-${news.id}`)}
+                                                    className="btn-outline"
+                                                    style={{ flex: 1, fontSize: '0.8rem', padding: '0.4rem 0.2rem', borderColor: '#666', color: '#666', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {t('read_less')}
+                                                </button>
+                                                {news.readMoreUrl && (
+                                                    <a
+                                                        href={news.readMoreUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn-outline"
+                                                        style={{
+                                                            flex: 1,
+                                                            fontSize: '0.8rem',
+                                                            padding: '0.4rem 0.2rem',
+                                                            borderColor: 'var(--color-primary)',
+                                                            color: 'var(--color-primary)',
+                                                            textDecoration: 'none',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis'
+                                                        }}>
+                                                        {t('full_article')} 🔗
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <p style={{ color: '#555', marginBottom: '1rem' }}>{news.summary}</p>
+                                            <div style={{ display: 'flex', gap: '0.5rem', width: '100%', flexWrap: 'nowrap' }}>
+                                                <button
+                                                    onClick={() => toggleNews(`mh-${news.id}`)}
                                                     className="btn-outline"
                                                     style={{ flex: 1, fontSize: '0.8rem', padding: '0.4rem 0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {t('read_more')}
