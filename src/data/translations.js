@@ -1860,7 +1860,7 @@ export const translations = {
         trending_down: "▼ मंदी (भाव पडले)",
         avg_price_fmt: "सरासरी: ₹{price} / {unit}",
         analysis_no_data: "विश्लेषणासाठी माहिती उपलब्ध नाही. कृपया आधी मंडी निवडा.",
-        close: "बंद करा",
+        // close: "बंद करा", // Removed duplicate
         search_btn: "भाव पहा (Search)",
         select_state_ph: "-- राज्य निवडा --",
         select_district_ph: "-- जिल्हा निवडा --",
@@ -1870,10 +1870,10 @@ export const translations = {
         safety_tip: "सुरक्षा टिप",
         warning_no_advance: "विक्रेत्यांना कधीही आगाऊ रक्कम देऊ नका. खरेदी करण्यापूर्वी नेहमी पिकाची पाहणी करा।",
         login_for_rates: "थेट दरांसाठी लॉगिन करा",
-        wheat: "गहू",
-        soybean: "सोयाबीन",
-        onion: "कांदा",
-        potato: "बटाटा",
+        // wheat: "गहू", // Removed duplicate
+        // soybean: "सोयाबीन", // Removed duplicate
+        // onion: "कांदा", // Removed duplicate
+        // potato: "बटाटा", // Removed duplicate
         weather_teaser_text: "जानेवारीमध्ये इंदूरचे तापमान दिवसा 24–28°C, रात्री 12–15°C, निरभ्र, पाऊस: 0%",
         desc_services: "ट्रॅक्टर, हार्व्हेस्टर, बियाणे, औषधे, वाहतूक यासारख्या कृषी सेवा भाड्याने घ्या किंवा द्या.",
         desc_advisory: "पेरणी, सिंचन आणि कीटक नियंत्रणासाठी वैयक्तिक सल्ला मिळवा.",
