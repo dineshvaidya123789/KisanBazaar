@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://kisanbazzar.co.in/sitemap.xml
