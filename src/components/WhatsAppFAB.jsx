@@ -1,12 +1,12 @@
 import React from 'react';
 
 const WhatsAppFAB = () => {
-    // const whatsappNumber = "919876543210"; // Placeholder number
+    // const whatsappNumber = "919987917394"; // Admin number
     // const message = "Hello, I have a query regarding Kisan Bazaar.";
 
     return (
         <a
-            href="https://wa.me/919876543210" // Replace with actual number
+            href="https://wa.me/919987917394" // Admin Contact Number
             target="_blank"
             rel="noopener noreferrer"
             style={{

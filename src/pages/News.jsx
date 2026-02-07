@@ -62,8 +62,10 @@ const News = () => {
         }));
     }, [currentNews]);
 
-    // Government schemes imported from centralized data
-    const schemes = allSchemes.filter(s => s.validUntil >= today);
+    // Filter schemes by state
+    const schemes = allSchemes.filter(s => s.validUntil >= today && s.state === 'central');
+    const mhSchemes = allSchemes.filter(s => s.validUntil >= today && s.state === 'mh');
+    const mpSchemes = allSchemes.filter(s => s.validUntil >= today && s.state === 'mp'); // For future use if needed
 
     return (
         <div style={{
@@ -305,6 +307,54 @@ const News = () => {
 
                 {activeTab === 'mh' && (
                     <div style={{ display: 'grid', gap: '1.5rem' }}>
+                        {/* MH Schemes Section */}
+                        {mhSchemes.length > 0 && (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#2E7D32', borderBottom: '2px solid #e0e0e0', paddingBottom: '0.5rem' }}>
+                                    {t('tab_schemes')} ({langCode === 'mh' ? 'महाराष्ट्र' : 'Maharashtra'})
+                                </h3>
+                                <div style={{ display: 'grid', gap: '1rem' }}>
+                                    {mhSchemes.map(scheme => (
+                                        <div key={scheme.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden', borderColor: scheme.color, borderLeft: `5px solid ${scheme.color}` }}>
+                                            <div style={{ padding: '1.5rem' }}>
+                                                <div style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                    <span style={{ backgroundColor: scheme.color + '1A', color: scheme.color, padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '600', marginRight: '0.5rem' }}>
+                                                        {scheme.title}
+                                                    </span>
+                                                    {isNewScheme(scheme.startDate) && (
+                                                        <span style={{ backgroundColor: '#ffebee', color: '#c62828', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '600', marginRight: '0.5rem' }}>
+                                                            {t('new_tag')}
+                                                        </span>
+                                                    )}
+                                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                                                        {langCode === 'hi' ? scheme.titleHi : (langCode === 'mr' ? scheme.titleMr || scheme.titleHi : scheme.title)}
+                                                    </span>
+                                                </div>
+                                                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', lineHeight: '1.4', color: '#333' }}>
+                                                    {langCode === 'en' ? scheme.benefit : (langCode === 'mr' ? scheme.benefitMr || scheme.benefitHi : scheme.benefitHi)}
+                                                </h3>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                    <span style={{ fontSize: '0.85rem', color: '#777' }}>
+                                                        {t('valid_until')}: {new Date(scheme.validUntil).toLocaleDateString(langCode === 'hi' ? 'hi-IN' : langCode === 'mr' ? 'mr-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </span>
+                                                    <a
+                                                        href={scheme.applyUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn-outline"
+                                                        style={{ fontSize: '0.9rem', padding: '0.4rem 1rem', borderColor: scheme.color, color: scheme.color, textDecoration: 'none', display: 'inline-block' }}
+                                                    >
+                                                        {scheme.applyText} 🔗
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* MH News Section */}
                         {mhNews.map(news => (
                             <div key={news.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
                                 <div style={{ padding: '1.5rem' }}>
