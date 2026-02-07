@@ -381,7 +381,7 @@ const Header = () => {
 
                         <input
                             type="text"
-                            placeholder="Search crops, mandi rates, or weather..."
+                            placeholder={t('search_placeholder_global')}
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             onFocus={() => setIsSearchFocused(true)}
@@ -413,7 +413,7 @@ const Header = () => {
                             <button
                                 onClick={() => {
                                     setQuery('');
-                                    document.querySelector('input[placeholder="Search crops, mandi rates, or weather..."]').focus();
+                                    document.querySelector(`input[placeholder="${t('search_placeholder_global')}"]`).focus();
                                 }}
                                 style={{
                                     background: 'transparent',

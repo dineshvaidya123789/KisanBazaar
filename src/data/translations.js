@@ -19,6 +19,7 @@ export const translations = {
         nav_profile: "Profile",
 
         // Header Specific
+        search_placeholder_global: "Search crops, mandi rates, or weather...",
         menu: "Menu",
         notifications: "Notifications",
         buyer_section: "Buyer Section",
@@ -650,6 +651,7 @@ export const translations = {
         nav_profile: "प्रोफाइल",
 
         // Header Specific
+        search_placeholder_global: "फसलें, मंडी भाव, या मौसम खोजें...",
         menu: "मेनू",
         notifications: "सूचनाएं",
         buyer_section: "खरीदार अनुभाग",
@@ -1258,6 +1260,8 @@ export const translations = {
         nav_profile: "प्रोफईल",
 
         // Header Specific
+        // Header Specific
+        search_placeholder_global: "पिके, मंडी भाव, किंवा हवामान शोधा...",
         menu: "मेनू",
         notifications: "सूचना",
         buyer_section: "खरेदीदार विभाग",
