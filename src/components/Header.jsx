@@ -1,39 +1,104 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAlerts } from '../context/AlertContext';
 import { useLanguage } from '../context/LanguageContext';
 import { translations } from '../data/translations';
 import { useSearchLogic } from '../hooks/useSearchLogic';
+import { useSmartVoice } from '../hooks/useSmartVoice';
+import { advisoryKeywords } from '../utils/voiceParser';
+import VoiceOverlay from './VoiceOverlay';
 
 const Header = () => {
     const { user } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const isActive = (path) => location.pathname === path ? 'active' : '';
 
     // Use Custom Hook for Search Logic
     const { query, setQuery, searchMode, setSearchMode, suggestions, handleSearchRaw } = useSearchLogic();
 
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [activeMobileSubmenu, setActiveMobileSubmenu] = useState(null); // Track open submenu on mobile
-    const [isAlertOpen, setIsAlertOpen] = useState(false);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const { language, t, changeLanguage, openLanguageModal } = useLanguage();
-    const { alerts, unreadCount, markAsRead, clearAll } = useAlerts();
+    // Smart Voice Handler
+    const { isListening, transcript, showOverlay, startListening, stopListening, speak } = useSmartVoice();
 
-    const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-    const toggleMobileSubmenu = (menuName) => {
-        if (activeMobileSubmenu === menuName) {
-            setActiveMobileSubmenu(null); // Close if already open
-        } else {
-            setActiveMobileSubmenu(menuName); // Open this one
-        }
-    };
+    const handleVoiceSearch = () => {
+        startListening(({ transcript, parsed }) => {
+            setQuery(transcript);
 
-    const closeMenu = () => {
-        setIsMobileMenuOpen(false);
-        setActiveMobileSubmenu(null);
-        setIsAlertOpen(false); // Close alert dropdown when navigating
+            // Smart Routing based on parsed intent
+            if (parsed) {
+                console.log("Global Voice Parsed:", parsed);
+                const commodityName = parsed.commodity ? (language === 'hi' ? parsed.commodity.hi : parsed.commodity.en) : transcript;
+                const locationName = parsed.district || parsed.state || '';
+
+                // 1. Explicit Sell Intent -> Go to Seller Form
+                if (parsed.type === 'Sell') {
+                    const speechText = commodityName
+                        ? (t('voice_selling', { item: commodityName }) || `Opening seller form for ${commodityName}`)
+                        : (t('voice_selling_generic') || "Opening seller form");
+
+                    speak(speechText);
+                    navigate('/sell?type=Sell', { state: { voiceData: parsed } });
+                    return;
+                }
+
+                // 2. Explicit Buy Intent -> Go to Buyer Form (Request)
+                if (parsed.type === 'Buy') {
+                    const speechText = commodityName
+                        ? (t('voice_buying', { item: commodityName }) || `Searching buyers for ${commodityName}`)
+                        : (t('voice_buying_generic') || "Opening buyer form");
+
+                    speak(speechText);
+                    navigate('/sell?type=Buy', { state: { voiceData: parsed } });
+                    return;
+                }
+
+                // 3. Rate Check Intent -> Go to Mandi Rates
+                if (parsed.type === 'Rate') {
+                    speak(t('voice_rates', { item: commodityName, loc: locationName }) || `Showing rates for ${commodityName} ${locationName ? 'in ' + locationName : ''}`);
+                    navigate(`/rates?search=${parsed.commodity?.en || transcript}`);
+                    return;
+                }
+
+                // 4. Weather Intent
+                if (parsed.type === 'Weather') {
+                    speak(t('voice_weather', { loc: locationName || 'your location' }) || `Checking weather for ${locationName || 'your location'}`);
+                    navigate('/weather'); // Assuming /weather route exists
+                    return;
+                }
+
+                // 5. News/Scheme Intent
+                if (parsed.type === 'News') {
+                    speak(t('voice_news') || "Opening News and Schemes");
+                    navigate('/news'); // Assuming /news route exists
+                    return;
+                }
+
+                // 6. Advisory/Farming Tips Intent
+                if (parsed.type === 'Advisory') {
+                    speak(t('voice_advisory', { item: commodityName }) || `Showing farming tips for ${commodityName}`);
+                    // Navigate to advisory with search
+                    setSearchMode('Advisory');
+                    handleSearchRaw(parsed.commodity?.en || transcript, 'Advisory');
+                    return;
+                }
+            }
+
+            // Default: Standard Text Search
+            const lowerTranscript = transcript.toLowerCase();
+            const isAdvisoryFallback = advisoryKeywords.some(k => lowerTranscript.includes(k));
+
+            if (isAdvisoryFallback) {
+                const commodityName = parsed?.commodity ? (language === 'hi' ? parsed.commodity.hi : parsed.commodity.en) : transcript;
+                speak(t('voice_advisory', { item: commodityName }) || `Showing farming tips for ${commodityName}`);
+                setSearchMode('Advisory');
+                handleSearchRaw(parsed?.commodity?.en || transcript, 'Advisory');
+                return;
+            }
+
+            speak(t('voice_searching', { term: transcript }) || `Searching for ${transcript}`);
+            handleSearchRaw(transcript);
+        });
     };
 
     // Language display mapping
@@ -51,6 +116,13 @@ const Header = () => {
             top: 0,
             zIndex: 1000
         }}>
+            <VoiceOverlay
+                isOpen={showOverlay}
+                isListening={isListening}
+                transcript={transcript}
+                onClose={stopListening}
+            />
+
             {/* Top Bar: Logo, Search, Sign In, Hamburger */}
             <div className="container" style={{
                 display: 'flex',
@@ -437,17 +509,7 @@ const Header = () => {
 
                         {/* Voice Search - Desktop Only */}
                         <button
-                            onClick={() => {
-                                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                                recognition.lang = 'hi-IN';
-                                recognition.onstart = () => { setQuery('Listening...'); };
-                                recognition.onresult = (event) => {
-                                    const transcript = event.results[0][0].transcript;
-                                    setQuery(transcript);
-                                    handleSearchRaw(transcript);
-                                };
-                                recognition.start();
-                            }}
+                            onClick={handleVoiceSearch}
                             className="voice-search-desktop"
                             style={{
                                 background: 'transparent',
@@ -500,15 +562,7 @@ const Header = () => {
                                 className="voice-icon-mobile"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                                    recognition.lang = 'hi-IN';
-                                    recognition.onstart = () => { setQuery('Listening...'); };
-                                    recognition.onresult = (event) => {
-                                        const transcript = event.results[0][0].transcript;
-                                        setQuery(transcript);
-                                        handleSearchRaw(transcript);
-                                    };
-                                    recognition.start();
+                                    handleVoiceSearch();
                                 }}
                                 style={{ cursor: 'pointer' }}
                             >
@@ -625,15 +679,6 @@ const Header = () => {
                         </div>
                     </div>
 
-
-
-
-
-
-
-
-
-
                     {/* Admin Link - Only visible to Admins */}
                     {user && user.role === 'Admin' && (
                         <Link
@@ -660,3 +705,4 @@ const Header = () => {
 };
 
 export default Header;
+

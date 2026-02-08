@@ -114,11 +114,7 @@ const LocationSelector = ({
             >
                 <option value="">{t('select_district_ph') || '-- District --'}</option>
                 {districts.map(district => {
-                    const data = selectedState ? import('../data/locationData').then(m => m.getDistrictData(selectedState, district)) : null;
-                    // Wait, we can't async import inside render. 
-                    // We need to import getDistrictData at top or pass it.
-                    // Actually, let's just use the helper if imported.
-                    // locationData.js exports getDistrictData. 
+                    // Get label if available
                     const label = (getDistrictData(selectedState, district) || {}).label || district;
                     return <option key={district} value={district}>{label}</option>
                 })}

@@ -7,6 +7,7 @@ import InterestsModal from '../components/InterestsModal';
 
 
 import SEO from '../components/SEO';
+import LiveDealsTicker from '../components/LiveDealsTicker';
 
 const Home = () => {
     const { t } = useLanguage();
@@ -28,6 +29,7 @@ const Home = () => {
                 description={t('hero_subtitle')}
             />
             {/* <SafetyBanner /> */}
+            <LiveDealsTicker />
             {/* Hero Section */}
             <section style={{
                 background: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('/images/hero_opt.jpg') center/cover no-repeat`,

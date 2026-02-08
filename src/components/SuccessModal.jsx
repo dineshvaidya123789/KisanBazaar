@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
-const SuccessModal = ({ show, onClose, type = 'Sell' }) => {
+const SuccessModal = ({ show, onClose, type = 'Sell', listingDetails }) => {
     const navigate = useNavigate();
     const { t } = useLanguage();
 
@@ -89,6 +89,38 @@ const SuccessModal = ({ show, onClose, type = 'Sell' }) => {
                         onMouseOut={(e) => e.target.style.backgroundColor = '#2E7D32'}
                     >
                         {t('view_my_listings')}
+                    </button>
+
+                    {/* Share on WhatsApp Button */}
+                    <button
+                        onClick={() => {
+                            // Construct share message
+                            const shareText = `Check out this listing on Kisan Bazaar!\n\nI am selling: ${listingDetails?.commodity || 'Crops'} (${listingDetails?.quantity || ''} ${listingDetails?.unit || ''})\nPrice: ₹${listingDetails?.price || 'Best Market Price'}\nLocation: ${listingDetails?.district || ''}, ${listingDetails?.state || ''}\n\nCall me: ${localStorage.getItem('kisan_user_mobile') || ''}\n\nDownload App: https://kisanbazaar.app`;
+
+                            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                            window.open(whatsappUrl, '_blank');
+                        }}
+                        style={{
+                            padding: '1rem 1.5rem',
+                            fontSize: '1.1rem',
+                            fontWeight: 'bold',
+                            backgroundColor: '#25D366', // WhatsApp Green
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            transition: 'all 0.3s',
+                            boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)'
+                        }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#128C7E'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = '#25D366'}
+                    >
+                        <span style={{ fontSize: '1.4rem' }}>📱</span>
+                        {t('share_whatsapp') || 'Share on WhatsApp'}
                     </button>
 
                     <button

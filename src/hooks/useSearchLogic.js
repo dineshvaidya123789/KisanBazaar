@@ -159,7 +159,7 @@ export const useSearchLogic = () => {
         // 3. KEYWORD DETECTION
         const isSowing = lowerQuery.includes('sow') || lowerQuery.includes('buai') || lowerQuery.includes('buaie') || lowerQuery.includes('seed');
         const isHarvesting = lowerQuery.includes('harvest') || lowerQuery.includes('katai') || lowerQuery.includes('cutting');
-        const isCare = lowerQuery.includes('care') || lowerQuery.includes('tips') || lowerQuery.includes('rog') || lowerQuery.includes('medicine');
+        const isCare = lowerQuery.includes('care') || lowerQuery.includes('tips') || lowerQuery.includes('rog') || lowerQuery.includes('medicine') || lowerQuery.includes('farming') || lowerQuery.includes('kheti') || lowerQuery.includes('salah') || lowerQuery.includes('ugaye') || lowerQuery.includes('grow') || lowerQuery.includes('टिप्स') || lowerQuery.includes('खेती') || lowerQuery.includes('शेती') || lowerQuery.includes('माहिती') || lowerQuery.includes('जानकारी') || lowerQuery.includes('सल्ला') || lowerQuery.includes('रोग') || lowerQuery.includes('लागवड');
         const isWeather = lowerQuery.includes('weather') || lowerQuery.includes('mosam') || lowerQuery.includes('mausam');
 
         // 4. BUILD SUGGESTIONS WITH COUNTS
@@ -182,7 +182,7 @@ export const useSearchLogic = () => {
             }
 
             // Count real sellers and buyers for this crop separately
-            const sellerCount = listings.filter(l => {
+            const sellerCount = Listings.filter(l => {
                 const itemTitle = (l.title || '').toLowerCase();
                 const itemComm = (l.commodity || '').toLowerCase();
                 const type = (l.type || '').toLowerCase();
@@ -190,7 +190,7 @@ export const useSearchLogic = () => {
                 return isSeller && cropSynonyms.some(s => itemTitle.includes(s) || itemComm.includes(s));
             }).length;
 
-            const buyerCount = listings.filter(l => {
+            const buyerCount = Listings.filter(l => {
                 const itemTitle = (l.title || '').toLowerCase();
                 const itemComm = (l.commodity || '').toLowerCase();
                 const type = (l.type || '').toLowerCase();
@@ -250,7 +250,7 @@ export const useSearchLogic = () => {
                 mode = 'Weather';
             } else if (lowerTerm.includes('rate') || lowerTerm.includes('bhav') || lowerTerm.includes('price') || lowerTerm.includes('mandi')) {
                 mode = 'Rates';
-            } else if (lowerTerm.includes('tip') || lowerTerm.includes('care') || lowerTerm.includes('sowing') || lowerTerm.includes('advisory')) {
+            } else if (lowerTerm.includes('tip') || lowerTerm.includes('care') || lowerTerm.includes('sowing') || lowerTerm.includes('advisory') || lowerTerm.includes('farming') || lowerTerm.includes('kheti') || lowerTerm.includes('rog') || lowerTerm.includes('disease') || lowerTerm.includes('ugaye') || lowerTerm.includes('grow') || lowerTerm.includes('टिप्स') || lowerTerm.includes('खेती') || lowerTerm.includes('शेती') || lowerTerm.includes('माहिती') || lowerTerm.includes('जानकारी') || lowerTerm.includes('सल्ला') || lowerTerm.includes('रोग') || lowerTerm.includes('लागवड')) {
                 mode = 'Advisory';
             } else {
                 // Default to marketplace
@@ -267,7 +267,7 @@ export const useSearchLogic = () => {
             setSuggestions([]); setQuery(''); return;
         }
         if (mode === 'Advisory') {
-            const cropParam = term.replace(/tips?|care|sowing|advisory/gi, '').trim() || term;
+            const cropParam = term.replace(/tips?|care|sowing|advisory|farming|kheti|rog|disease|ugaye|grow|salah|टिप्स|खेती|शेती|माहिती|जानकारी|सल्ला|रोग|लागवड/gi, '').trim() || term;
             navigate(`/advisory?crop=${encodeURIComponent(cropParam)}&topic=${subtype || 'general'}`);
             setSuggestions([]); setQuery(''); return;
         }

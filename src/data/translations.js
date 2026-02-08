@@ -630,7 +630,19 @@ export const translations = {
         trade_area_title: "Trade Area: Satara, Maharashtra",
         trade_area_desc: "Exclusive marketplace for Satara district. Connect with local buyers and sellers.",
         sellers_in_satara: "Sellers in Satara",
-        buyers_in_satara: "Buyers in Satara"
+        buyers_in_satara: "Buyers in Satara",
+        live_updates: "LIVE UPDATES",
+        voice_input_unsupported: "Voice input is not supported in this browser.",
+        listening: "Listening...",
+        speak: "Tap to Speak",
+        smart_voice_fill: "Tap to Speak & Fill Form",
+        voice_fill_hint: "Try: \"I want to sell 50 quintal Wheat for 2000 rupees\"",
+        invalid_commodity: "Could not identify the crop. Please select manually.",
+        // Validation Errors
+        state_required: "Please select a State",
+        district_required: "Please select a District",
+        unit_required: "Please select a Unit",
+        quantity_required: "Please enter a valid Quantity",
     },
     hi: {
         // Navigation
@@ -1240,6 +1252,18 @@ export const translations = {
         error_send_otp: "ओटीपी भेजने में विफल। कृपया अपना नंबर जांचें और पुनः प्रयास करें।",
         error_verify_otp: "अमान्य ओटीपी। कृपया एसएमएस जांचें।",
         error_invalid_phone: "कृपया एक मान्य 10-अंकीय नंबर दर्ज करें।",
+        live_updates: "ताज़ा अपडेट",
+        voice_input_unsupported: "इस ब्राउज़र में वॉयस इनपुट समर्थित नहीं है।",
+        listening: "सुन रहा हूँ...",
+        speak: "बोलकर लिखें",
+        smart_voice_fill: "बोलकर फॉर्म भरें",
+        voice_fill_hint: "जैसे: \"मुझे 50 क्विंटल गेहूं 2000 रुपये में बेचना है\"",
+        invalid_commodity: "फसल की पहचान नहीं हो सकी। कृपया मैन्युअल रूप से चुनें।",
+        // Validation Errors
+        state_required: "कृपया राज्य चुनें",
+        district_required: "कृपया ज़िला चुनें",
+        unit_required: "कृपया इकाई चुनें",
+        quantity_required: "कृपया मान्य मात्रा दर्ज करें",
     },
     mr: {
         // Navigation
@@ -1399,6 +1423,18 @@ export const translations = {
         location_permission_denied: "स्थान परवानगी नाकारली. कृपया ब्राउझर सेटिंग्जमध्ये ती सक्षम करा.",
         location_timeout: "स्थान शोधण्याची वेळ संपली.",
         back_to_home: "होमवर परत जा",
+        live_updates: "थेट अपडेट",
+        voice_input_unsupported: "या ब्राउझरमध्ये व्हॉइस इनपुट समर्थित नाही.",
+        listening: "ऐकत आहे...",
+        speak: "बोलून टाईप करा",
+        smart_voice_fill: "बोलून फॉर्म भरा",
+        voice_fill_hint: "उदा: \"मला 50 क्विंटल गहू 2000 रुपयांत विकायचा आहे\"",
+        invalid_commodity: "पीक ओळखता आले नाही. कृपया स्वतः निवडा.",
+        // Validation Errors
+        state_required: "कृपया राज्य निवडा",
+        district_required: "कृपया जिल्हा निवडा",
+        unit_required: "कृपया एकक निवडा",
+        quantity_required: "कृपया वैध प्रमाण प्रविष्ट करा",
 
         // Commodities
         mushroom: "मशरूम",
@@ -1878,6 +1914,6 @@ export const translations = {
         // Auth Errors
         error_send_otp: "ओटीपी पाठविण्यात अयशस्वी. कृपया आपला नंबर तपासा आणि पुन्हा प्रयत्न करा.",
         error_verify_otp: "अवैध ओटीपी. कृपया एसएमएस तपासा.",
-        error_invalid_phone: "कृपया एक वैध 10-अंकी क्रमांक प्रविष्ट करा.",
+        error_invalid_phone: "कृपया एक वैध 10-अंकी क्रमांक प्रविष्ट करा."
     }
 };

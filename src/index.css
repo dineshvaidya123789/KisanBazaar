@@ -597,3 +597,23 @@ header input.header-search-input::placeholder {
     font-size: 1.75rem !important;
   }
 }
+
+/* Live Ticker Animation */
+.ticker-track {
+  display: flex;
+  animation: scroll 30s linear infinite;
+}
+
+.ticker-container:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
