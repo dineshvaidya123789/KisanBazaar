@@ -173,6 +173,11 @@ const Home = () => {
                             {t('desc_trade_area')}
                         </div>
                     </QuickCard>
+                    <QuickCard title={t('quick_land_lease')} icon="⛰️" link="/land" color="#795548">
+                        <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.3rem', lineHeight: '1.3', padding: '0 0.5rem' }}>
+                            {t('desc_land_lease')}
+                        </div>
+                    </QuickCard>
                 </div>
             </section>
 

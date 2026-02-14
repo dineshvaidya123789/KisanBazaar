@@ -20,6 +20,10 @@ export const translations = {
 
         // Header Specific
         search_placeholder_global: "Search crops, mandi rates, or weather...",
+        nav_transport: "Transport",
+        land_section: "Land / Lease",
+        quick_land_lease: "Land / Lease",
+        desc_land_lease: "Rent or lease fertile land for farming directly from owners.",
         menu: "Menu",
         notifications: "Notifications",
         buyer_section: "Buyer Section",
@@ -410,7 +414,6 @@ export const translations = {
         service_drone: "Drones",
         service_inputs: "Fertilizers/Seeds",
         verified: "Verified",
-        verified_seller: "Verified Seller",
         // call: "Call", // Duplicate
         // whatsapp: "WhatsApp", // Duplicate
         report: "Report",
@@ -707,6 +710,10 @@ export const translations = {
 
         // Header Specific
         search_placeholder_global: "फसलें, मंडी भाव, या मौसम खोजें...",
+        nav_transport: "परिवहन",
+        land_section: "जमीन / लीज",
+        quick_land_lease: "जमीन / लीज",
+        desc_land_lease: "मालिकों से सीधे खेती के लिए उपजाऊ जमीन किराए या लीज पर लें।",
         menu: "मेनू",
         notifications: "सूचनाएं",
         buyer_section: "खरीदार अनुभाग",
@@ -1225,7 +1232,7 @@ export const translations = {
 
         // Safety Banner
         safety_tip: "सुरक्षा टिप",
-        warning_no_advance: "विक्रेताओं को कभी भी कोई अग्रिम राशि न दें। खरीदने से पहले हमेशा फसल की जांच करें。",
+        warning_no_advance: "विक्रेताओं को कभी भी कोई अग्रिम राशि न दें। खरीदने से पहले हमेशा फसल की जांच करें।",
         login_for_rates: "लाइव भाव के लिए लॉगिन करें",
         wheat: "गेहूं",
         soybean: "सोयाबीन",
@@ -1522,9 +1529,11 @@ export const translations = {
         unit_required: "कृपया एकक निवडा",
         quantity_required: "कृपया वैध प्रमाण प्रविष्ट करा",
 
-        // Land Lease
+        nav_transport: "वाहतूक",
         land_section: "जमीन / भाडेतत्त्वावर",
-        find_land: "जमीन शोधा",
+        quick_land_lease: "जमीन / भाडेतत्त्वावर",
+        desc_land_lease: "मालकांकडून थेट शेतीसाठी सुपीक जमीन भाड्याने किंवा भाडेतत्त्वावर घ्या.",
+        buyer_section: "खरीदार अनुभाग",
         list_land: "जमीन लिस्ट करा",
         soil_type: "मातीचा प्रकार",
         water_source: "पाण्याचा स्रोत",

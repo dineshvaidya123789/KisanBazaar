@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useMarket } from '../context/MarketContext';
 import { useLanguage } from '../context/LanguageContext';
 import { COMMODITIES, searchCommodities, getRecommendedUnit } from '../data/commodities';
-import { getAllDistricts, getAllTehsils, getAllVillages } from '../data/locationData';
+import { getAllDistricts, getAllTehsils } from '../data/locationData';
 import CommodityAutosuggest from '../components/CommodityAutosuggest';
 import PriceAdvisor from '../components/PriceAdvisor';
 import SuccessModal from '../components/SuccessModal';
