@@ -13,7 +13,27 @@ const Header = () => {
     const { user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
+
     const isActive = (path) => location.pathname === path ? 'active' : '';
+
+    // Context Hooks
+    const { t, language, openLanguageModal } = useLanguage();
+    const { alerts, unreadCount, isAlertOpen, setIsAlertOpen, markAsRead, clearAll } = useAlerts();
+
+    // Local State
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeMobileSubmenu, setActiveMobileSubmenu] = useState(null);
+
+    const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+    const closeMenu = () => {
+        setIsMobileMenuOpen(false);
+        setActiveMobileSubmenu(null);
+    };
+
+    const toggleMobileSubmenu = (menu) => {
+        setActiveMobileSubmenu(activeMobileSubmenu === menu ? null : menu);
+    };
 
     // Use Custom Hook for Search Logic
     const { query, setQuery, searchMode, setSearchMode, suggestions, handleSearchRaw } = useSearchLogic();
@@ -697,6 +717,23 @@ const Header = () => {
                             👑 Admin
                         </Link>
                     )}
+
+                    {/* Land Lease Link - NEW */}
+                    <Link
+                        to="/land"
+                        onClick={closeMenu}
+                        className={isActive('/land')}
+                        style={{
+                            color: '#555',
+                            fontWeight: 'bold',
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}
+                    >
+                        ⛰️ {t('land_section')}
+                    </Link>
 
                 </nav>
             </div>

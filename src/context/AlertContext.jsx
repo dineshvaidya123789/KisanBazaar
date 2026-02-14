@@ -11,6 +11,7 @@ export const useAlerts = () => useContext(AlertContext);
 export const AlertProvider = ({ children }) => {
     const [alerts, setAlerts] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
 
     // Initialize alerts from localStorage
     useEffect(() => {
@@ -152,7 +153,7 @@ export const AlertProvider = ({ children }) => {
     }, [addAlert]);
 
     return (
-        <AlertContext.Provider value={{ alerts, unreadCount, markAsRead, clearAll, addAlert }}>
+        <AlertContext.Provider value={{ alerts, unreadCount, isAlertOpen, setIsAlertOpen, markAsRead, clearAll, addAlert }}>
             {children}
         </AlertContext.Provider>
     );

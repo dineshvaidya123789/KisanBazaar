@@ -35,7 +35,9 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Admin = lazy(() => import('./pages/Admin'));
 const FPORegistration = lazy(() => import('./pages/FPORegistration'));
 const TradeArea = lazy(() => import('./pages/TradeArea'));
-const Promo = lazy(() => import('./pages/Promo'));
+import Promo from './pages/Promo';
+import Land from './pages/Land';
+import LandForm from './pages/LandForm';
 import ConsentBanner from './components/ConsentBanner';
 import InstallPrompt from './components/InstallPrompt';
 import LanguageSelectionModal from './components/LanguageSelectionModal';
@@ -105,6 +107,8 @@ function App() {
               />
               <Route path="/fpo-registration" element={<FPORegistration />} />
               <Route path="/trade-area" element={<TradeArea />} />
+              <Route path="/land" element={<Land />} />
+              <Route path="/add-land" element={<LandForm />} />
               <Route path="/promo" element={<Promo />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -1,0 +1,53 @@
+export const landListings = [
+    {
+        id: 1,
+        title: "5 Acres Fertile Black Soil",
+        state: "Maharashtra",
+        district: "Satara",
+        area: 5,
+        areaUnit: "Acres",
+        soilType: "Black Soil",
+        waterSource: "Canal",
+        price: 25000,
+        priceUnit: "Yearly / Acre",
+        type: "Lease",
+        contactName: "Ramesh Patil",
+        phone: "9876543210",
+        image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Excellent black soil suitable for Sugarcane and Turmeric. Canal water available 24/7."
+    },
+    {
+        id: 2,
+        title: "3 Acres for Organic Farming",
+        state: "Madhya Pradesh",
+        district: "Indore",
+        area: 3,
+        areaUnit: "Acres",
+        soilType: "Red Soil",
+        waterSource: "Well",
+        price: 15000,
+        priceUnit: "Yearly / Acre",
+        type: "Share",
+        contactName: "Suresh Yadav",
+        phone: "9123456780",
+        image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Fenced land with drip irrigation installed. Flexible for partnership model."
+    },
+    {
+        id: 3,
+        title: "10 Acres Large Plot",
+        state: "Maharashtra",
+        district: "Pune",
+        area: 10,
+        areaUnit: "Acres",
+        soilType: "Loamy",
+        waterSource: "Borewell",
+        price: 30000,
+        priceUnit: "Yearly / Acre",
+        type: "Lease",
+        contactName: "Vijay Deshmukh",
+        phone: "9988776655",
+        image: "https://images.unsplash.com/photo-1592982537447-6f2a6a0c7c18?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        description: "Near highway, easy transport access. suitable for vegetables and flowers."
+    }
+];
