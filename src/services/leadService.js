@@ -10,25 +10,25 @@ const SERPER_API_KEY = "6c2973d259e27a9b7dea3006ab70246e20c6cb80"; // Enabled li
 
 const CATEGORIES = {
     requirements: [
-        "wanted buy maize tons India MP",
-        "soybean purchase requirement Maharashtra contact",
-        "bulk onion buyers Mumbai Maharashtra",
-        "wheat procurement requirement 2025 India",
-        "whatsapp group requirement buy maize India"
+        "wanted buy Tuur Chana Moong pulses India MP Maharashtra",
+        "Pomegranate Grapes Mango export requirement Maharashtra",
+        "pulses trader contact requirement MP Indore",
+        "fruit exporter requirement Mumbai Nashik",
+        "wanted buy 100 tons soybean Chana Madhya Pradesh"
     ],
     farmers: [
-        "available maize for sale Burhanpur MP farmer",
-        "onion stock available for sale Maharashtra facebook",
-        "soybean harvest sale Madhya Pradesh farmers",
-        "I want to sell wheat contact Maharashtra",
-        "banana production for sale Burhanpur MP facebook"
+        "Tuur dal stock available for sale MP farmer",
+        "fresh Grapes Pomegranate for sale Maharashtra facebook",
+        "Moong Chana pulses for sale Madhya Pradesh",
+        "Mango production for sale Ratnagiri Maharashtra",
+        "bulk fruits pulses available for sale MP MS"
     ],
     news: [
-        "agriculture export policy India 2025",
-        "mandi rates today Madhya Pradesh",
-        "onion price trend Maharashtra",
-        "government procurement update India",
-        "new agricultural schemes Maharashtra 2025"
+        "pulses export policy India 2025",
+        "fruit market price trend Maharashtra 2025",
+        "mandi rates Chana Tuur MP today",
+        "government procurement pulses 2025",
+        "horticulture schemes Maharashtra 2025"
     ]
 };
 
@@ -40,12 +40,10 @@ export const fetchLiveLeads = async (type = 'requirements') => {
     const queries = CATEGORIES[type] || CATEGORIES.requirements;
     const query = queries[Math.floor(Math.random() * queries.length)];
 
-    // Add strict negative filters to eliminate news, corporate noise, and jobs
+    // Add aggressive negative filters to eliminate non-agri, travel, lifestyle, and foreign noise
     let finalQuery = query;
-    if (type === 'requirements') {
-        finalQuery += " -news -government -policy -approves -pdf -SEBI -regulation -results -standalone -unaudited -jobs -vacancies -careers -recruitment -mandi -rates -prices";
-    } else if (type === 'farmers') {
-        finalQuery += " -news -government -policy -approves -jobs -pdf -mandi -rates";
+    if (type === 'requirements' || type === 'farmers') {
+        finalQuery += " -travel -tips -mess -innovation -menstrual -adolescents -female -pregnant -vacancies -careers -jobs -recruitment -pdf -SEBI -regulation -results -standalone -unaudited -Pakistan -Lahore -Karachi";
     }
 
     try {
