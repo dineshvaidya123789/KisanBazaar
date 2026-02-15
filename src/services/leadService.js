@@ -10,25 +10,25 @@ const SERPER_API_KEY = "6c2973d259e27a9b7dea3006ab70246e20c6cb80"; // Enabled li
 
 const CATEGORIES = {
     requirements: [
-        "buy maize tons India Madhya Pradesh",
-        "looking for soybean buyers contact Maharashtra",
-        "bulk onion requirement Mumbai",
-        "wheat purchase requirement 2025 India",
-        "procurement manager buy leads agriculture India"
+        "wanted buy maize tons India MP",
+        "soybean purchase requirement Maharashtra contact",
+        "bulk onion buyers Mumbai Maharashtra",
+        "wheat procurement requirement 2025 India",
+        "whatsapp group requirement buy maize India"
     ],
     farmers: [
-        "available maize for sale Burhanpur farmer",
+        "available maize for sale Burhanpur MP farmer",
         "onion stock available for sale Maharashtra facebook",
-        "soybean harvest for sale Madhya Pradesh",
+        "soybean harvest sale Madhya Pradesh farmers",
         "I want to sell wheat contact Maharashtra",
-        "banana production for sale MP facebook"
+        "banana production for sale Burhanpur MP facebook"
     ],
     news: [
         "agriculture export policy India 2025",
         "mandi rates today Madhya Pradesh",
         "onion price trend Maharashtra",
-        "government wheat procurement update India",
-        "agriculture news Maharashtra today"
+        "government procurement update India",
+        "new agricultural schemes Maharashtra 2025"
     ]
 };
 
@@ -40,8 +40,13 @@ export const fetchLiveLeads = async (type = 'requirements') => {
     const queries = CATEGORIES[type] || CATEGORIES.requirements;
     const query = queries[Math.floor(Math.random() * queries.length)];
 
-    // Add negative filters for transactional leads
-    const finalQuery = type === 'news' ? query : `${query} -news -government -policy -approves`;
+    // Add strict negative filters to eliminate news, corporate noise, and jobs
+    let finalQuery = query;
+    if (type === 'requirements') {
+        finalQuery += " -news -government -policy -approves -pdf -SEBI -regulation -results -standalone -unaudited -jobs -vacancies -careers -recruitment -mandi -rates -prices";
+    } else if (type === 'farmers') {
+        finalQuery += " -news -government -policy -approves -jobs -pdf -mandi -rates";
+    }
 
     try {
         const response = await fetch("https://google.serper.dev/search", {
@@ -56,7 +61,7 @@ export const fetchLiveLeads = async (type = 'requirements') => {
                 hl: "en",
                 autocorrect: true,
                 tbs: "qdr:w", // Always past week
-                num: 15
+                num: 30 // Fetch more results for better filtering
             }),
         });
 
