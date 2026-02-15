@@ -11,23 +11,25 @@ const SERPER_API_KEY = "6c2973d259e27a9b7dea3006ab70246e20c6cb80"; // Enabled li
 const CATEGORIES = {
     requirements: [
         "wanted buy Tuur Chana Moong pulses India",
-        "Pomegranate Grapes Mango export requirement India Maharashtra",
-        "pulses trader procurement requirement MP Maharashtra India",
-        "fruit exporter requirement Mumbai Nashik India",
-        "wanted buy bulk Tuur dal Chana dal India"
+        "Maize Corn yellow maize buy requirement India",
+        "Wheat procurement bulk requirement India",
+        "Soybean soybean meal buy requirement MP Maharashtra",
+        "Pomegranate Grapes Mango export requirement India",
+        "Onion garlic potato procurement requirement India",
+        "Agri commodities bulk buy requirement India"
     ],
     farmers: [
-        "Tuur dal stock available for sale India MP Maharashtra",
-        "fresh Grapes Pomegranate for sale Maharashtra India",
-        "Moong Chana pulses stock for sale Madhya Pradesh India",
-        "Ratnagiri Mango production for sale Maharashtra India",
-        "bulk fruits pulses stock available India MP MS"
+        "Tuur dal Chana dal stock for sale MP Maharashtra",
+        "Maize Corn yellow maize stock available for sale India",
+        "Wheat Soybean stock for sale Madhya Pradesh",
+        "fresh Grapes Pomegranate Mango for sale Maharashtra India",
+        "Onion garlic potato stock available for sale India"
     ],
     news: [
         "pulses mandi price trend India 2025",
-        "fruit export policy Maharashtra 2025",
-        "mandi rates Chana Tuur MP today",
-        "government procurement pulses 2025",
+        "Maize Wheat market price trend India",
+        "mandi rates Chana Tuur Maize MP today",
+        "government procurement policy agriculture 2025 India",
         "horticulture news Maharashtra 2025"
     ]
 };
@@ -35,19 +37,20 @@ const CATEGORIES = {
 const CROP_KEYWORDS = [
     'tuur', 'chana', 'moong', 'pulses', 'pomegranate', 'grapes', 'mango',
     'soybean', 'wheat', 'dal', 'corn', 'maize', 'banana', 'fruits',
-    'grain', 'anar', 'kismis', 'orange', 'santra', 'arhar', 'urad', 'masoor'
+    'grain', 'anar', 'kismis', 'orange', 'santra', 'arhar', 'urad', 'masoor',
+    'onion', 'garlic', 'potato', 'veg', 'tomato', 'ginger'
 ];
 
 const PERSONA_KEYWORDS = [
     'buyer', 'seller', 'exporter', 'trader', 'procurement', 'wanted',
     'available', 'stock', 'requirement', 'purchase', 'contact', 'wholesale',
-    'importer', 'supply', 'need'
+    'importer', 'supply', 'need', 'buying', 'selling', 'stock'
 ];
 
 const LOCATION_KEYWORDS = [
     'india', 'maharashtra', 'madhya pradesh', 'mp', 'mumbai', 'indore',
     'burhanpur', 'nashik', 'pune', 'nagpur', 'satara', 'sangli', 'ratnagiri',
-    'bhopal', 'jabalpur', 'gwalior'
+    'bhopal', 'jabalpur', 'gwalior', 'delhi', 'indiana', 'rajasthan', 'gujarat'
 ];
 
 const B2B_SITES = [
@@ -57,7 +60,9 @@ const B2B_SITES = [
     "globalbuyersonline.com",
     "b2bmap.com",
     "indiamart.com",
-    "tradeindia.com"
+    "tradeindia.com",
+    "facebook.com",
+    "linkedin.com"
 ];
 
 export const fetchLiveLeads = async (type = 'requirements') => {
@@ -68,9 +73,10 @@ export const fetchLiveLeads = async (type = 'requirements') => {
     const queries = CATEGORIES[type] || CATEGORIES.requirements;
     const baseQuery = queries[Math.floor(Math.random() * queries.length)];
 
-    // Aggressively target B2B platforms for requirements
+    // Target specific platforms or do a broad search
     let finalQuery = baseQuery;
-    if (type === 'requirements') {
+    const useSiteOperator = Math.random() > 0.3; // 70% chance to target a specific site
+    if (useSiteOperator && type !== 'news') {
         const site = B2B_SITES[Math.floor(Math.random() * B2B_SITES.length)];
         finalQuery = `${baseQuery} site:${site}`;
     }
@@ -104,21 +110,22 @@ export const fetchLiveLeads = async (type = 'requirements') => {
             const seen = new Set();
             return data.organic.filter(item => {
                 const text = (item.title + " " + item.snippet).toLowerCase();
+                const link = item.link.toLowerCase();
 
-                // 1. MANDATORY GEOGRAPHY: Result must mention India or Indian State/City
-                const hasLocation = LOCATION_KEYWORDS.some(k => text.includes(k));
-                if (!hasLocation && type !== 'news') return false;
+                // 1. CROP VALIDATION: Mandatory
+                const hasAgriTerm = CROP_KEYWORDS.some(k => text.includes(k)) || text.includes('agri');
+                if (!hasAgriTerm && type !== 'news') return false;
 
-                // 2. MANDATORY CROP: Result must mention a specific agricultural crop
-                const hasAgriTerm = CROP_KEYWORDS.some(k => text.includes(k));
-
-                // 3. MANDATORY PERSONA: Result must mention a transactional role
+                // 2. TRANSACTIONAL VALIDATION: Mandatory for transactional types
                 const hasPersonaTerm = PERSONA_KEYWORDS.some(k => text.includes(k));
+                if (!hasPersonaTerm && type !== 'news') return false;
 
-                // Strict rule for transactional leads: All three (Location, Crop, Persona) must match
-                if (type !== 'news') {
-                    if (!hasAgriTerm || !hasPersonaTerm) return false;
-                }
+                // 3. GEOGRAPHY VALIDATION: Softer check
+                // If it's a known B2B site or mention India/States, it's good.
+                const isKnownB2B = B2B_SITES.some(site => link.includes(site));
+                const hasLocation = LOCATION_KEYWORDS.some(k => text.includes(k));
+
+                if (type !== 'news' && !isKnownB2B && !hasLocation) return false;
 
                 // 4. AGGRESSIVE BLACKLIST for food/lifestyle noise
                 const noise = [
