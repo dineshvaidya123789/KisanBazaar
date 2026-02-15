@@ -65,6 +65,12 @@ const B2B_SITES = [
     "linkedin.com"
 ];
 
+const NEWS_BLACKLIST = [
+    'news', 'policy', 'breaking', 'government', 'mandi rates', 'trend',
+    'daily', 'report', 'withdraw', 'limit', 'decided', 'reopens',
+    'analysis', 'outlook', 'forecast', 'update', 'headlines'
+];
+
 export const fetchLiveLeads = async (type = 'requirements') => {
     if (!SERPER_API_KEY) {
         // ... (keep fallback logic for demo)
@@ -75,15 +81,16 @@ export const fetchLiveLeads = async (type = 'requirements') => {
 
     // Target specific platforms or do a broad search
     let finalQuery = baseQuery;
-    const useSiteOperator = Math.random() > 0.3; // 70% chance to target a specific site
+    const useSiteOperator = Math.random() > 0.4; // 60% chance to target a specific site
     if (useSiteOperator && type !== 'news') {
         const site = B2B_SITES[Math.floor(Math.random() * B2B_SITES.length)];
-        finalQuery = `${baseQuery} site:${site}`;
+        finalQuery = `"${baseQuery}" site:${site}`; // Quotes for exact match
     }
 
     // Aggressive negative filters for total noise removal
     if (type === 'requirements' || type === 'farmers') {
-        finalQuery += " -recipe -cooking -kitchen -delicious -menu -benefits -healthy -tips -day -plates -disposable -college -Karachi -Pakistan -Lahore -Indonesia";
+        const negativeTerms = NEWS_BLACKLIST.map(term => `-${term}`).join(' ');
+        finalQuery += ` ${negativeTerms} -recipe -cooking -kitchen -delicious -menu -benefits -healthy -tips -day -plates -disposable -college -Karachi -Pakistan -Lahore -Indonesia`;
     }
 
     try {
@@ -120,14 +127,22 @@ export const fetchLiveLeads = async (type = 'requirements') => {
                 const hasPersonaTerm = PERSONA_KEYWORDS.some(k => text.includes(k));
                 if (!hasPersonaTerm && type !== 'news') return false;
 
-                // 3. GEOGRAPHY VALIDATION: Softer check
+                // 3. NEWS FILTER: For transactional types, must NOT look like news
+                if (type !== 'news') {
+                    const looksLikeNews = NEWS_BLACKLIST.some(term => text.includes(term)) ||
+                        link.includes('news') ||
+                        link.includes('press');
+                    if (looksLikeNews) return false;
+                }
+
+                // 4. GEOGRAPHY VALIDATION: Softer check
                 // If it's a known B2B site or mention India/States, it's good.
                 const isKnownB2B = B2B_SITES.some(site => link.includes(site));
                 const hasLocation = LOCATION_KEYWORDS.some(k => text.includes(k));
 
                 if (type !== 'news' && !isKnownB2B && !hasLocation) return false;
 
-                // 4. AGGRESSIVE BLACKLIST for food/lifestyle noise
+                // 5. AGGRESSIVE BLACKLIST for food/lifestyle noise
                 const noise = [
                     'menu', 'pulao', 'recipe', 'delicious', 'benefits', 'healthy',
                     'cooking', 'kitchen', 'day', 'plates', 'disposable', 'insecticide',
