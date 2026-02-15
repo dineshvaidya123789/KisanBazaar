@@ -17,7 +17,7 @@ const Chaupal = () => {
             questionHindi: "मेरे गेहूं के पत्ते पीले पड़ रहे हैं। मुझे क्या करना चाहिए?",
             likes: 12,
             replies: [
-                { id: 101, author: "Dr. Singh (Agri Expert)", text: "Check for nitrogen deficiency. Apply urea if needed.", textHindi: "नाइट्रोजन की कमी की जाँच करें। आवश्यकता हो तो यूरिया डालें।" },
+                { id: 101, author: "Dr. Singh (Agri Expert)", isVerified: true, text: "Check for nitrogen deficiency. Apply urea if needed.", textHindi: "नाइट्रोजन की कमी की जाँच करें। आवश्यकता हो तो यूरिया डालें।" },
                 { id: 102, author: "Shyam", text: "It could also be due to over-watering.", textHindi: "यह अधिक पानी देने के कारण भी हो सकता है।" }
             ],
             timestamp: "2 hours ago"
@@ -37,14 +37,20 @@ const Chaupal = () => {
     const [questions, setQuestions] = useState([]);
     const [newQuestion, setNewQuestion] = useState("");
     const [showAskForm, setShowAskForm] = useState(false);
-    const [replyingTo, setReplyingTo] = useState(null); // ID of question being replied to
-    const [visibleCount, setVisibleCount] = useState(5); // Pagination Limit
-    // replyText needs to be an object to handle multiple reply inputs if needed, 
-    // or at least match the usage logic { [id]: text }
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [visibleCount, setVisibleCount] = useState(5);
     const [replyText, setReplyText] = useState({});
-    const [selectedImage, setSelectedImage] = useState(null); // For new question
-    const [replyImage, setReplyImage] = useState(null); // For reply
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [replyImage, setReplyImage] = useState(null);
     const questionInputRef = React.useRef(null);
+
+    // Voice Note State
+    const [isRecording, setIsRecording] = useState(false);
+    const [mediaRecorder, setMediaRecorder] = useState(null);
+    const [audioBlob, setAudioBlob] = useState(null);
+    const [audioUrl, setAudioUrl] = useState(null);
+    const [recordingTime, setRecordingTime] = useState(0);
+    const timerRef = React.useRef(null);
 
     // Auth & Admin State
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -59,7 +65,56 @@ const Chaupal = () => {
         return item[field];
     };
 
-    // Helper to convert file to Base64
+    // --- Voice Recording Logic ---
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream);
+            const chunks = [];
+
+            recorder.ondataavailable = (e) => chunks.push(e.data);
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                setAudioBlob(blob);
+                setAudioUrl(URL.createObjectURL(blob));
+                setIsRecording(false);
+                clearInterval(timerRef.current);
+            };
+
+            setMediaRecorder(recorder);
+            recorder.start();
+            setIsRecording(true);
+            setRecordingTime(0);
+            timerRef.current = setInterval(() => {
+                setRecordingTime(prev => {
+                    if (prev >= 30) {
+                        recorder.stop();
+                        return 30;
+                    }
+                    return prev + 1;
+                });
+            }, 1000);
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            alert("Microphone access denied or not available.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+    };
+
+    const blobToBase64 = (blob) => {
+        return new Promise((resolve, _) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    };
+
     const handleImageChange = (e, isReply = false) => {
         const file = e.target.files[0];
         if (file) {
@@ -78,12 +133,13 @@ const Chaupal = () => {
     // Load from localStorage on mount
     useEffect(() => {
         const savedQuestions = localStorage.getItem('kisan_chaupal_questions');
+        let initialData = [];
         if (savedQuestions) {
-            const data = JSON.parse(savedQuestions);
-            setQuestions(data.sort((a, b) => b.id - a.id));
+            initialData = JSON.parse(savedQuestions).sort((a, b) => b.id - a.id);
         } else {
-            setQuestions(seedQuestions.sort((a, b) => b.id - a.id));
+            initialData = seedQuestions.sort((a, b) => b.id - a.id);
         }
+        setQuestions(initialData);
     }, []);
 
     // Save to localStorage whenever questions change
@@ -93,19 +149,6 @@ const Chaupal = () => {
         }
     }, [questions]);
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            await login(loginPhone, loginOtp);
-            setShowLoginModal(false);
-            setLoginPhone("");
-            setLoginOtp("");
-            // If they were trying to ask or reply, they can now proceed
-        } catch (error) {
-            alert(error);
-        }
-    };
-
     const checkAuth = () => {
         if (!user) {
             setShowLoginModal(true);
@@ -114,23 +157,23 @@ const Chaupal = () => {
         return true;
     };
 
-    const handlePostQuestion = (e) => {
+    const handlePostQuestion = async (e) => {
         e.preventDefault();
         if (!checkAuth()) return;
 
         if (!newQuestion.trim()) {
-            // Standard Criteria: Auto-focus instead of popup
             questionInputRef.current?.focus();
             return;
         }
 
         const newQ = {
-            id: Date.now(), // Unique ID based on timestamp
-            author: user.name, // Use actual user name
+            id: Date.now(),
+            author: user.name,
             district: user.village || "Madhya Pradesh",
             question: newQuestion,
             questionHindi: "",
             image: selectedImage,
+            audio: audioBlob ? await blobToBase64(audioBlob) : null,
             likes: 0,
             replies: [],
             timestamp: t('just_now')
@@ -140,6 +183,8 @@ const Chaupal = () => {
         setQuestions(updatedQuestions);
         setNewQuestion("");
         setSelectedImage(null);
+        setAudioBlob(null);
+        setAudioUrl(null);
         setShowAskForm(false);
     };
 
@@ -154,7 +199,7 @@ const Chaupal = () => {
         setQuestions(updatedQuestions);
     };
 
-    const handleReplySubmit = (questionId) => {
+    const handleReplySubmit = async (questionId) => {
         if (!checkAuth()) return;
         const text = replyText[questionId] || "";
         if (!text.trim()) return;
@@ -164,6 +209,7 @@ const Chaupal = () => {
             author: user.name,
             text: text,
             image: replyImage,
+            audio: audioBlob ? await blobToBase64(audioBlob) : null,
             textHindi: ""
         };
 
@@ -177,6 +223,8 @@ const Chaupal = () => {
         setQuestions(updatedQuestions);
         setReplyText({ ...replyText, [questionId]: "" });
         setReplyImage(null);
+        setAudioBlob(null);
+        setAudioUrl(null);
         setReplyingTo(null);
     };
 
@@ -223,35 +271,106 @@ const Chaupal = () => {
                     accept="image/*"
                     onChange={(e) => handleImageChange(e, false)}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <button
-                        className="btn btn-outline"
-                        style={{ fontSize: '0.9rem' }}
-                        onClick={() => document.getElementById('questionImageInput').click()}
-                    >
-                        📷 {selectedImage ? t('image_selected') : t('upload_image')}
-                    </button>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                            className="btn btn-outline"
+                            style={{ fontSize: '0.85rem', padding: '8px 12px' }}
+                            onClick={() => document.getElementById('questionImageInput').click()}
+                        >
+                            📷 {selectedImage ? t('image_selected') : t('upload_image')}
+                        </button>
+
+                        {!isRecording && !audioUrl && (
+                            <button
+                                className="btn btn-outline"
+                                style={{ fontSize: '0.85rem', padding: '8px 12px', border: '1px solid var(--color-secondary)', color: 'var(--color-secondary)' }}
+                                onClick={startRecording}
+                            >
+                                🎙️ {t('voice_note')}
+                            </button>
+                        )}
+
+                        {isRecording && (
+                            <button
+                                className="btn btn-danger"
+                                style={{
+                                    fontSize: '0.85rem',
+                                    padding: '8px 12px',
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    animation: 'pulse 1.5s infinite'
+                                }}
+                                onClick={stopRecording}
+                            >
+                                ⏹️ {t('stop_recording')} ({recordingTime}s)
+                            </button>
+                        )}
+                    </div>
                     <button className="btn btn-primary" onClick={handlePostQuestion}>{t('post_question')}</button>
                 </div>
+
+                {audioUrl && (
+                    <div style={{ marginTop: '1rem', padding: '10px', backgroundColor: '#f0f9ff', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <audio src={audioUrl} controls style={{ height: '35px', flex: 1 }} />
+                        <button
+                            onClick={() => { setAudioBlob(null); setAudioUrl(null); }}
+                            style={{ border: 'none', background: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '1.2rem' }}
+                            title={t('delete_voice')}
+                        >
+                            🗑️
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Questions Feed */}
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{t('chaupal_feed')}</h2>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {questions.map(q => (
                     <div key={q.id} className="card" style={{ padding: '0', overflow: 'hidden' }}>
                         <div style={{ padding: '1.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <span style={{ fontWeight: 'bold', color: '#555' }}>👤 {q.author}</span>
-                                {isAdminMode && <button onClick={() => handleDelete(q.id)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>{t('delete')}</button>}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontWeight: 'bold', color: '#555' }}>👤 {q.author}</span>
+                                    {q.isVerified && (
+                                        <span style={{
+                                            backgroundColor: '#e3f2fd',
+                                            color: '#1976d2',
+                                            padding: '2px 8px',
+                                            borderRadius: '12px',
+                                            fontSize: '0.7rem',
+                                            fontWeight: 'bold',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            border: '1px solid #bbdefb'
+                                        }}>
+                                            ✅ {t('verified_expert')}
+                                        </span>
+                                    )}
+                                </div>
+                                {isAdminMode && !q.isExternal && <button onClick={() => handleDelete(q.id)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>{t('delete')}</button>}
                             </div>
 
                             {/* Question Text in Localized Language */}
-                            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#222' }}>
+                            <p style={{ margin: '0.5rem 0', color: '#333', fontSize: '1.1rem', lineHeight: '1.5' }}>
                                 {getContent(q, 'question')}
-                            </h3>
+                            </p>
+
+                            <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1rem' }}>
+                                📍 {q.district} • {q.timestamp}
+                            </div>
 
                             {q.image && (
                                 <img src={q.image} alt="Crop issue" style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', borderRadius: '8px', marginBottom: '1rem' }} />
+                            )}
+
+                            {q.audio && (
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <audio src={q.audio} controls style={{ width: '100%', height: '40px' }} />
+                                </div>
                             )}
 
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
@@ -274,24 +393,79 @@ const Chaupal = () => {
                         {(replyingTo === q.id || q.replies.length > 0) && (
                             <div style={{ backgroundColor: '#f9f9f9', padding: '1rem 1.5rem', borderTop: '1px solid #eee' }}>
                                 {q.replies.map(r => (
-                                    <div key={r.id} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #eee' }}>
-                                        <div style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#444' }}>{r.author}</div>
-                                        <div style={{ fontSize: '0.95rem', color: '#333' }}>
-                                            {getContent(r, 'text')}
+                                    <div key={r.id} style={{
+                                        marginBottom: '1rem',
+                                        padding: r.isVerified ? '1rem' : '0',
+                                        paddingBottom: '1rem',
+                                        borderBottom: '1px solid #eee',
+                                        backgroundColor: r.isVerified ? '#fff' : 'transparent',
+                                        borderRadius: r.isVerified ? '12px' : '0',
+                                        border: r.isVerified ? '1px solid #e3f2fd' : 'none',
+                                        boxShadow: r.isVerified ? '0 2px 4px rgba(25, 118, 210, 0.05)' : 'none'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                            <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#444' }}>{r.author}</span>
+                                            {r.isVerified && (
+                                                <span style={{
+                                                    backgroundColor: '#e3f2fd',
+                                                    color: '#1976d2',
+                                                    padding: '1px 6px',
+                                                    borderRadius: '10px',
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: 'bold',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px',
+                                                    border: '1px solid #bbdefb'
+                                                }}>
+                                                    🛡️ {t('verified_expert')}
+                                                </span>
+                                            )}
                                         </div>
+                                        <p style={{ margin: '0', color: '#555', fontSize: '0.95rem' }}>{getContent(r, 'text')}</p>
+                                        {r.audio && (
+                                            <div style={{ marginTop: '0.5rem' }}>
+                                                <audio src={r.audio} controls style={{ width: '100%', height: '35px' }} />
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
 
                                 {replyingTo === q.id && (
-                                    <div style={{ marginTop: '1rem', display: 'flex', gap: '10px' }}>
-                                        <input
-                                            type="text"
+                                    <div style={{ marginTop: '1rem' }}>
+                                        <textarea
                                             value={replyText[q.id] || ''}
                                             onChange={(e) => setReplyText({ ...replyText, [q.id]: e.target.value })}
                                             placeholder={t('write_reply')}
-                                            style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', marginBottom: '0.5rem', minHeight: '80px' }}
                                         />
-                                        <button className="btn btn-sm btn-primary" onClick={() => handleReplySubmit(q.id)}>{t('reply')}</button>
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                            {!isRecording && !audioUrl && (
+                                                <button
+                                                    className="btn btn-outline"
+                                                    style={{ fontSize: '0.75rem', padding: '4px 8px' }}
+                                                    onClick={startRecording}
+                                                >
+                                                    🎙️ {t('voice_note')}
+                                                </button>
+                                            )}
+                                            {isRecording && (
+                                                <span style={{ fontSize: '0.75rem', color: '#dc3545', fontWeight: 'bold' }}>
+                                                    🔴 {t('recording')} ({recordingTime}s)
+                                                    <button onClick={stopRecording} style={{ marginLeft: '8px', cursor: 'pointer', border: 'none', background: '#dc3545', color: 'white', padding: '2px 8px', borderRadius: '4px' }}>{t('stop_recording')}</button>
+                                                </span>
+                                            )}
+                                            {audioUrl && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                                    <audio src={audioUrl} controls style={{ height: '30px', flex: 1 }} />
+                                                    <button onClick={() => { setAudioBlob(null); setAudioUrl(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>🗑️</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                            <button className="btn btn-primary btn-sm" onClick={() => handleReplySubmit(q.id)}>{t('reply')}</button>
+                                            <button className="btn btn-outline btn-sm" onClick={() => setReplyingTo(null)}>{t('cancel_reply')}</button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -301,23 +475,21 @@ const Chaupal = () => {
             </div>
 
             {/* Login Modal */}
-            {
-                showLoginModal && (
-                    <div className="modal-overlay">
-                        <div className="modal-content" style={{ maxWidth: '300px', textAlign: 'center' }}>
-                            <h3>{t('login_required')}</h3>
-                            <p>{t('login_to_ask')}</p>
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
-                                <button className="btn btn-primary" onClick={() => login('9876543210', '1234').then(() => setShowLoginModal(false))}>{t('login_demo_user')}</button>
-                                <button className="btn btn-outline" onClick={() => setShowLoginModal(false)}>{t('cancel_reply')}</button>
-                            </div>
+            {showLoginModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ maxWidth: '300px', textAlign: 'center' }}>
+                        <h3>{t('login_required')}</h3>
+                        <p>{t('login_to_ask')}</p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
+                            <button className="btn btn-primary" onClick={() => login('9876543210', '1234').then(() => setShowLoginModal(false))}>{t('login_demo_user')}</button>
+                            <button className="btn btn-outline" onClick={() => setShowLoginModal(false)}>{t('cancel_reply')}</button>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
 
             <BackToHomeButton />
-        </div >
+        </div>
     );
 };
 

@@ -5,14 +5,30 @@ import { Navigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
+import { fetchLiveLeads } from '../services/leadService';
 
 const Admin = () => {
     const { user, loading } = useAuth();
-    const { listings, deleteListing } = useMarket();
+    const { listings, deleteListing, addListing } = useMarket();
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('listings'); // 'listings', 'alerts', or 'users'
+    const [activeTab, setActiveTab] = useState('listings'); // 'listings', 'alerts', 'users', or 'leads'
     const [alerts, setAlerts] = useState([]);
     const [users, setUsers] = useState([]);
+    const [webLeads, setWebLeads] = useState([]);
+    const [buyerNeeds, setBuyerNeeds] = useState([]);
+    const [farmerSellers, setFarmerSellers] = useState([]);
+    const [marketNews, setMarketNews] = useState([]);
+    const [leadCategory, setLeadCategory] = useState('requirements'); // 'requirements', 'farmers', 'news'
+    const [isFetchingLeads, setIsFetchingLeads] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [convertingLead, setConvertingLead] = useState(null);
+    const [conversionForm, setConversionForm] = useState({
+        commodity: '',
+        type: 'Buy',
+        price: '',
+        quantity: '',
+        unit: 'quintal'
+    });
 
     // Fetch alerts from Firestore
     useEffect(() => {
@@ -39,6 +55,82 @@ const Admin = () => {
         });
         return () => unsubscribe();
     }, []);
+
+    const loadWebLeads = async () => {
+        setIsFetchingLeads(true);
+        try {
+            const [reqs, farmers, news] = await Promise.all([
+                fetchLiveLeads('requirements'),
+                fetchLiveLeads('farmers'),
+                fetchLiveLeads('news')
+            ]);
+            setBuyerNeeds(reqs);
+            setFarmerSellers(farmers);
+            setMarketNews(news);
+
+            // Set initial view to results of the active sub-tab category
+            setWebLeads(leadCategory === 'requirements' ? reqs :
+                leadCategory === 'farmers' ? farmers : news);
+        } catch (err) {
+            console.error("Load leads failed:", err);
+        }
+        setIsFetchingLeads(false);
+    };
+
+    useEffect(() => {
+        if (activeTab === 'leads' && (buyerNeeds.length === 0)) {
+            loadWebLeads();
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        setWebLeads(leadCategory === 'requirements' ? buyerNeeds :
+            leadCategory === 'farmers' ? farmerSellers : marketNews);
+    }, [leadCategory, buyerNeeds, farmerSellers, marketNews]);
+
+    const startConversion = (lead) => {
+        // Simple extraction logic
+        const commonCrops = ['maize', 'onion', 'soybean', 'wheat', 'rice', 'tomato', 'potato', 'chilli', 'cotton'];
+        const text = (lead.author + ' ' + lead.question).toLowerCase();
+        const foundCrop = commonCrops.find(crop => text.includes(crop));
+
+        setConvertingLead(lead);
+        setConversionForm({
+            commodity: foundCrop ? foundCrop.charAt(0).toUpperCase() + foundCrop.slice(1) : '',
+            type: lead.type === 'farmers' ? 'Sell' : 'Buy',
+            price: '',
+            quantity: '',
+            unit: 'quintal'
+        });
+    };
+
+    const handlePublishConversion = async (e) => {
+        e.preventDefault();
+        setIsPublishing(true);
+        try {
+            const newListing = {
+                commodity: conversionForm.commodity,
+                type: conversionForm.type,
+                targetPrice: conversionForm.price,
+                priceUnit: conversionForm.unit,
+                quantity: conversionForm.quantity,
+                description: `Sourced from Web Lead: ${convertingLead.question}`,
+                seller: conversionForm.type === 'Sell' ? 'Admin Verified Farmer' : 'Admin Verification',
+                contactMobile: user.phone,
+                location: 'Verified Web Lead',
+                isExternal: false,
+                source: 'Kisan Bazaar Admin'
+            };
+
+            await addListing(newListing);
+            alert(`Successfully posted as ${conversionForm.type} Requirement!`);
+            setConvertingLead(null);
+        } catch (err) {
+            console.error('Conversion failed:', err);
+            alert('Failed to publish conversion.');
+        }
+        setIsPublishing(false);
+    };
 
 
     if (loading) return <div>Loading...</div>;
@@ -130,6 +222,21 @@ const Admin = () => {
                     >
                         👥 Users ({users.length})
                     </button>
+                    <button
+                        onClick={() => setActiveTab('leads')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: activeTab === 'leads' ? '3px solid #3b82f6' : '3px solid transparent',
+                            color: activeTab === 'leads' ? '#3b82f6' : '#64748b',
+                            fontWeight: activeTab === 'leads' ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            fontSize: '1rem'
+                        }}
+                    >
+                        🌐 Web Leads ({webLeads.length})
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
@@ -146,7 +253,28 @@ const Admin = () => {
 
             <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                 <div style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                    <h3 style={{ margin: 0 }}>{activeTab === 'listings' ? 'Moderation Queue' : 'Active Alerts'}</h3>
+                    <h3 style={{ margin: 0 }}>
+                        {activeTab === 'listings' ? 'Moderation Queue' :
+                            activeTab === 'leads' ? 'External Market Requirements' :
+                                activeTab === 'users' ? 'Registered Users' : 'Active Alerts'}
+                    </h3>
+                    {activeTab === 'leads' && (
+                        <button
+                            onClick={loadWebLeads}
+                            disabled={isFetchingLeads}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem'
+                            }}
+                        >
+                            {isFetchingLeads ? 'Fetching...' : '🔄 Refresh Leads'}
+                        </button>
+                    )}
                     {activeTab === 'listings' && (
                         <input
                             type="text"
@@ -214,7 +342,7 @@ const Admin = () => {
                             </tbody>
                         </table>
                     </div>
-                ) : (
+                ) : activeTab === 'alerts' ? (
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead style={{ background: '#f8fafc', color: '#64748b', fontSize: '0.9rem' }}>
@@ -259,14 +387,14 @@ const Admin = () => {
                                 ) : (
                                     <tr>
                                         <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-                                            No active alerts yet. Users can set alerts from the Marketplace page.
+                                            No active alerts yet.
                                         </td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
-                )}
+                ) : null}
 
                 {activeTab === 'users' && (
                     <div style={{ overflowX: 'auto' }}>
@@ -312,7 +440,211 @@ const Admin = () => {
                         </table>
                     </div>
                 )}
+
+                {activeTab === 'leads' && (
+                    <div style={{ padding: '1rem' }}>
+                        {/* Sub-Navigation for Leads */}
+                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '8px' }}>
+                            <button
+                                onClick={() => setLeadCategory('requirements')}
+                                style={{
+                                    padding: '6px 12px', borderRadius: '4px', cursor: 'pointer',
+                                    background: leadCategory === 'requirements' ? '#3b82f6' : 'white',
+                                    color: leadCategory === 'requirements' ? 'white' : '#64748b',
+                                    border: '1px solid #cbd5e1', fontSize: '0.9rem'
+                                }}
+                            >
+                                🛒 Buyer Needs ({buyerNeeds.length})
+                            </button>
+                            <button
+                                onClick={() => setLeadCategory('farmers')}
+                                style={{
+                                    padding: '6px 12px', borderRadius: '4px', cursor: 'pointer',
+                                    background: leadCategory === 'farmers' ? '#10b981' : 'white',
+                                    color: leadCategory === 'farmers' ? 'white' : '#64748b',
+                                    border: '1px solid #cbd5e1', fontSize: '0.9rem'
+                                }}
+                            >
+                                👨‍🌾 Farmer Sellers ({farmerSellers.length})
+                            </button>
+                            <button
+                                onClick={() => setLeadCategory('news')}
+                                style={{
+                                    padding: '6px 12px', borderRadius: '4px', cursor: 'pointer',
+                                    background: leadCategory === 'news' ? '#f59e0b' : 'white',
+                                    color: leadCategory === 'news' ? 'white' : '#64748b',
+                                    border: '1px solid #cbd5e1', fontSize: '0.9rem'
+                                }}
+                            >
+                                📰 Market News ({marketNews.length})
+                            </button>
+                        </div>
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                <thead style={{ background: '#f8fafc', color: '#64748b', fontSize: '0.9rem' }}>
+                                    <tr>
+                                        <th style={{ padding: '1rem' }}>Source</th>
+                                        <th style={{ padding: '1rem' }}>Title / Farmer</th>
+                                        <th style={{ padding: '1rem' }}>Latest Update / Post</th>
+                                        <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {webLeads.length > 0 ? (
+                                        webLeads.map(lead => (
+                                            <tr key={lead.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <span style={{
+                                                        padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem',
+                                                        background: lead.source === 'Facebook' ? '#e7f3ff' : '#fff3e0',
+                                                        color: lead.source === 'Facebook' ? '#1877f2' : '#e65100',
+                                                        border: '1px solid #e2e8f0'
+                                                    }}>
+                                                        {lead.source}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '1rem', fontWeight: '500' }}>{lead.author}</td>
+                                                <td style={{ padding: '1rem', fontSize: '0.9rem', color: '#475569' }}>
+                                                    {lead.question}
+                                                </td>
+                                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                        <a
+                                                            href={lead.link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            style={{
+                                                                textDecoration: 'none', background: '#f8fafc', color: '#475569',
+                                                                padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem',
+                                                                border: '1px solid #e2e8f0', fontWeight: '600'
+                                                            }}
+                                                        >
+                                                            🔗 Link
+                                                        </a>
+                                                        {lead.type !== 'news' && (
+                                                            <button
+                                                                onClick={() => startConversion(lead)}
+                                                                style={{
+                                                                    background: lead.type === 'farmers' ? '#10b981' : '#3b82f6',
+                                                                    color: 'white', padding: '6px 12px', borderRadius: '6px',
+                                                                    fontSize: '0.8rem', fontWeight: '600', border: 'none', cursor: 'pointer'
+                                                                }}
+                                                            >
+                                                                {lead.type === 'farmers' ? '👨‍🌾 Post Sell' : '➕ Post Buy'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+                                                {isFetchingLeads ? 'Loading latest updates...' : 'No data found. Try refreshing.'}
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Conversion Modal */}
+            {convertingLead && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div className="card" style={{ width: '400px', padding: '1.5rem', background: 'white' }}>
+                        <h2 style={{ marginBottom: '1rem' }}>Convert to {conversionForm.type === 'Sell' ? 'Farmer Selling' : 'Buyer Requirement'}</h2>
+                        <form onSubmit={handlePublishConversion}>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Listing Type</label>
+                                <select
+                                    value={conversionForm.type}
+                                    onChange={(e) => setConversionForm({ ...conversionForm, type: e.target.value })}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                >
+                                    <option value="Buy">Buyer Looking to Buy</option>
+                                    <option value="Sell">Farmer Looking to Sell</option>
+                                </select>
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Commodity / Crop</label>
+                                <input
+                                    type="text"
+                                    value={conversionForm.commodity}
+                                    onChange={(e) => setConversionForm({ ...conversionForm, commodity: e.target.value })}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                    required
+                                />
+                            </div>
+                            <div style={{ marginBottom: '1rem', display: 'flex', gap: '10px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Target Price</label>
+                                    <input
+                                        type="number"
+                                        value={conversionForm.price}
+                                        onChange={(e) => setConversionForm({ ...conversionForm, price: e.target.value })}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                        placeholder="e.g. 2100"
+                                    />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Unit</label>
+                                    <select
+                                        value={conversionForm.unit}
+                                        onChange={(e) => setConversionForm({ ...conversionForm, unit: e.target.value })}
+                                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                    >
+                                        <option value="quintal">Quintal</option>
+                                        <option value="kg">Kg</option>
+                                        <option value="ton">Ton</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Quantity Required</label>
+                                <input
+                                    type="text"
+                                    value={conversionForm.quantity}
+                                    onChange={(e) => setConversionForm({ ...conversionForm, quantity: e.target.value })}
+                                    style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                                    placeholder="e.g. 5-10 tons"
+                                />
+                            </div>
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '1.5rem' }}>
+                                This will be published as a "Buy" requirement. The original web lead description will be preserved.
+                            </p>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setConvertingLead(null)}
+                                    disabled={isPublishing}
+                                    style={{ flex: 1, padding: '0.75rem', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: isPublishing ? 'not-allowed' : 'pointer', opacity: isPublishing ? 0.5 : 1 }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isPublishing}
+                                    style={{
+                                        flex: 2, padding: '0.75rem', borderRadius: '6px', border: 'none',
+                                        background: isPublishing ? '#94a3b8' : '#10b981',
+                                        color: 'white', fontWeight: 'bold', cursor: isPublishing ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    {isPublishing ? '🚀 Publishing...' : '✅ Publish Now'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

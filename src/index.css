@@ -617,3 +617,15 @@ header input.header-search-input::placeholder {
     transform: translateX(-50%);
   }
 }
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-border {
+  0% { border-color: #ff9800; box-shadow: 0 0 5px rgba(255, 152, 0, 0.2); }
+  50% { border-color: #f57c00; box-shadow: 0 0 20px rgba(255, 152, 0, 0.5); }
+  100% { border-color: #ff9800; box-shadow: 0 0 5px rgba(255, 152, 0, 0.2); }
+}

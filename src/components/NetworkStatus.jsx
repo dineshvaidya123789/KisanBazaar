@@ -1,20 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { useLanguage } from '../context/LanguageContext';
 
 const NetworkStatus = () => {
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-    useEffect(() => {
-        const handleOnline = () => setIsOnline(true);
-        const handleOffline = () => setIsOnline(false);
-
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
+    const isOnline = useOnlineStatus();
+    const { t } = useLanguage();
 
     if (isOnline) return null;
 
@@ -24,25 +14,21 @@ const NetworkStatus = () => {
             top: 0,
             left: 0,
             right: 0,
-            backgroundColor: '#d32f2f', // Red for alert
+            backgroundColor: '#ff9800',
             color: 'white',
             textAlign: 'center',
-            padding: '8px',
-            zIndex: 10000,
+            padding: '8px 16px',
             fontSize: '0.9rem',
             fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            zIndex: 10000,
             display: 'flex',
-            justifyContent: 'center',
             alignItems: 'center',
-            gap: '8px'
+            justifyContent: 'center',
+            gap: '8px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            animation: 'slideDown 0.3s ease-out'
         }}>
-            <span>⚠</span>
-            <span>
-                No Internet Connection. You are offline.
-                <br />
-                (इंटरनेट कनेक्शन नहीं है। आप ऑफ़लाइन हैं।)
-            </span>
+            <span>⚠️ {t('offline_msg')}</span>
         </div>
     );
 };
