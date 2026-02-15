@@ -50,18 +50,34 @@ const LOCATION_KEYWORDS = [
     'bhopal', 'jabalpur', 'gwalior'
 ];
 
+const B2B_SITES = [
+    "exportersindia.com",
+    "expertsofdeals.com",
+    "go4worldbusiness.com",
+    "globalbuyersonline.com",
+    "b2bmap.com",
+    "indiamart.com",
+    "tradeindia.com"
+];
+
 export const fetchLiveLeads = async (type = 'requirements') => {
     if (!SERPER_API_KEY) {
         // ... (keep fallback logic for demo)
     }
 
     const queries = CATEGORIES[type] || CATEGORIES.requirements;
-    const query = queries[Math.floor(Math.random() * queries.length)];
+    const baseQuery = queries[Math.floor(Math.random() * queries.length)];
 
-    // Loosened filters to allow more candidates through to the manual vetting layer
-    let finalQuery = query;
+    // Aggressively target B2B platforms for requirements
+    let finalQuery = baseQuery;
+    if (type === 'requirements') {
+        const site = B2B_SITES[Math.floor(Math.random() * B2B_SITES.length)];
+        finalQuery = `${baseQuery} site:${site}`;
+    }
+
+    // Aggressive negative filters for total noise removal
     if (type === 'requirements' || type === 'farmers') {
-        finalQuery += " -recipe -cooking -kitchen -delicious -menu -benefits -healthy -tips -day -plates -disposable -college -Karachi -Pakistan -Lahore";
+        finalQuery += " -recipe -cooking -kitchen -delicious -menu -benefits -healthy -tips -day -plates -disposable -college -Karachi -Pakistan -Lahore -Indonesia";
     }
 
     try {
