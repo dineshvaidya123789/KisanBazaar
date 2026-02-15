@@ -10,27 +10,33 @@ const SERPER_API_KEY = "6c2973d259e27a9b7dea3006ab70246e20c6cb80"; // Enabled li
 
 const CATEGORIES = {
     requirements: [
-        "wanted buy Tuur Chana Moong pulses India MP Maharashtra",
-        "Pomegranate Grapes Mango export requirement Maharashtra",
-        "pulses trader contact requirement MP Indore",
-        "fruit exporter requirement Mumbai Nashik",
-        "wanted buy 100 tons soybean Chana Madhya Pradesh"
+        "Wanted Agri BUYER \"Tuur\" OR \"Chana\" OR \"Moong\" India",
+        "Requirement Pomegranate OR Grapes OR Mango \"Exporter\" Maharashtra",
+        "Agri TRADER contact \"Pulses\" OR \"Grains\" MP Maharashtra",
+        "wanted buy bulk \"Tuur dal\" OR \"Chana dal\" India",
+        "wanted Soybean \"procurement\" buyer India MP"
     ],
     farmers: [
-        "Tuur dal stock available for sale MP farmer",
-        "fresh Grapes Pomegranate for sale Maharashtra facebook",
-        "Moong Chana pulses for sale Madhya Pradesh",
-        "Mango production for sale Ratnagiri Maharashtra",
-        "bulk fruits pulses available for sale MP MS"
+        "Tuur dal stock \"available for sale\" MP Maharashtra",
+        "fresh \"Grapes\" OR \"Pomegranate\" sale Maharashtra facebook",
+        "Moong Chana pulses stock \"sale\" Madhya Pradesh",
+        "Ratnagiri \"Mango\" for sale Maharashtra",
+        "bulk fruits pulses \"stock available\" MP MS"
     ],
     news: [
-        "pulses export policy India 2025",
-        "fruit market price trend Maharashtra 2025",
+        "pulses mandi price trend India 2025",
+        "fruit export policy Maharashtra 2025",
         "mandi rates Chana Tuur MP today",
         "government procurement pulses 2025",
-        "horticulture schemes Maharashtra 2025"
+        "horticulture news Maharashtra 2025"
     ]
 };
+
+const CROP_KEYWORDS = [
+    'tuur', 'chana', 'moong', 'pulses', 'pomegranate', 'grapes', 'mango',
+    'soybean', 'wheat', 'dal', 'corn', 'maize', 'banana', 'fruits',
+    'grain', 'anar', 'kismis', 'orange', 'santra', 'arhar'
+];
 
 export const fetchLiveLeads = async (type = 'requirements') => {
     if (!SERPER_API_KEY) {
@@ -40,10 +46,10 @@ export const fetchLiveLeads = async (type = 'requirements') => {
     const queries = CATEGORIES[type] || CATEGORIES.requirements;
     const query = queries[Math.floor(Math.random() * queries.length)];
 
-    // Add aggressive negative filters to eliminate non-agri, travel, lifestyle, and foreign noise
+    // Aggressive negative filters for total noise removal
     let finalQuery = query;
     if (type === 'requirements' || type === 'farmers') {
-        finalQuery += " -travel -tips -mess -innovation -menstrual -adolescents -female -pregnant -vacancies -careers -jobs -recruitment -pdf -SEBI -regulation -results -standalone -unaudited -Pakistan -Lahore -Karachi";
+        finalQuery += " -plates -disposable -insecticides -pesticides -colleges -MBA -courses -exam -admission -travel -mess -Innovation -Menstrual -Pakistan -Jobs -Careers";
     }
 
     try {
@@ -58,17 +64,26 @@ export const fetchLiveLeads = async (type = 'requirements') => {
                 gl: "in",
                 hl: "en",
                 autocorrect: true,
-                tbs: "qdr:w", // Always past week
-                num: 30 // Fetch more results for better filtering
+                tbs: "qdr:w",
+                num: 40 // Fetch more to allow for stricter filtering
             }),
         });
 
         const data = await response.json();
 
         if (data.organic && data.organic.length > 0) {
-            // Deduplicate by title or snippet to remove redundant results
             const seen = new Set();
             return data.organic.filter(item => {
+                const text = (item.title + " " + item.snippet).toLowerCase();
+
+                // MANDATORY AGRI VALIDATION: Result must mention a crop/agri term
+                const hasAgriTerm = CROP_KEYWORDS.some(k => text.includes(k));
+                if (!hasAgriTerm && type !== 'news') return false;
+
+                // Noise keywords to kill again at post-fetch
+                const noise = ['disposable', 'plate', 'insecticide', 'college', 'university', 'admission', 'course'];
+                if (noise.some(n => text.includes(n))) return false;
+
                 const dupKey = (item.title + item.snippet).substring(0, 50);
                 if (seen.has(dupKey)) return false;
                 seen.add(dupKey);
