@@ -11,17 +11,17 @@ const SERPER_API_KEY = "6c2973d259e27a9b7dea3006ab70246e20c6cb80"; // Enabled li
 const CATEGORIES = {
     requirements: [
         "wanted buy Tuur Chana Moong pulses India",
-        "Pomegranate Grapes Mango export requirement Maharashtra",
-        "pulses trader contact requirement MP Maharashtra",
-        "fruit exporter requirement Mumbai Nashik",
-        "buy bulk Tuur dal Chana dal procurement India"
+        "Pomegranate Grapes Mango export requirement India Maharashtra",
+        "pulses trader procurement requirement MP Maharashtra India",
+        "fruit exporter requirement Mumbai Nashik India",
+        "wanted buy bulk Tuur dal Chana dal India"
     ],
     farmers: [
-        "Tuur dal stock available for sale MP Maharashtra",
-        "fresh Grapes Pomegranate for sale Maharashtra",
-        "Moong Chana pulses stock for sale Madhya Pradesh",
-        "Ratnagiri Mango production for sale Maharashtra",
-        "bulk fruits pulses stock available India"
+        "Tuur dal stock available for sale India MP Maharashtra",
+        "fresh Grapes Pomegranate for sale Maharashtra India",
+        "Moong Chana pulses stock for sale Madhya Pradesh India",
+        "Ratnagiri Mango production for sale Maharashtra India",
+        "bulk fruits pulses stock available India MP MS"
     ],
     news: [
         "pulses mandi price trend India 2025",
@@ -40,7 +40,14 @@ const CROP_KEYWORDS = [
 
 const PERSONA_KEYWORDS = [
     'buyer', 'seller', 'exporter', 'trader', 'procurement', 'wanted',
-    'available', 'stock', 'requirement', 'purchase', 'contact', 'wholesale'
+    'available', 'stock', 'requirement', 'purchase', 'contact', 'wholesale',
+    'importer', 'supply', 'need'
+];
+
+const LOCATION_KEYWORDS = [
+    'india', 'maharashtra', 'madhya pradesh', 'mp', 'mumbai', 'indore',
+    'burhanpur', 'nashik', 'pune', 'nagpur', 'satara', 'sangli', 'ratnagiri',
+    'bhopal', 'jabalpur', 'gwalior'
 ];
 
 export const fetchLiveLeads = async (type = 'requirements') => {
@@ -54,7 +61,7 @@ export const fetchLiveLeads = async (type = 'requirements') => {
     // Loosened filters to allow more candidates through to the manual vetting layer
     let finalQuery = query;
     if (type === 'requirements' || type === 'farmers') {
-        finalQuery += " -travel -mess -college -admission -exam -plates -disposable";
+        finalQuery += " -recipe -cooking -kitchen -delicious -menu -benefits -healthy -tips -day -plates -disposable -college -Karachi -Pakistan -Lahore";
     }
 
     try {
@@ -68,9 +75,10 @@ export const fetchLiveLeads = async (type = 'requirements') => {
                 q: finalQuery,
                 gl: "in",
                 hl: "en",
+                location: "India",
                 autocorrect: true,
                 tbs: "qdr:w",
-                num: 40 // Fetch more to allow for stricter filtering
+                num: 40
             }),
         });
 
@@ -81,19 +89,27 @@ export const fetchLiveLeads = async (type = 'requirements') => {
             return data.organic.filter(item => {
                 const text = (item.title + " " + item.snippet).toLowerCase();
 
-                // MANDATORY AGRI VALIDATION: Result must mention a crop/agri term
+                // 1. MANDATORY GEOGRAPHY: Result must mention India or Indian State/City
+                const hasLocation = LOCATION_KEYWORDS.some(k => text.includes(k));
+                if (!hasLocation && type !== 'news') return false;
+
+                // 2. MANDATORY CROP: Result must mention a specific agricultural crop
                 const hasAgriTerm = CROP_KEYWORDS.some(k => text.includes(k));
 
-                // MANDATORY PERSONA VALIDATION: Result must mention a buyer/seller/exporter/trader
+                // 3. MANDATORY PERSONA: Result must mention a transactional role
                 const hasPersonaTerm = PERSONA_KEYWORDS.some(k => text.includes(k));
 
-                // Strict rule for transactional leads: both must match
+                // Strict rule for transactional leads: All three (Location, Crop, Persona) must match
                 if (type !== 'news') {
                     if (!hasAgriTerm || !hasPersonaTerm) return false;
                 }
 
-                // Noise keywords to kill again at post-fetch
-                const noise = ['disposable', 'plate', 'insecticide', 'college', 'university', 'admission', 'course', 'travel', 'mess'];
+                // 4. AGGRESSIVE BLACKLIST for food/lifestyle noise
+                const noise = [
+                    'menu', 'pulao', 'recipe', 'delicious', 'benefits', 'healthy',
+                    'cooking', 'kitchen', 'day', 'plates', 'disposable', 'insecticide',
+                    'college', 'university', 'admission', 'karachi', 'pakistan'
+                ];
                 if (noise.some(n => text.includes(n))) return false;
 
                 const dupKey = (item.title + item.snippet).substring(0, 50);
