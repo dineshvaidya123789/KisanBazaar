@@ -1,7 +1,7 @@
 import { locationData } from '../data/locationData';
 
 const API_KEY = 'zpka_3e36f919d14b482bab42a3647f93c313_8fbe4bad';
-const BASE_URL = 'http://dataservice.accuweather.com';
+const BASE_URL = 'https://dataservice.accuweather.com'; // was http, which browsers block on an https site
 
 const weatherCache = new Map();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes

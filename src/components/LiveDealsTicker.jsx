@@ -8,15 +8,8 @@ const LiveDealsTicker = () => {
     const [deals, setDeals] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Mock Data for "Busy" Look
-    const mockDeals = [
-        { id: 'm1', text_en: "Ramesh (Satara) sold 50kg Onion", text_hi: "रमेश (सातारा) ने 50 किलो प्याज बेचा", text_mr: "रमेश (सातारा) यांनी 50 किलो कांदा विकला", type: 'sell' },
-        { id: 'm2', text_en: "Suresh (Pune) bought 100kg Wheat", text_hi: "सुरेश (पुणे) ने 100 किलो गेहूं खरीदा", text_mr: "सुरेश (पुणे) यांनी 100 किलो गहू खरेदी केला", type: 'buy' },
-        { id: 'm3', text_en: "Anita (Nashik) listed 200kg Tomato", text_hi: "अनिता (नासिक) ने 200 किलो टमाटर सूचीबद्ध किया", text_mr: "अनिता (नाशिक) यांनी 200 किलो टोमॅटो लिस्ट केला", type: 'sell' },
-        { id: 'm4', text_en: "Vijay (Indore) looking for Soyabean", text_hi: "विजय (इंदौर) सोयाबीन की तलाश में है", text_mr: "विजय (इंदूर) सोयाबीन शोधत आहे", type: 'buy' },
-        { id: 'm5', text_en: "Manoj (Bhusawal) sold 500 Dozen Banana", text_hi: "मनोज (भुसावल) ने 500 दर्जन केले बेचे", text_mr: "मनोज (भुसावळ) यांनी 500 डझन केळी विकली", type: 'sell' }
-    ];
-
+    // Only real listings are shown. (An earlier version padded the ticker with made-up deals such as
+    // "Ramesh (Satara) sold 50kg Onion"; removed 2026-11-19 so no invented activity is shown.)
     useEffect(() => {
         const fetchDeals = async () => {
             try {
@@ -47,17 +40,10 @@ const LiveDealsTicker = () => {
                     };
                 });
 
-                // Combine Real + Mock (Ensure at least 5-6 items for smooth scroll)
-                let combined = [...realDeals];
-                if (combined.length < 6) {
-                    const needed = 6 - combined.length;
-                    combined = [...combined, ...mockDeals.slice(0, needed)];
-                }
-
-                setDeals(combined);
+                setDeals(realDeals);
             } catch (error) {
                 console.error("Error fetching ticker deals:", error);
-                setDeals(mockDeals); // Fallback to full mock
+                setDeals([]); // nothing real to show: the ticker hides itself
             } finally {
                 setLoading(false);
             }
@@ -66,7 +52,7 @@ const LiveDealsTicker = () => {
         fetchDeals();
     }, []);
 
-    if (loading) return null;
+    if (loading || deals.length === 0) return null;
 
     return (
         <div className="ticker-container" style={{

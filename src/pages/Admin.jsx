@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
-import { fetchLiveLeads } from '../services/leadService';
+import { fetchLiveLeads, LEADS_ENABLED } from '../services/leadService';
 
 const Admin = () => {
     const { user, loading } = useAuth();
@@ -443,6 +443,11 @@ const Admin = () => {
 
                 {activeTab === 'leads' && (
                     <div style={{ padding: '1rem' }}>
+                        {!LEADS_ENABLED && (
+                            <div style={{ padding: '12px 14px', marginBottom: '1rem', background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '8px', color: '#92400e', fontSize: '0.9rem' }}>
+                                Web Leads are switched off for now. They will come back once the search runs on a secure server.
+                            </div>
+                        )}
                         {/* Sub-Navigation for Leads */}
                         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '8px' }}>
                             <button

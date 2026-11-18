@@ -6,7 +6,10 @@
  * 2. Replace the placeholder below or add it to your environment variables.
  */
 
-const SERPER_API_KEY = "6c2973d259e27a9b7dea3006ab70246e20c6cb80"; // Enabled live leads
+// The Serper search key that was written here was removed on 2026-11-19 (it was readable by every visitor).
+// Web Leads stay switched off until the search runs on a server that keeps the key secret.
+export const LEADS_ENABLED = false;
+const SERPER_API_KEY = '';
 
 const CATEGORIES = {
     requirements: [
@@ -72,6 +75,7 @@ const NEWS_BLACKLIST = [
 ];
 
 export const fetchLiveLeads = async (type = 'requirements') => {
+    if (!LEADS_ENABLED) return []; // switched off, no request is made
     if (!SERPER_API_KEY) {
         // ... (keep fallback logic for demo)
     }

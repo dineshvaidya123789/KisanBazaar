@@ -8,6 +8,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from '../firebase';
+import { isAdminPhone } from '../utils/adminPhone';
 
 const AuthContext = createContext();
 
@@ -24,12 +25,9 @@ export const AuthProvider = ({ children }) => {
                 // User is signed in.
                 const phoneNumber = firebaseUser.phoneNumber;
 
-                // Hardcoded Admin Access for your number
-                let role = 'Farmer';
-                // Check against widely used formats just in case
-                if (phoneNumber === '+919987917394' || phoneNumber === '+91 9987917394') {
-                    role = 'Admin';
-                }
+                // Admin is decided by the login phone number only (the database rules use the same number).
+                // The profile's role field cannot grant or remove Admin.
+                const role = isAdminPhone(phoneNumber) ? 'Admin' : 'Farmer';
 
                 // 1. Optimistic Update - Unlock UI Immediately
                 setUser({
@@ -80,7 +78,8 @@ export const AuthProvider = ({ children }) => {
                             ...profileData,
                             // Ensure defaults if missing in DB
                             name: profileData.name || prev.name,
-                            role: profileData.role || prev.role,
+                            // Only the admin phone is Admin; a profile saying Admin on any other phone counts as Farmer.
+                            role: isAdminPhone(firebaseUser.phoneNumber) ? 'Admin' : (profileData.role === 'Admin' ? 'Farmer' : (profileData.role || prev.role)),
                             city: profileData.city || prev.city,
                             interests: profileData.interests || prev.interests
                         };
