@@ -1,11 +1,33 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import fs from 'node:fs'
+import path from 'node:path'
+
+// GitHub Pages shows its own "404" page for any address that is not a real file (for example /weather or /login).
+// It uses a file called 404.html when there is one. Giving it a copy of index.html lets the app open at any direct
+// link, also for a visitor who has never opened the site before (added 2026-11-19).
+const copyIndexTo404 = () => {
+  let outDir = 'dist'
+  return {
+    name: 'copy-index-to-404',
+    apply: 'build',
+    enforce: 'post',
+    configResolved(config) {
+      outDir = path.resolve(config.root, config.build.outDir)
+    },
+    closeBundle() {
+      const from = path.join(outDir, 'index.html')
+      if (fs.existsSync(from)) fs.copyFileSync(from, path.join(outDir, '404.html'))
+    }
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    copyIndexTo404(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
