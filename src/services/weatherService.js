@@ -1,13 +1,17 @@
 import { locationData } from '../data/locationData';
 
-const API_KEY = 'zpka_3e36f919d14b482bab42a3647f93c313_8fbe4bad';
-const BASE_URL = 'https://dataservice.accuweather.com'; // was http, which browsers block on an https site
+// Weather comes from Open-Meteo (https://open-meteo.com): free for non-commercial use, no API key, data licence CC BY 4.0
+// (the Weather page shows the required credit). Switch to their paid plan before charging subscriptions.
+// Replaced the old AccuWeather calls on 2026-11-19: their key was not valid (every call answered 403), so only the
+// fixed fallback text below was ever shown.
+const GEOCODE_URL = 'https://geocoding-api.open-meteo.com/v1/search';
+const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 
 const weatherCache = new Map();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
-export const getWeather = async (query, days = 5) => { // Days ignored, AW gives 1, 5, 10, 15
-    const cacheKey = `aw-${query}`;
+export const getWeather = async (query, days = 5) => { // days is ignored: the forecast is always 5 days
+    const cacheKey = `om-${query}`;
     const cached = weatherCache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -15,23 +19,25 @@ export const getWeather = async (query, days = 5) => { // Days ignored, AW gives
     }
 
     try {
-        // Step 1: Search for Location Key
-        const locationKey = await getLocationKey(query);
-        if (!locationKey) throw new Error('Location not found');
+        // Step 1: find the place ("Tehsil, State" or "District, State")
+        const place = await findPlace(query);
+        if (!place) throw new Error('Location not found');
 
-        // Step 2: Parallel Fetch (Current + Forecast)
-        const [current, forecast] = await Promise.all([
-            fetch(`${BASE_URL}/currentconditions/v1/${locationKey.Key}?apikey=${API_KEY}&details=true`),
-            fetch(`${BASE_URL}/forecasts/v1/daily/5day/${locationKey.Key}?apikey=${API_KEY}&metric=true`)
-        ]);
+        // Step 2: current weather + 5 day forecast in one call
+        const params = new URLSearchParams({
+            latitude: String(place.latitude),
+            longitude: String(place.longitude),
+            current: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m',
+            daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,uv_index_max,relative_humidity_2m_mean',
+            timezone: 'auto',
+            forecast_days: '5'
+        });
+        const res = await fetch(`${FORECAST_URL}?${params.toString()}`);
+        if (!res.ok) throw new Error('Weather API Error');
+        const data = await res.json();
+        if (!data.current || !data.daily) throw new Error('Weather API returned no data');
 
-        if (!current.ok || !forecast.ok) throw new Error('Weather API Error');
-
-        const currentData = await current.json();
-        const forecastData = await forecast.json();
-
-        const transformed = transformAccuWeatherData(currentData[0], forecastData, locationKey);
-
+        const transformed = transformOpenMeteoData(data, place);
         weatherCache.set(cacheKey, { data: transformed, timestamp: Date.now() });
         return transformed;
 
@@ -53,68 +59,88 @@ export const getCacheStatus = () => {
     };
 };
 
-const getLocationKey = async (query) => {
-    // Sanitize: AccuWeather search works best with "City" or "City, State"
-    // Remove "Tehsil" word if present? No, let's just pass the query.
-    // Ensure URL encoding.
-    const url = `${BASE_URL}/locations/v1/cities/search?apikey=${API_KEY}&q=${encodeURIComponent(query)}`;
-    const res = await fetch(url);
+// "Satara, Maharashtra" -> the first Indian match whose state name fits, else the first Indian match.
+const findPlace = async (query) => {
+    const [rawName, rawState] = String(query || '').split(',').map(s => s.trim());
+    if (!rawName) return null;
+    const params = new URLSearchParams({ name: rawName, count: '10', language: 'en', format: 'json', countryCode: 'IN' });
+    const res = await fetch(`${GEOCODE_URL}?${params.toString()}`);
+    if (!res.ok) return null;
     const data = await res.json();
-    return data && data.length > 0 ? data[0] : null;
+    const results = Array.isArray(data.results) ? data.results : [];
+    if (results.length === 0) return null;
+    const state = (rawState || '').toLowerCase();
+    return (state && results.find(r => String(r.admin1 || '').toLowerCase() === state)) || results[0];
 };
 
-// ... Transformer and Icon Mapper ...
-const transformAccuWeatherData = (current, forecast, location) => {
+// WMO weather codes -> short text and emoji
+const describeCode = (code) => {
+    if (code === 0) return { text: 'Clear sky', icon: '☀️' };
+    if (code === 1) return { text: 'Mainly clear', icon: '🌤️' };
+    if (code === 2) return { text: 'Partly cloudy', icon: '⛅' };
+    if (code === 3) return { text: 'Overcast', icon: '☁️' };
+    if (code === 45 || code === 48) return { text: 'Fog', icon: '🌫️' };
+    if (code >= 51 && code <= 57) return { text: 'Drizzle', icon: '🌦️' };
+    if (code >= 61 && code <= 67) return { text: 'Rain', icon: '🌧️' };
+    if (code >= 71 && code <= 77) return { text: 'Snow', icon: '❄️' };
+    if (code >= 80 && code <= 82) return { text: 'Rain showers', icon: '🌧️' };
+    if (code === 85 || code === 86) return { text: 'Snow showers', icon: '❄️' };
+    if (code === 95) return { text: 'Thunderstorm', icon: '⛈️' };
+    if (code === 96 || code === 99) return { text: 'Thunderstorm with hail', icon: '⛈️' };
+    return { text: 'Partly cloudy', icon: '🌤️' };
+};
+
+const compass = (deg) => {
+    if (typeof deg !== 'number') return undefined;
+    return ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(deg / 45) % 8];
+};
+
+const transformOpenMeteoData = (data, place) => {
+    const c = data.current;
+    const d = data.daily;
+    const now = describeCode(c.weather_code);
+    const todayRain = (d.precipitation_probability_max && d.precipitation_probability_max[0]) || 0;
     return {
         current: {
-            temp: Math.round(current.Temperature.Metric.Value),
-            condition: current.WeatherText,
-            humidity: current.RelativeHumidity,
-            wind: `${Math.round(current.Wind?.Speed?.Metric?.Value || 0)} km/h`,
-            feelsLike: Math.round(current.RealFeelTemperature?.Metric?.Value || current.Temperature.Metric.Value),
-            uv: current.UVIndex,
-            visibility: current.Visibility?.Metric?.Value,
-            pressure: current.Pressure?.Metric?.Value,
-            windDir: current.Wind?.Direction?.English,
-            rainProb: current.PrecipitationSummary?.Precipitation?.Metric?.Value > 0 ? 'High' : 'Low',
-            icon: getWeatherEmoji(current.WeatherIcon),
-            lastUpdated: new Date(current.LocalObservationDateTime).toLocaleTimeString(),
+            temp: Math.round(c.temperature_2m),
+            condition: now.text,
+            humidity: Math.round(c.relative_humidity_2m),
+            wind: `${Math.round(c.wind_speed_10m || 0)} km/h`,
+            feelsLike: Math.round(c.apparent_temperature),
+            uv: d.uv_index_max ? Math.round(d.uv_index_max[0]) : undefined,
+            visibility: undefined, // not part of this free call
+            pressure: Math.round(c.surface_pressure),
+            windDir: compass(c.wind_direction_10m),
+            rainProb: `${Math.round(todayRain)}%`,
+            icon: now.icon,
+            lastUpdated: new Date(c.time).toLocaleTimeString(),
         },
-        forecast: forecast.DailyForecasts.map((day, index) => {
-            const date = new Date(day.Date);
-            const dayName = index === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
+        forecast: d.time.map((dateStr, i) => {
+            const date = new Date(dateStr);
+            const max = d.temperature_2m_max[i];
+            const min = d.temperature_2m_min[i];
+            const desc = describeCode(d.weather_code[i]);
             return {
-                day: dayName,
-                date: day.Date,
-                temp: Math.round((day.Temperature.Maximum.Value + day.Temperature.Minimum.Value) / 2),
-                maxTemp: Math.round(day.Temperature.Maximum.Value),
-                minTemp: Math.round(day.Temperature.Minimum.Value),
-                condition: day.Day.IconPhrase,
-                icon: getWeatherEmoji(day.Day.Icon),
-                rainChance: day.Day.PrecipitationProbability || 0,
-                humidity: 50, // AccuWeather basic forecast doesn't always have humidity in this endpoint
-                maxWind: Math.round(day.Day.Wind?.Speed?.Value || 0)
+                day: i === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' }),
+                date: dateStr,
+                temp: Math.round((max + min) / 2),
+                maxTemp: Math.round(max),
+                minTemp: Math.round(min),
+                condition: desc.text,
+                icon: desc.icon,
+                rainChance: Math.round(d.precipitation_probability_max[i] || 0),
+                humidity: d.relative_humidity_2m_mean ? Math.round(d.relative_humidity_2m_mean[i]) : undefined,
+                maxWind: Math.round(d.wind_speed_10m_max[i] || 0)
             };
         }),
         alerts: [],
         location: {
-            name: location.LocalizedName,
-            region: location.AdministrativeArea.LocalizedName,
-            country: location.Country.LocalizedName
-        }
+            name: place.name,
+            region: place.admin1 || '',
+            country: place.country || 'India'
+        },
+        source: 'Open-Meteo'
     };
-};
-
-const getWeatherEmoji = (iconCode) => {
-    if (iconCode >= 1 && iconCode <= 5) return '☀️'; // Sunny
-    if (iconCode >= 6 && iconCode <= 8) return '☁️'; // Cloudy
-    if (iconCode === 11) return '🌫️'; // Fog
-    if ((iconCode >= 12 && iconCode <= 14) || iconCode === 18) return '🌧️'; // Rain
-    if (iconCode >= 15 && iconCode <= 17) return '⛈️'; // T-Storms
-    if (iconCode >= 19 && iconCode <= 21) return '❄️'; // Snow
-    if (iconCode >= 22 && iconCode <= 29) return '❄️'; // Snow/Ice
-    if (iconCode >= 33 && iconCode <= 36) return '🌙'; // Night Clear
-    return '🌤️';
 };
 
 const getFallbackWeather = (city) => {

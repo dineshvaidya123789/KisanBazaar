@@ -499,6 +499,12 @@ const Weather = () => {
                 </>
             ) : null}
 
+            {weatherData && !weatherData.isFallback && (
+                <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#777', margin: '1rem 0' }}>
+                    Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo.com</a> (CC BY 4.0)
+                </p>
+            )}
+
             <BackToHomeButton />
         </div>
     );
