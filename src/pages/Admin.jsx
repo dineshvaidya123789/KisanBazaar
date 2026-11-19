@@ -6,12 +6,13 @@ import SEO from '../components/SEO';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { fetchLiveLeads, LEADS_ENABLED } from '../services/leadService';
+import LivestockAdminTab from '../components/LivestockAdminTab';
 
 const Admin = () => {
     const { user, loading } = useAuth();
     const { listings, deleteListing, addListing } = useMarket();
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState('listings'); // 'listings', 'alerts', 'users', or 'leads'
+    const [activeTab, setActiveTab] = useState('listings'); // 'listings', 'alerts', 'users', 'leads' or 'livestock'
     const [alerts, setAlerts] = useState([]);
     const [users, setUsers] = useState([]);
     const [webLeads, setWebLeads] = useState([]);
@@ -223,6 +224,21 @@ const Admin = () => {
                         👥 Users ({users.length})
                     </button>
                     <button
+                        onClick={() => setActiveTab('livestock')}
+                        style={{
+                            padding: '1rem 2rem',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: activeTab === 'livestock' ? '3px solid #3b82f6' : '3px solid transparent',
+                            color: activeTab === 'livestock' ? '#3b82f6' : '#64748b',
+                            fontWeight: activeTab === 'livestock' ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            fontSize: '1rem'
+                        }}
+                    >
+                        Livestock
+                    </button>
+                    <button
                         onClick={() => setActiveTab('leads')}
                         style={{
                             padding: '0.75rem 1.5rem',
@@ -256,7 +272,8 @@ const Admin = () => {
                     <h3 style={{ margin: 0 }}>
                         {activeTab === 'listings' ? 'Moderation Queue' :
                             activeTab === 'leads' ? 'External Market Requirements' :
-                                activeTab === 'users' ? 'Registered Users' : 'Active Alerts'}
+                                activeTab === 'users' ? 'Registered Users' :
+                                    activeTab === 'livestock' ? 'Livestock Listings' : 'Active Alerts'}
                     </h3>
                     {activeTab === 'leads' && (
                         <button
@@ -395,6 +412,8 @@ const Admin = () => {
                         </table>
                     </div>
                 ) : null}
+
+                {activeTab === 'livestock' && <LivestockAdminTab />}
 
                 {activeTab === 'users' && (
                     <div style={{ overflowX: 'auto' }}>

@@ -35,6 +35,8 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Admin = lazy(() => import('./pages/Admin'));
 const FPORegistration = lazy(() => import('./pages/FPORegistration'));
 const TradeArea = lazy(() => import('./pages/TradeArea'));
+const LivestockSell = lazy(() => import('./pages/LivestockSell'));
+const MyAnimals = lazy(() => import('./pages/MyAnimals'));
 import Promo from './pages/Promo';
 import Land from './pages/Land';
 import LandForm from './pages/LandForm';
@@ -105,6 +107,9 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/livestock/sell" element={<LivestockSell />} />
+              <Route path="/livestock/edit/:id" element={<LivestockSell />} />
+              <Route path="/livestock/my" element={<MyAnimals />} />
               <Route path="/fpo-registration" element={<FPORegistration />} />
               <Route path="/trade-area" element={<TradeArea />} />
               <Route path="/land" element={<Land />} />

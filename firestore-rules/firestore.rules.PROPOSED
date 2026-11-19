@@ -1,0 +1,164 @@
+// PROPOSED rules for KisanBazaar (Stage A as published 2026-11-18, plus an additive livestock Phase 1 section) (project kisanbazaar-1b2bc). NOT deployed. Stage A: closes the worst holes and keeps
+// every behaviour the live app has today (guests can still post a listing and create alerts).
+// Rollback = paste back the old public rule: allow read, write: if true.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    // The owner's login phone (phone sign-in puts it in the token). Admin is decided HERE, not in the app.
+    function isAdmin() { return signedIn() && request.auth.token.phone_number == '+919987917394'; }
+
+    // A listing may be created or changed by its owner: ownerUid (new listings) or the same phone as the login
+    // (older listings hold the phone as 10 digits or as +91xxxxxxxxxx).
+    function ownsListing(d) {
+      return signedIn() && (
+        ('ownerUid' in d && d.ownerUid == request.auth.uid) ||
+        ('contactMobile' in d && (request.auth.token.phone_number == d.contactMobile ||
+                                  request.auth.token.phone_number == '+91' + d.contactMobile))
+      );
+    }
+
+    function validListing(d) {
+      return d.keys().size() <= 40
+        && d.type in ['Buy', 'Sell']
+        && d.commodity is string && d.commodity.size() <= 120
+        && d.seller is string && d.seller.size() <= 120
+        && d.contactMobile is string && d.contactMobile.size() <= 20
+        && (!('comments' in d) || (d.comments is string && d.comments.size() <= 2000))
+        && (!('description' in d) || (d.description is string && d.description.size() <= 2000))
+        && (!('images' in d) || (d.images is list && d.images.size() <= 6));
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // A user can create only their own profile as Farmer; the Admin profile only for the admin phone.
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.uid == uid
+                    && (request.resource.data.role == 'Farmer' || (isAdmin() && request.resource.data.role == 'Admin'))
+                    && request.resource.data.isVerified == false;
+      // A user can edit their own profile but never role, uid or isVerified.
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.isVerified == resource.data.isVerified);
+      allow delete: if isAdmin();
+    }
+
+    match /listings/{id} {
+      allow read: if true;                                            // public marketplace
+      allow create: if isAdmin() || validListing(request.resource.data);   // STAGE B: add signedIn() to require login
+      allow update: if isAdmin() || (ownsListing(resource.data) && validListing(request.resource.data)
+                    && (!('ownerUid' in resource.data) || request.resource.data.get('ownerUid', null) == resource.data.ownerUid));
+      allow delete: if isAdmin() || ownsListing(resource.data);
+    }
+
+    match /buyerRequests/{id} {
+      allow read: if signedIn();                                      // holds buyer phone numbers
+      allow create: if signedIn() && request.resource.data.keys().size() <= 30;
+      allow update, delete: if isAdmin();
+    }
+
+    match /alerts/{id} {
+      allow create: if request.resource.data.keys().size() <= 15;     // guests create these today (userId is a phone or 'anonymous')
+      allow read, update, delete: if isAdmin();
+    }
+
+
+    // ===================== LIVESTOCK MODULE (Phase 1, additive; nothing above is changed) =====================
+    function lsCfg() { return get(/databases/$(database)/documents/livestockConfig/main).data; }
+    // Sellers can write only while the admin has switched the module on.
+    function lsOn() { return exists(/databases/$(database)/documents/livestockConfig/main) && lsCfg().get('enabled', false) == true; }
+    function lsAutoApproved() {
+      return exists(/databases/$(database)/documents/livestockAccounts/$(request.auth.uid))
+        && get(/databases/$(database)/documents/livestockAccounts/$(request.auth.uid)).data.get('autoApprove', false) == true;
+    }
+    function lsKeysOk(d) {
+      return d.keys().hasOnly(['ownerUid','ownerType','sellerName','businessName','category','breed','sex','ageMonths','weightKg',
+        'milkYieldPerDay','lactations','pregnancyMonths','quantity','priceType','price','state','district','tehsil','photos',
+        'earTagNo','healthNote','purposeOfSale','notForSlaughter','termsAcceptedAt','status','rejectionReason','createdAt',
+        'approvedAt','approvedBy','expiresAt','postedByAdmin','updatedAt']);
+    }
+    function lsValid(d) {
+      return lsKeysOk(d)
+        && d.ownerUid is string
+        && d.ownerType in ['individual','farm','trader','fpo']
+        && d.category in ['goat','cow','buffalo']
+        && d.breed is string && d.breed.size() > 0 && d.breed.size() <= 60
+        && d.sex in ['male','female','mixed']
+        && d.ageMonths is number && d.ageMonths >= 0 && d.ageMonths <= 300
+        && d.quantity is int && d.quantity >= 1 && d.quantity <= 1000
+        && d.price is number && d.price > 0 && d.price <= 100000000
+        && d.priceType in ['per_animal','per_kg','per_lot']
+        && d.purposeOfSale in ['dairy','breeding','rearing']
+        && d.state is string && d.state.size() <= 80
+        && d.district is string && d.district.size() <= 80
+        && (!('tehsil' in d) || (d.tehsil is string && d.tehsil.size() <= 80))
+        && (!('sellerName' in d) || (d.sellerName is string && d.sellerName.size() <= 120))
+        && (!('businessName' in d) || (d.businessName is string && d.businessName.size() <= 120))
+        && (!('weightKg' in d) || (d.weightKg is number && d.weightKg > 0 && d.weightKg <= 200))
+        && (!('earTagNo' in d) || (d.earTagNo is string && d.earTagNo.size() <= 20))
+        && (!('healthNote' in d) || (d.healthNote is string && d.healthNote.size() <= 500))
+        && (!('photos' in d) || (d.photos is list && d.photos.size() <= 6))
+        && d.status in ['pending','approved','rejected','sold']
+        && d.expiresAt is number
+        && d.expiresAt <= request.time.toMillis() + 61 * 86400000;
+    }
+
+    match /livestockConfig/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /livestockAccounts/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // A seller can create only their own account, and never set autoApprove / verified / plan.
+      allow create: if isAdmin() || (signedIn() && request.auth.uid == uid && lsOn()
+                    && request.resource.data.keys().hasOnly(['uid','businessName','ownerType','createdAt'])
+                    && request.resource.data.uid == uid);
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['businessName','ownerType']));
+      allow delete: if isAdmin();
+    }
+
+    // Seller phone numbers are NOT in the public listing. Id = listing id. Readable only by the owner and the admin.
+    match /livestockContacts/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      allow create, update: if isAdmin() || (signedIn() && lsOn()
+                    && request.resource.data.keys().hasOnly(['ownerUid','phone','updatedAt'])
+                    && request.resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.phone is string && request.resource.data.phone.size() <= 20
+                    && getAfter(/databases/$(database)/documents/livestockListings/$(id)).data.ownerUid == request.auth.uid);
+      allow delete: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+    }
+
+    match /livestockListings/{id} {
+      // Public sees only approved, not expired. Owner sees own. Admin sees all. (Queries must use the same filters.)
+      // A single listing: approved and not expired. A list query: the rules cannot compare to the client's time, so a query
+      // must filter status == 'approved' (the app also filters expiresAt); an expired one can still be opened by its exact id only if it is approved.
+      allow get: if (resource.data.status == 'approved' && resource.data.expiresAt > request.time.toMillis())
+                  || isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      allow list: if resource.data.status == 'approved'
+                  || isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+      allow create: if isAdmin() ? lsValid(request.resource.data)
+                  : (signedIn() && lsOn() && lsValid(request.resource.data)
+                     && request.resource.data.ownerUid == request.auth.uid
+                     && !('approvedBy' in request.resource.data) && !('rejectionReason' in request.resource.data)
+                     && !('postedByAdmin' in request.resource.data)
+                     && (request.resource.data.status == 'pending' || (request.resource.data.status == 'approved' && lsAutoApproved())));
+      // Owner edits: cannot change owner, cannot approve or reject by hand (only 'sold', 'pending', or 'approved' for an auto-approved seller).
+      allow update: if isAdmin() ? lsValid(request.resource.data)
+                  : (signedIn() && resource.data.ownerUid == request.auth.uid && lsValid(request.resource.data)
+                     && request.resource.data.ownerUid == resource.data.ownerUid
+                     && request.resource.data.get('approvedBy', null) == resource.data.get('approvedBy', null)
+                     && request.resource.data.get('approvedAt', null) == resource.data.get('approvedAt', null)
+                     && request.resource.data.get('rejectionReason', null) == resource.data.get('rejectionReason', null)
+                     && request.resource.data.get('postedByAdmin', null) == resource.data.get('postedByAdmin', null)
+                     && (request.resource.data.status in ['sold','pending'] || (request.resource.data.status == 'approved' && lsAutoApproved())));
+      allow delete: if isAdmin() || (signedIn() && resource.data.ownerUid == request.auth.uid);
+    }
+    // ===================== END LIVESTOCK =====================
+
+    // Everything else is closed.
+  }
+}

@@ -1,0 +1,17 @@
+// PROPOSED Storage rules for KisanBazaar livestock photos. NOT published. Storage must first be set up in the Firebase console.
+// Photos live under livestock/{uid}/...; anyone can view (the listing page shows them), only that user (or the admin) can write.
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /livestock/{uid}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && (request.auth.uid == uid || request.auth.token.phone_number == '+919987917394')
+                   && request.resource.size < 800 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null
+                   && (request.auth.uid == uid || request.auth.token.phone_number == '+919987917394');
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

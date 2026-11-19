@@ -1,0 +1,69 @@
+// PROPOSED rules for KisanBazaar (project kisanbazaar-1b2bc). NOT deployed. Stage A: closes the worst holes and keeps
+// every behaviour the live app has today (guests can still post a listing and create alerts).
+// Rollback = paste back the old public rule: allow read, write: if true.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    // The owner's login phone (phone sign-in puts it in the token). Admin is decided HERE, not in the app.
+    function isAdmin() { return signedIn() && request.auth.token.phone_number == '+919987917394'; }
+
+    // A listing may be created or changed by its owner: ownerUid (new listings) or the same phone as the login
+    // (older listings hold the phone as 10 digits or as +91xxxxxxxxxx).
+    function ownsListing(d) {
+      return signedIn() && (
+        ('ownerUid' in d && d.ownerUid == request.auth.uid) ||
+        ('contactMobile' in d && (request.auth.token.phone_number == d.contactMobile ||
+                                  request.auth.token.phone_number == '+91' + d.contactMobile))
+      );
+    }
+
+    function validListing(d) {
+      return d.keys().size() <= 40
+        && d.type in ['Buy', 'Sell']
+        && d.commodity is string && d.commodity.size() <= 120
+        && d.seller is string && d.seller.size() <= 120
+        && d.contactMobile is string && d.contactMobile.size() <= 20
+        && (!('comments' in d) || (d.comments is string && d.comments.size() <= 2000))
+        && (!('description' in d) || (d.description is string && d.description.size() <= 2000))
+        && (!('images' in d) || (d.images is list && d.images.size() <= 6));
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // A user can create only their own profile as Farmer; the Admin profile only for the admin phone.
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.uid == uid
+                    && (request.resource.data.role == 'Farmer' || (isAdmin() && request.resource.data.role == 'Admin'))
+                    && request.resource.data.isVerified == false;
+      // A user can edit their own profile but never role, uid or isVerified.
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.uid == resource.data.uid
+                    && request.resource.data.isVerified == resource.data.isVerified);
+      allow delete: if isAdmin();
+    }
+
+    match /listings/{id} {
+      allow read: if true;                                            // public marketplace
+      allow create: if isAdmin() || validListing(request.resource.data);   // STAGE B: add signedIn() to require login
+      allow update: if isAdmin() || (ownsListing(resource.data) && validListing(request.resource.data)
+                    && (!('ownerUid' in resource.data) || request.resource.data.get('ownerUid', null) == resource.data.ownerUid));
+      allow delete: if isAdmin() || ownsListing(resource.data);
+    }
+
+    match /buyerRequests/{id} {
+      allow read: if signedIn();                                      // holds buyer phone numbers
+      allow create: if signedIn() && request.resource.data.keys().size() <= 30;
+      allow update, delete: if isAdmin();
+    }
+
+    match /alerts/{id} {
+      allow create: if request.resource.data.keys().size() <= 15;     // guests create these today (userId is a phone or 'anonymous')
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Everything else is closed.
+  }
+}
