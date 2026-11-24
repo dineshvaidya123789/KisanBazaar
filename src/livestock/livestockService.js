@@ -2,11 +2,11 @@
 import { getApp } from 'firebase/app';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import {
-    collection, doc, getDoc, getDocs, onSnapshot, query, where, orderBy, limit, startAfter, writeBatch, setDoc, updateDoc, deleteDoc, deleteField,
+    collection, doc, getDoc, getDocFromServer, getDocs, onSnapshot, query, where, orderBy, limit, startAfter, writeBatch, setDoc, updateDoc, deleteDoc, deleteField,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { mergeConfig } from './config';
-import { buildListingDoc, normalizePhone, expiryFrom, serverFilters, BROWSE_PAGE_SIZE } from './logic';
+import { buildListingDoc, normalizePhone, expiryFrom, serverFilters, BROWSE_PAGE_SIZE, enquiryId, buildEnquiryDoc } from './logic';
 import { compressImage } from '../utils/imageCompression';
 
 const LISTINGS = 'livestockListings';
@@ -146,12 +146,40 @@ export const fetchBrowsePage = async ({ filters, cursor = null, pageSize = BROWS
 };
 
 // One listing by id. Returns null when it does not exist OR the viewer may not see it (the same answer on purpose).
-export const fetchListing = async (id) => {
+// fresh = ask the server, never the local copy (used right after a failed action, to find out whether the animal is still there).
+export const fetchListing = async (id, { fresh = false } = {}) => {
     try {
-        const s = await getDoc(doc(db, LISTINGS, id));
+        const s = await (fresh ? getDocFromServer : getDoc)(doc(db, LISTINGS, id));
         return s.exists() ? { id: s.id, ...s.data() } : null;
     } catch (e) {
         if (e && e.code === 'permission-denied') return null;
         throw e;
     }
 };
+
+// ---- enquiries ----
+const ENQUIRIES = 'livestockEnquiries';
+
+// The buyer's own enquiry for this animal, or null. (One per buyer per animal: the id is listing + buyer.)
+export const getMyEnquiry = async (listingId, buyerUid) => {
+    try {
+        const s = await getDoc(doc(db, ENQUIRIES, enquiryId(listingId, buyerUid)));
+        return s.exists() ? { id: s.id, ...s.data() } : null;
+    } catch (e) {
+        if (e && e.code === 'permission-denied') return null;
+        throw e;
+    }
+};
+
+export const sendEnquiry = async ({ listing, buyerUid, name, phone, message }) => {
+    const data = buildEnquiryDoc({ listing, buyerUid, name, phone, message, nowMs: Date.now() });
+    await setDoc(doc(db, ENQUIRIES, enquiryId(listing.id, buyerUid)), data);
+    return { id: enquiryId(listing.id, buyerUid), ...data };
+};
+
+export const subscribeSellerEnquiries = (sellerUid, cb) =>
+    onSnapshot(query(collection(db, ENQUIRIES), where('sellerUid', '==', sellerUid)),
+        (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))),
+        (err) => { console.error('enquiries', err); cb([]); });
+
+export const setEnquiryStatus = (id, status) => updateDoc(doc(db, ENQUIRIES, id), { status });

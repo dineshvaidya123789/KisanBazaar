@@ -6,7 +6,8 @@ import SEO from '../components/SEO';
 import { useLivestockConfig } from '../livestock/useLivestockConfig';
 import { makeT } from '../livestock/texts';
 import { displayState, canRenew, statusForSellerSubmit } from '../livestock/logic';
-import { subscribeMyListings, subscribeAccount, markSold, renewListing, deleteListing } from '../livestock/livestockService';
+import { subscribeMyListings, subscribeAccount, markSold, renewListing, deleteListing, subscribeSellerEnquiries } from '../livestock/livestockService';
+import { unreadCount } from '../livestock/logic';
 
 const chip = { pending: '#fef3c7', approved: '#dcfce7', rejected: '#fee2e2', sold: '#e5e7eb', expired: '#e5e7eb' };
 
@@ -18,13 +19,15 @@ const MyAnimals = () => {
     const navigate = useNavigate();
     const [items, setItems] = useState(null);
     const [account, setAccount] = useState(null);
+    const [enquiries, setEnquiries] = useState(null);
     const [error, setError] = useState('');
 
     useEffect(() => {
         if (!user) return undefined;
         const a = subscribeMyListings(user.uid, setItems);
         const b = subscribeAccount(user.uid, setAccount);
-        return () => { a(); b(); };
+        const c = subscribeSellerEnquiries(user.uid, setEnquiries);
+        return () => { a(); b(); c(); };
     }, [user && user.uid]);
 
     if (loading || !loaded) return <div style={{ padding: 20, textAlign: 'center' }}>...</div>;
@@ -41,6 +44,7 @@ const MyAnimals = () => {
                 <h2 style={{ margin: 0 }}>{tx('my_title')}</h2>
                 <button onClick={() => navigate('/livestock/sell')} style={{ padding: '0.7rem 1.2rem', borderRadius: 10, border: 'none', background: 'var(--color-primary, #166534)', color: '#fff', cursor: 'pointer' }}>{tx('post_new')}</button>
             </div>
+            <p style={{ margin: '0.8rem 0 0' }}><Link to="/livestock/inbox">{tx('inbox_title')}{unreadCount(enquiries) > 0 ? <b style={{ marginLeft: 6, background: '#16a34a', color: '#fff', borderRadius: 10, padding: '1px 8px' }}>{unreadCount(enquiries)}</b> : null}</Link></p>
             {error && <div style={{ color: '#b91c1c', margin: '0.6rem 0' }}>{error}</div>}
             {items && items.length === 0 && <p style={{ marginTop: 24 }}>{tx('none')}</p>}
             {(items || []).map((l) => {

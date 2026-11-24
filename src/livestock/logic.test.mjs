@@ -122,3 +122,30 @@ test('browse: display helpers', () => {
   assert.ok(whatsappShareUrl('a b&c').startsWith('https://wa.me/?text=a%20b%26c'));
   assert.equal(detailUrl('https://x.in/', 'id1'), 'https://x.in/livestock/id1');
 });
+
+import { ENQUIRY_MAX, enquiryId, validateEnquiry, buildEnquiryDoc, unreadCount, telUrl, whatsappChatUrl, replyText } from './logic.js';
+test('enquiry: id is listing + buyer', () => assert.equal(enquiryId('L1', 'u9'), 'L1_u9'));
+test('enquiry: validation', () => {
+  const ok = { name: 'Ravi', message: 'Still available?', phone: '+919876543210' };
+  assert.deepEqual(validateEnquiry(ok), {});
+  assert.ok(validateEnquiry({ ...ok, name: '   ' }).name);
+  assert.ok(validateEnquiry({ ...ok, name: 'x'.repeat(81) }).name);
+  assert.ok(validateEnquiry({ ...ok, message: '   ' }).message);
+  assert.ok(validateEnquiry({ ...ok, message: 'x'.repeat(ENQUIRY_MAX + 1) }).message);
+  assert.deepEqual(validateEnquiry({ ...ok, message: 'x'.repeat(ENQUIRY_MAX) }), {});
+  assert.ok(validateEnquiry({ ...ok, phone: '' }).phone);
+  assert.ok(validateEnquiry({ ...ok, phone: '12345' }).phone);
+  assert.deepEqual(validateEnquiry({ ...ok, phone: '9876543210' }), {}); // 10 digits as login stores it
+});
+test('enquiry: the record has exactly the fields the rules allow, trimmed, with a normalised phone', () => {
+  const d = buildEnquiryDoc({ listing: { id: 'L1', ownerUid: 's1', quantity: 5, breed: 'Beetal', category: 'goat' }, buyerUid: 'b1', name: ' Ravi ', phone: '9876543210', message: ' hi ', nowMs: 5 });
+  assert.deepEqual(Object.keys(d).sort(), ['buyerName', 'buyerPhone', 'buyerUid', 'createdAt', 'listingId', 'listingTitle', 'message', 'sellerUid', 'status'].sort());
+  assert.equal(d.buyerName, 'Ravi'); assert.equal(d.message, 'hi'); assert.equal(d.buyerPhone, '+919876543210'); assert.equal(d.status, 'new'); assert.equal(d.listingTitle, '5 × Beetal goat');
+});
+test('enquiry: unread count and contact links', () => {
+  assert.equal(unreadCount([{ status: 'new' }, { status: 'read' }, {}]), 2); assert.equal(unreadCount(null), 0);
+  assert.equal(telUrl('9876543210'), 'tel:+919876543210'); assert.equal(telUrl('abc'), '');
+  assert.equal(whatsappChatUrl('+91 98765 43210'), 'https://wa.me/919876543210');
+  assert.equal(whatsappChatUrl('9876543210', 'a b'), 'https://wa.me/919876543210?text=a%20b'); assert.equal(whatsappChatUrl('x'), '');
+  assert.ok(replyText({ buyerName: 'Ravi', listingTitle: '5 × Beetal goat' }).includes('Ravi'));
+});

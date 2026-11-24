@@ -7,6 +7,7 @@ import { useLivestockConfig } from '../livestock/useLivestockConfig';
 import { makeT } from '../livestock/texts';
 import { ageText, displayState, formatRupees, listingTitle, shareMessage, whatsappShareUrl, detailUrl } from '../livestock/logic';
 import { fetchListing } from '../livestock/livestockService';
+import EnquiryBox from '../livestock/EnquiryBox';
 
 const row = { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' };
 
@@ -93,7 +94,8 @@ const LivestockDetail = () => {
                 <a href={whatsappShareUrl(text)} target="_blank" rel="noopener noreferrer" style={{ padding: '0.7rem 1.2rem', borderRadius: 10, background: '#16a34a', color: '#fff', textDecoration: 'none' }}>{tx('share_wa')}</a>
                 <button type="button" onClick={copy} style={{ padding: '0.7rem 1.2rem', borderRadius: 10, border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer' }}>{copied ? tx('link_copied') : tx('copy_link')}</button>
             </div>
-            <p style={{ marginTop: 18, color: '#64748b', fontSize: '0.9rem' }}>{tx('contact_soon')}</p>
+            {/* Enquiry only for a live animal; the owner or admin looking at a hidden one gets no form. Phone reveal comes in night 3. */}
+            {!isOwnerView && <EnquiryBox listing={listing} user={user} tx={tx} />}
         </div>
     );
 };

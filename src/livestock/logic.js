@@ -152,3 +152,44 @@ export const shareMessage = (l, url) =>
 export const whatsappShareUrl = (text) => 'https://wa.me/?text=' + encodeURIComponent(text);
 
 export const detailUrl = (origin, id) => `${String(origin || '').replace(/\/$/, '')}/livestock/${id}`;
+
+// ---- buyer side: enquiries ----
+
+export const ENQUIRY_MAX = 300;
+
+// One enquiry per buyer per animal: the id says so (the rules check it too).
+export const enquiryId = (listingId, buyerUid) => `${listingId}_${buyerUid}`;
+
+// Returns {field: message}. Empty object = valid. The phone is the buyer's login number.
+export const validateEnquiry = ({ name, message, phone }) => {
+    const e = {};
+    if (!String(name || '').trim()) e.name = 'Enter your name';
+    else if (String(name).trim().length > 80) e.name = 'Name is too long (80 characters at most)';
+    const m = String(message || '').trim();
+    if (!m) e.message = 'Write a short message';
+    else if (m.length > ENQUIRY_MAX) e.message = `Keep it under ${ENQUIRY_MAX} characters`;
+    if (!normalizePhone(phone)) e.phone = 'Your mobile number is missing. Please log in again.';
+    return e;
+};
+
+// The record written to livestockEnquiries. The title is copied in so the seller's inbox needs no extra reads.
+export const buildEnquiryDoc = ({ listing, buyerUid, name, phone, message, nowMs }) => ({
+    listingId: listing.id,
+    sellerUid: listing.ownerUid,
+    buyerUid,
+    buyerName: String(name).trim(),
+    buyerPhone: normalizePhone(phone),
+    message: String(message).trim(),
+    listingTitle: listingTitle(listing).slice(0, 120),
+    status: 'new',
+    createdAt: nowMs,
+});
+
+export const unreadCount = (list) => (list || []).filter((q) => q.status !== 'read').length;
+
+const digits = (p) => normalizePhone(p).replace(/\D/g, '');
+
+// Links are built only from the checked phone digits, never from free text.
+export const telUrl = (phone) => (normalizePhone(phone) ? 'tel:' + normalizePhone(phone) : '');
+export const whatsappChatUrl = (phone, text = '') => (digits(phone) ? `https://wa.me/${digits(phone)}${text ? '?text=' + encodeURIComponent(text) : ''}` : '');
+export const replyText = (q) => `Hello ${q.buyerName}, thank you for asking about ${q.listingTitle}.`;
