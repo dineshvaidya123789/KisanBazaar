@@ -37,6 +37,7 @@ const LivestockAdminTab = () => {
         autoApproveAfterFirst: !!draft.autoApproveAfterFirst,
         expiryDays: Math.max(1, Math.min(60, Number(draft.expiryDays) || 30)),
         maxPhotos: Math.max(1, Math.min(6, Number(draft.maxPhotos) || 4)),
+        revealLimitPerDay: Math.max(1, Math.min(500, Math.round(Number(draft.revealLimitPerDay)) || 20)),
         defaultState: draft.defaultState || '',
         defaultDistrict: draft.defaultDistrict || '',
     }), 'Settings saved.');
@@ -56,6 +57,7 @@ const LivestockAdminTab = () => {
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: 10 }}>
                         <label>Listing valid (days) <input type="number" style={{ width: 70 }} value={draft.expiryDays} onChange={(e) => setDraft({ ...draft, expiryDays: e.target.value })} /></label>
                         <label>Max photos <input type="number" style={{ width: 60 }} value={draft.maxPhotos} onChange={(e) => setDraft({ ...draft, maxPhotos: e.target.value })} /></label>
+                        <label>Phone numbers a buyer can open per day <input type="number" style={{ width: 70 }} value={draft.revealLimitPerDay} onChange={(e) => setDraft({ ...draft, revealLimitPerDay: e.target.value })} /></label>
                         <label>Default state <input value={draft.defaultState} onChange={(e) => setDraft({ ...draft, defaultState: e.target.value })} /></label>
                         <label>Default district <input value={draft.defaultDistrict} onChange={(e) => setDraft({ ...draft, defaultDistrict: e.target.value })} /></label>
                         <button onClick={saveSettings}>Save settings</button>

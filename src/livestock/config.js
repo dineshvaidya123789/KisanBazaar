@@ -12,6 +12,7 @@ export const DEFAULT_CONFIG = {
     autoApproveAfterFirst: true,          // after the admin approves a seller once, that seller's listings go live at once
     expiryDays: 30,                       // a listing disappears from the public after this many days unless renewed
     maxPhotos: 4,
+    revealLimitPerDay: 20,                // phone numbers one buyer may open per day (the server function enforces it)
     defaultState: '',
     defaultDistrict: '',
 };

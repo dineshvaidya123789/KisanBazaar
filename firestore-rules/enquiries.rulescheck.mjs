@@ -108,6 +108,13 @@ await seed((db) => db.collection('livestockConfig').doc('main').set({ enabled: f
 await t('a buyer cannot send while the module is off', () => assertFails(col(ctxOf(BUYER)).doc(idOf('live', BUYER)).set(enq('live', BUYER))));
 await seed((db) => db.collection('livestockConfig').doc('main').set({ enabled: true }));
 
+console.log('reveal log and counters (written only by the server function)');
+await seed(async (db) => { await db.collection('livestockReveals').doc('buyer1_live').set({ buyerUid: BUYER.uid, listingId: 'live' }); await db.collection('livestockRevealCounts').doc('buyer1_20261124').set({ uid: BUYER.uid, count: 1 }); });
+await t('a buyer cannot read the reveal log', () => assertFails(ctxOf(BUYER).collection('livestockReveals').doc('buyer1_live').get()));
+await t('a buyer cannot write the reveal log (no free reveals)', () => assertFails(ctxOf(BUYER).collection('livestockReveals').doc('buyer1_new').set({ buyerUid: BUYER.uid, listingId: 'live' })));
+await t('a buyer cannot read or reset their own counter', async () => { await assertFails(ctxOf(BUYER).collection('livestockRevealCounts').doc('buyer1_20261124').get()); await assertFails(ctxOf(BUYER).collection('livestockRevealCounts').doc('buyer1_20261124').set({ uid: BUYER.uid, count: 0 })); });
+await t('a seller cannot read who revealed their number', () => assertFails(ctxOf(SELLER).collection('livestockReveals').doc('buyer1_live').get()));
+await t('logged-out cannot read either', async () => { await assertFails(anon().collection('livestockReveals').doc('buyer1_live').get()); await assertFails(anon().collection('livestockRevealCounts').doc('buyer1_20261124').get()); });
 console.log('regression: nothing else opened up');
 await t('logged-out still cannot read users', () => assertFails(anon().collection('users').doc('x').get()));
 await t('an unknown collection stays closed', () => assertFails(ctxOf(SELLER).collection('somethingElse').doc('x').get()));

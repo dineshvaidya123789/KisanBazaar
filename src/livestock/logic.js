@@ -193,3 +193,8 @@ const digits = (p) => normalizePhone(p).replace(/\D/g, '');
 export const telUrl = (phone) => (normalizePhone(phone) ? 'tel:' + normalizePhone(phone) : '');
 export const whatsappChatUrl = (phone, text = '') => (digits(phone) ? `https://wa.me/${digits(phone)}${text ? '?text=' + encodeURIComponent(text) : ''}` : '');
 export const replyText = (q) => `Hello ${q.buyerName}, thank you for asking about ${q.listingTitle}.`;
+
+// Which screen text goes with each reason the reveal function gives. Unknown or missing reasons mean the function was unreachable.
+export const revealErrorKey = (reason) => ({
+    LOGIN: 'reveal_login', DISABLED: 'soon', GONE: 'unavailable', OWN: 'enq_own', NO_PHONE: 'reveal_nophone', LIMIT: 'reveal_limit',
+}[reason] || 'reveal_failed');

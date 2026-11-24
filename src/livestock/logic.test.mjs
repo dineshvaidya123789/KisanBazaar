@@ -149,3 +149,12 @@ test('enquiry: unread count and contact links', () => {
   assert.equal(whatsappChatUrl('9876543210', 'a b'), 'https://wa.me/919876543210?text=a%20b'); assert.equal(whatsappChatUrl('x'), '');
   assert.ok(replyText({ buyerName: 'Ravi', listingTitle: '5 × Beetal goat' }).includes('Ravi'));
 });
+
+import { revealErrorKey } from './logic.js';
+test('reveal: every reason maps to a screen text that exists in all three languages', () => {
+  for (const r of ['LOGIN', 'DISABLED', 'GONE', 'OWN', 'NO_PHONE', 'LIMIT', 'BAD_REQUEST', undefined, 'SOMETHING_NEW']) {
+    const k = revealErrorKey(r);
+    for (const l of ['en', 'hi', 'mr']) assert.ok(TEXTS[l][k], l + ' text for ' + String(r));
+  }
+  assert.equal(revealErrorKey('LIMIT'), 'reveal_limit'); assert.equal(revealErrorKey(undefined), 'reveal_failed');
+});

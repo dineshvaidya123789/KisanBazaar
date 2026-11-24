@@ -1,5 +1,6 @@
 // Firebase calls for the livestock module. All business rules are in logic.js; access rules are in firestore.rules.
 import { getApp } from 'firebase/app';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import {
     collection, doc, getDoc, getDocFromServer, getDocs, onSnapshot, query, where, orderBy, limit, startAfter, writeBatch, setDoc, updateDoc, deleteDoc, deleteField,
@@ -183,3 +184,18 @@ export const subscribeSellerEnquiries = (sellerUid, cb) =>
         (err) => { console.error('enquiries', err); cb([]); });
 
 export const setEnquiryStatus = (id, status) => updateDoc(doc(db, ENQUIRIES, id), { status });
+
+// ---- phone reveal (server function; the number is not in any public record) ----
+// Resolves { phone, remaining, limit } (remaining and limit are null for the admin). Rejects with an Error whose .reason is one of
+// LOGIN, DISABLED, GONE, OWN, NO_PHONE, LIMIT, BAD_REQUEST, or undefined when the function could not be reached.
+export const revealPhone = async (listingId) => {
+    try {
+        const fn = httpsCallable(getFunctions(getApp(), 'asia-south1'), 'revealContact');
+        return (await fn({ listingId })).data;
+    } catch (e) {
+        const err = new Error((e && e.message) || 'reveal failed');
+        err.reason = e && e.details && e.details.reason;
+        err.code = e && e.code;
+        throw err;
+    }
+};

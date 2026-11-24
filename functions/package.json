@@ -1,0 +1,16 @@
+{
+  "name": "kisanbazaar-functions",
+  "private": true,
+  "description": "Server-side code for the KisanBazaar livestock marketplace (phone reveal).",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "test": "node --test logic.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.4.0"
+  }
+}

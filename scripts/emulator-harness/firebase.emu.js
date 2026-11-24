@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator, signInWithPhoneNumber, signOut } from 'firebase/auth';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 const app = initializeApp({ apiKey: 'fake', authDomain: 'localhost', projectId: 'demo-kisanbazaar', storageBucket: 'demo-kisanbazaar.appspot.com', appId: 'fake' });
 const db = getFirestore(app);
@@ -11,6 +12,7 @@ const storage = getStorage(app);
 connectFirestoreEmulator(db, '127.0.0.1', 9137);
 connectAuthEmulator(auth, 'http://127.0.0.1:9190', { disableWarnings: true });
 connectStorageEmulator(storage, '127.0.0.1', 9139);
+connectFunctionsEmulator(getFunctions(app, 'asia-south1'), '127.0.0.1', 5001);
 auth.settings.appVerificationDisabledForTesting = true;
 const messaging = undefined;
 
