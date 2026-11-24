@@ -169,3 +169,22 @@ test('all validation messages are translated keys in en, hi and mr', () => {
   for (const k of keys) for (const l of ['en', 'hi', 'mr']) assert.ok(TEXTS[l][k], `${k} missing in ${l}`);
   assert.equal(makeT('hi')('err_msg_long', { n: 300 }).includes('300'), true);
 });
+
+test('reports: reasons, note limit, record shape, and every text key exists in en/hi/mr', async () => {
+  const { validateReport, buildReportDoc, reportId, REPORT_REASONS, REPORT_NOTE_MAX, newReportCount } = await import('./logic.js');
+  const { TEXTS } = await import('./texts.js');
+  assert.deepEqual(validateReport({ reason: 'fake', note: '' }), {});
+  assert.equal(validateReport({ reason: '', note: '' }).reason, 'err_rep_reason');
+  assert.equal(validateReport({ reason: 'bogus' }).reason, 'err_rep_reason');
+  assert.equal(validateReport({ reason: 'spam', note: 'x'.repeat(REPORT_NOTE_MAX + 1) }).note, 'err_rep_note');
+  assert.deepEqual(validateReport({ reason: 'spam', note: 'x'.repeat(REPORT_NOTE_MAX) }), {});
+  const l = { id: 'L1', ownerUid: 's1', quantity: 2, breed: 'Sirohi', category: 'goat' };
+  const d = buildReportDoc({ listing: l, reporterUid: 'b1', reason: 'fake', note: '  ', nowMs: 5 });
+  assert.equal('note' in d, false);
+  assert.equal(d.status, 'new'); assert.equal(d.sellerUid, 's1'); assert.equal(d.reporterUid, 'b1');
+  assert.equal(buildReportDoc({ listing: l, reporterUid: 'b1', reason: 'fake', note: ' hi ', nowMs: 5 }).note, 'hi');
+  assert.equal(reportId('L1', 'b1'), 'L1_b1');
+  assert.equal(newReportCount([{ status: 'new' }, { status: 'reviewed' }, {}]), 2);
+  const keys = ['rep_link', 'rep_title', 'rep_reason', 'rep_note', 'rep_send', 'rep_sending', 'rep_sent', 'rep_already', 'rep_failed', 'rep_cancel', 'rep_login', 'err_rep_reason', 'err_rep_note', ...REPORT_REASONS.map((r) => 'rep_' + r)];
+  for (const k of keys) for (const lang of ['en', 'hi', 'mr']) assert.ok(TEXTS[lang][k], `${k} missing in ${lang}`);
+});

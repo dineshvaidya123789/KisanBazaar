@@ -187,6 +187,37 @@ export const buildEnquiryDoc = ({ listing, buyerUid, name, phone, message, nowMs
     createdAt: nowMs,
 });
 
+// ---- reports ("Report this listing") ----
+export const REPORT_REASONS = ['fake', 'wrong_info', 'already_sold', 'spam', 'animal_welfare', 'other'];
+export const REPORT_NOTE_MAX = 200;
+export const reportId = (listingId, reporterUid) => `${listingId}_${reporterUid}`;
+
+// Returns {field: text key}. Empty object = valid.
+export const validateReport = ({ reason, note }) => {
+    const e = {};
+    if (!REPORT_REASONS.includes(reason)) e.reason = 'err_rep_reason';
+    if (String(note || '').trim().length > REPORT_NOTE_MAX) e.note = 'err_rep_note';
+    return e;
+};
+
+// The record written to livestockReports. The note is left out when empty (the rules allow it to be missing).
+export const buildReportDoc = ({ listing, reporterUid, reason, note, nowMs }) => {
+    const d = {
+        listingId: listing.id,
+        listingTitle: listingTitle(listing).slice(0, 120),
+        sellerUid: listing.ownerUid,
+        reporterUid,
+        reason,
+        status: 'new',
+        createdAt: nowMs,
+    };
+    const n = String(note || '').trim();
+    if (n) d.note = n;
+    return d;
+};
+
+export const newReportCount = (list) => (list || []).filter((r) => r.status !== 'reviewed').length;
+
 export const unreadCount = (list) => (list || []).filter((q) => q.status !== 'read').length;
 
 const digits = (p) => normalizePhone(p).replace(/\D/g, '');

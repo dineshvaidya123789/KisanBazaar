@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLivestockConfig } from '../livestock/useLivestockConfig';
-import { displayState } from '../livestock/logic';
+import { displayState, newReportCount } from '../livestock/logic';
 import {
+    subscribeReports, setReportStatus, deleteReport,
     subscribeAllListings, subscribeAccounts, approveListing, rejectListing, deleteListing, getContactPhone, saveConfig, setAccountFlag,
 } from '../livestock/livestockService';
 
@@ -22,10 +23,12 @@ const LivestockAdminTab = () => {
     const [msg, setMsg] = useState('');
     const [draft, setDraft] = useState(null);
 
+    const [reports, setReports] = useState([]);
     useEffect(() => {
         const a = subscribeAllListings(setItems);
         const b = subscribeAccounts(setAccounts);
-        return () => { a(); b(); };
+        const c = subscribeReports(setReports);
+        return () => { a(); b(); c(); };
     }, []);
     useEffect(() => { if (loaded) setDraft({ ...config }); }, [loaded]);
 
@@ -68,6 +71,27 @@ const LivestockAdminTab = () => {
                     <button onClick={saveSettings} style={{ marginTop: 12, padding: '0.6rem 1.4rem' }}>Save settings</button>
                 </div>
             )}
+
+            <div style={{ border: '1px solid #fecaca', borderRadius: 8, padding: '0.8rem 1rem', marginBottom: '1rem', background: reports.length ? '#fff7f7' : '#f8fafc' }}>
+                <strong>Reports</strong> <span style={{ color: '#64748b' }}>({newReportCount(reports)} new, {reports.length} in all)</span>
+                {reports.length === 0 && <div style={{ color: '#94a3b8', marginTop: 6 }}>No reports.</div>}
+                {reports.map((r) => {
+                    const target = items.find((l) => l.id === r.listingId);
+                    const tst = target ? displayState(target, now) : 'deleted';
+                    return (
+                        <div key={r.id} style={{ borderTop: '1px solid #fee2e2', marginTop: 8, paddingTop: 8, opacity: r.status === 'reviewed' ? 0.6 : 1 }}>
+                            <b>{r.listingTitle}</b> <small>({tst})</small> - <b>{nice(r.reason)}</b> <small>{new Date(r.createdAt).toLocaleDateString()}{r.status === 'reviewed' ? ' - reviewed' : ''}</small>
+                            {r.note && <div style={{ whiteSpace: 'pre-wrap', margin: '4px 0' }}>{r.note}</div>}
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                                {target && <Link to={`/livestock/${r.listingId}`}>Open listing</Link>}
+                                {r.status !== 'reviewed' && <button onClick={() => run(() => setReportStatus(r.id, 'reviewed'), 'Marked reviewed.')}>Dismiss</button>}
+                                {target && (tst === 'pending' || tst === 'approved') && <button onClick={() => { const why = window.prompt('Reason for rejecting (the seller will see this):'); if (why && why.trim()) run(async () => { await rejectListing(target, user.uid, why.trim()); await setReportStatus(r.id, 'reviewed'); }, 'Listing rejected.'); }}>Reject listing</button>}
+                                <button style={{ color: '#b91c1c' }} onClick={() => { if (window.confirm('Delete this report?')) run(() => deleteReport(r.id), 'Report deleted.'); }}>Delete report</button>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
                 {['pending', 'approved', 'rejected', 'sold', 'expired', 'all'].map((f) => (

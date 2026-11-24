@@ -8,6 +8,7 @@ import { makeT } from '../livestock/texts';
 import { ageText, displayState, formatRupees, listingTitle, shareMessage, whatsappShareUrl, detailUrl } from '../livestock/logic';
 import { fetchListing } from '../livestock/livestockService';
 import EnquiryBox from '../livestock/EnquiryBox';
+import ReportBox from '../livestock/ReportBox';
 import RevealPhone from '../livestock/RevealPhone';
 
 const row = { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '0.5rem 0', borderBottom: '1px solid #f1f5f9' };
@@ -98,6 +99,7 @@ const LivestockDetail = () => {
             {/* Enquiry only for a live animal; the owner or admin looking at a hidden one gets no form. The phone number comes from a server function (RevealPhone). */}
             {!isOwnerView && <RevealPhone listing={listing} user={user} tx={tx} />}
             {!isOwnerView && <EnquiryBox listing={listing} user={user} tx={tx} />}
+            {!isOwnerView && <ReportBox listing={listing} user={user} tx={tx} />}
         </div>
     );
 };

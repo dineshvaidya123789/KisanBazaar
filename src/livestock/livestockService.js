@@ -7,7 +7,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { mergeConfig } from './config';
-import { buildListingDoc, normalizePhone, expiryFrom, serverFilters, BROWSE_PAGE_SIZE, enquiryId, buildEnquiryDoc } from './logic';
+import { buildListingDoc, normalizePhone, expiryFrom, serverFilters, BROWSE_PAGE_SIZE, enquiryId, buildEnquiryDoc, reportId, buildReportDoc } from './logic';
 import { compressImage } from '../utils/imageCompression';
 
 const LISTINGS = 'livestockListings';
@@ -186,6 +186,35 @@ export const subscribeSellerEnquiries = (sellerUid, cb) =>
         (err) => { console.error('enquiries', err); cb([]); });
 
 export const setEnquiryStatus = (id, status) => updateDoc(doc(db, ENQUIRIES, id), { status });
+
+// ---- reports ----
+const REPORTS = 'livestockReports';
+
+// The reporter's own report for this animal, or null.
+export const getMyReport = async (listingId, reporterUid) => {
+    try {
+        const s = await getDoc(doc(db, REPORTS, reportId(listingId, reporterUid)));
+        return s.exists() ? { id: s.id, ...s.data() } : null;
+    } catch (e) {
+        if (e && e.code === 'permission-denied') return null;
+        throw e;
+    }
+};
+
+export const sendReport = async ({ listing, reporterUid, reason, note }) => {
+    const data = buildReportDoc({ listing, reporterUid, reason, note, nowMs: Date.now() });
+    await setDoc(doc(db, REPORTS, reportId(listing.id, reporterUid)), data);
+    return { id: reportId(listing.id, reporterUid), ...data };
+};
+
+// Admin only (the rules refuse everyone else).
+export const subscribeReports = (cb) =>
+    onSnapshot(collection(db, REPORTS),
+        (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))),
+        (err) => { console.error('reports', err); cb([]); });
+
+export const setReportStatus = (id, status) => updateDoc(doc(db, REPORTS, id), { status });
+export const deleteReport = (id) => deleteDoc(doc(db, REPORTS, id));
 
 // ---- phone reveal (server function; the number is not in any public record) ----
 // Resolves { phone, remaining, limit } (remaining and limit are null for the admin). Rejects with an Error whose .reason is one of

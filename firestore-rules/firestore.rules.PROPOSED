@@ -183,6 +183,29 @@ service cloud.firestore {
                     && request.resource.data.status in ['new','read']);
       allow delete: if isAdmin() || (signedIn() && resource.data.buyerUid == request.auth.uid);
     }
+    // Reports ("Report this listing"). One per person per animal (id = listing + reporter). Only the admin reads all; the reporter reads their own.
+    match /livestockReports/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.reporterUid == request.auth.uid);
+      allow create: if signedIn() && lsOn()
+                    && request.resource.data.keys().hasOnly(['listingId','listingTitle','sellerUid','reporterUid','reason','note','status','createdAt'])
+                    && request.resource.data.keys().hasAll(['listingId','listingTitle','sellerUid','reporterUid','reason','status','createdAt'])
+                    && request.resource.data.reporterUid == request.auth.uid
+                    && request.resource.data.listingId is string
+                    && id == request.resource.data.listingId + '_' + request.auth.uid
+                    && request.resource.data.status == 'new'
+                    && request.resource.data.reason in ['fake','wrong_info','already_sold','spam','animal_welfare','other']
+                    && request.resource.data.get('note', '') is string && request.resource.data.get('note', '').size() <= 200
+                    && request.resource.data.listingTitle is string && request.resource.data.listingTitle.size() <= 120
+                    && request.resource.data.createdAt is number
+                    && request.resource.data.sellerUid != request.auth.uid
+                    && exists(/databases/$(database)/documents/livestockListings/$(request.resource.data.listingId))
+                    && get(/databases/$(database)/documents/livestockListings/$(request.resource.data.listingId)).data.status == 'approved'
+                    && get(/databases/$(database)/documents/livestockListings/$(request.resource.data.listingId)).data.expiresAt > request.time.toMillis()
+                    && get(/databases/$(database)/documents/livestockListings/$(request.resource.data.listingId)).data.ownerUid == request.resource.data.sellerUid;
+      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                    && request.resource.data.status in ['new','reviewed'];
+      allow delete: if isAdmin();
+    }
     // ===================== END LIVESTOCK =====================
 
     // Everything else is closed.
