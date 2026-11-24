@@ -73,12 +73,12 @@ const EnquiryBox = ({ listing, user, tx }) => {
             <h3 style={{ margin: '0 0 6px' }}>{tx('enq_title')}</h3>
             <label style={{ display: 'block', fontWeight: 600, margin: '0.6rem 0 0.25rem' }}>{tx('enq_name')}</label>
             <input style={box} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />
-            {errors.name && <div role="alert" style={err}>{errors.name}</div>}
+            {errors.name && <div role="alert" style={err}>{tx(errors.name, { n: ENQUIRY_MAX })}</div>}
             <label style={{ display: 'block', fontWeight: 600, margin: '0.8rem 0 0.25rem' }}>{tx('enq_message')}</label>
             <textarea style={{ ...box, minHeight: 80, fontFamily: 'inherit' }} value={message} maxLength={ENQUIRY_MAX} onChange={(e) => setMessage(e.target.value)} />
-            {errors.message && <div role="alert" style={err}>{errors.message}</div>}
+            {errors.message && <div role="alert" style={err}>{tx(errors.message, { n: ENQUIRY_MAX })}</div>}
             <div style={{ fontSize: '0.85rem', color: '#475569', marginTop: 8 }}>{tx('enq_phone_note', { phone: normalizePhone(user.phone) || '' })}</div>
-            {errors.phone && <div role="alert" style={err}>{errors.phone}</div>}
+            {errors.phone && <div role="alert" style={err}>{tx(errors.phone, { n: ENQUIRY_MAX })}</div>}
             {note && <div role="alert" style={err}>{note}</div>}
             <button type="submit" disabled={busy} style={{ marginTop: 14, width: '100%', padding: '0.8rem', fontSize: '1.05rem', borderRadius: 10, border: 'none', background: 'var(--color-primary, #166534)', color: '#fff', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1 }}>
                 {busy ? tx('enq_sending') : tx('enq_send')}

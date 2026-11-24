@@ -8,6 +8,9 @@ import {
 } from '../livestock/livestockService';
 
 const cell = { padding: '0.6rem', verticalAlign: 'top', borderBottom: '1px solid #e2e8f0' };
+const nice = (s) => String(s == null ? '' : s).replace(/_/g, ' '); // per_animal -> per animal
+const field = { display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.9rem' };
+const wide = { width: '100%', boxSizing: 'border-box', padding: '0.4rem' };
 
 const LivestockAdminTab = () => {
     const { user } = useAuth();
@@ -54,14 +57,15 @@ const LivestockAdminTab = () => {
                         ))}
                         <label><input type="checkbox" checked={!!draft.autoApproveAfterFirst} onChange={(e) => setDraft({ ...draft, autoApproveAfterFirst: e.target.checked })} /> Auto-approve a seller after the first approval</label>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: 10 }}>
-                        <label>Listing valid (days) <input type="number" style={{ width: 70 }} value={draft.expiryDays} onChange={(e) => setDraft({ ...draft, expiryDays: e.target.value })} /></label>
-                        <label>Max photos <input type="number" style={{ width: 60 }} value={draft.maxPhotos} onChange={(e) => setDraft({ ...draft, maxPhotos: e.target.value })} /></label>
-                        <label>Phone numbers a buyer can open per day <input type="number" style={{ width: 70 }} value={draft.revealLimitPerDay} onChange={(e) => setDraft({ ...draft, revealLimitPerDay: e.target.value })} /></label>
-                        <label>Default state <input value={draft.defaultState} onChange={(e) => setDraft({ ...draft, defaultState: e.target.value })} /></label>
-                        <label>Default district <input value={draft.defaultDistrict} onChange={(e) => setDraft({ ...draft, defaultDistrict: e.target.value })} /></label>
-                        <button onClick={saveSettings}>Save settings</button>
+                    {/* One field per row on a phone, several per row on a wide screen */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginTop: 12 }}>
+                        <label style={field}>Listing valid (days) <input type="number" style={wide} value={draft.expiryDays} onChange={(e) => setDraft({ ...draft, expiryDays: e.target.value })} /></label>
+                        <label style={field}>Max photos <input type="number" style={wide} value={draft.maxPhotos} onChange={(e) => setDraft({ ...draft, maxPhotos: e.target.value })} /></label>
+                        <label style={field}>Phone numbers a buyer can open per day <input type="number" style={wide} value={draft.revealLimitPerDay} onChange={(e) => setDraft({ ...draft, revealLimitPerDay: e.target.value })} /></label>
+                        <label style={field}>Default state <input style={wide} value={draft.defaultState} onChange={(e) => setDraft({ ...draft, defaultState: e.target.value })} /></label>
+                        <label style={field}>Default district <input style={wide} value={draft.defaultDistrict} onChange={(e) => setDraft({ ...draft, defaultDistrict: e.target.value })} /></label>
                     </div>
+                    <button onClick={saveSettings} style={{ marginTop: 12, padding: '0.6rem 1.4rem' }}>Save settings</button>
                 </div>
             )}
 
@@ -89,14 +93,14 @@ const LivestockAdminTab = () => {
                                 <tr key={l.id}>
                                     <td style={cell}>
                                         {l.photos && l.photos[0] && <img src={l.photos[0]} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, float: 'left', marginRight: 8 }} />}
-                                        <b>{l.quantity} × {l.breed} {l.category}</b><br />{l.sex}, {l.ageMonths} mo, {l.purposeOfSale}
+                                        <b>{l.quantity} × {l.breed} {l.category}</b><br />{l.sex}, {l.ageMonths} mo, {nice(l.purposeOfSale)}
                                         {l.notForSlaughter && <><br /><small>not for slaughter ✔</small></>}
                                         {l.healthNote && <><br /><small>{l.healthNote}</small></>}
                                     </td>
-                                    <td style={cell}>Rs {l.price}<br /><small>{l.priceType}</small></td>
+                                    <td style={cell}>Rs {l.price}<br /><small>{nice(l.priceType)}</small></td>
                                     <td style={cell}>{l.district}, {l.state}</td>
                                     <td style={cell}>
-                                        {l.sellerName || acct.businessName || l.ownerType}<br />
+                                        {l.sellerName || acct.businessName || nice(l.ownerType)}<br />
                                         {phones[l.id] ? <b>{phones[l.id]}</b> : <button onClick={() => run(async () => { const p = await getContactPhone(l.id); setPhones((m) => ({ ...m, [l.id]: p || 'n/a' })); })}>Show phone</button>}
                                         {l.postedByAdmin ? <><br /><small>posted by admin</small></> : (
                                             <><br />

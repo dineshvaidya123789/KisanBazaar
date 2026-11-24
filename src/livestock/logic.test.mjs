@@ -158,3 +158,14 @@ test('reveal: every reason maps to a screen text that exists in all three langua
   }
   assert.equal(revealErrorKey('LIMIT'), 'reveal_limit'); assert.equal(revealErrorKey(undefined), 'reveal_failed');
 });
+
+// Every message the forms can show is a text key that exists in English, Hindi and Marathi (no English-only leftovers).
+test('all validation messages are translated keys in en, hi and mr', () => {
+  const bad = { category: 'cow', breed: '', sex: 'x', ageMonths: '', quantity: '0', price: '0', priceType: 'x', purposeOfSale: 'x', state: '', district: '',
+    weightKg: '999', notForSlaughter: false, termsAccepted: false, phone: '1', ownerType: 'x', healthNote: 'a'.repeat(501) };
+  const keys = new Set([...Object.values(validateListing({ ...bad, category: 'goat' }, cfg)), ...Object.values(validateListing(bad, cfg)),
+    ...Object.values(validateEnquiry({ name: '', message: '', phone: '' })), ...Object.values(validateEnquiry({ name: 'a'.repeat(81), message: 'a'.repeat(ENQUIRY_MAX + 1), phone: '9876543210' }))]);
+  assert.ok(keys.size >= 15, 'collected ' + keys.size);
+  for (const k of keys) for (const l of ['en', 'hi', 'mr']) assert.ok(TEXTS[l][k], `${k} missing in ${l}`);
+  assert.equal(makeT('hi')('err_msg_long', { n: 300 }).includes('300'), true);
+});

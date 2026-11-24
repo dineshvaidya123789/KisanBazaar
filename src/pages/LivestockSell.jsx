@@ -87,7 +87,9 @@ const LivestockSell = () => {
     if (!form) return <div style={{ padding: 20, textAlign: 'center' }}>...</div>;
 
     const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-    const cats = enabledCategories(config);
+    // Editing a listing whose animal type the admin has since switched off: keep that type selectable so the seller can still fix or renew it.
+    const onNow = enabledCategories(config);
+    const cats = existing && existing.category && !onNow.includes(existing.category) ? [...onNow, existing.category] : onNow;
     const breeds = config.breeds[form.category] || [];
     const isGoat = form.category === 'goat';
     const photoCount = keepPhotos.length + newFiles.length;
@@ -101,7 +103,7 @@ const LivestockSell = () => {
 
     const submit = async (e) => {
         e.preventDefault();
-        const errs = validateListing(form, config);
+        const errs = validateListing(form, existing && existing.category ? { ...config, categories: { ...config.categories, [existing.category]: true } } : config);
         setErrors(errs);
         if (Object.keys(errs).length) { window.scrollTo(0, 0); return; }
         setBusy(true); setMessage('');
@@ -152,7 +154,7 @@ const LivestockSell = () => {
 
                 <label style={label}>{tx('who')}</label>
                 {choice('ownerType', OWNER_TYPES, (o) => tx(o))}
-                {errors.ownerType && <div style={errStyle}>{errors.ownerType}</div>}
+                {errors.ownerType && <div style={errStyle}>{tx(errors.ownerType)}</div>}
 
                 {form.ownerType !== 'individual' && (
                     <>
@@ -163,28 +165,28 @@ const LivestockSell = () => {
 
                 <label style={label}>{tx('animal')}</label>
                 {choice('category', cats, (o) => o.charAt(0).toUpperCase() + o.slice(1))}
-                {errors.category && <div style={errStyle}>{errors.category}</div>}
+                {errors.category && <div style={errStyle}>{tx(errors.category)}</div>}
 
                 <label style={label}>{tx('breed')}</label>
                 <select style={box} value={form.breed} onChange={(e) => set('breed', e.target.value)}>
                     <option value="">{tx('choose')}</option>
                     {breeds.map((b) => <option key={b} value={b}>{b}</option>)}
                 </select>
-                {errors.breed && <div style={errStyle}>{errors.breed}</div>}
+                {errors.breed && <div style={errStyle}>{tx(errors.breed)}</div>}
 
                 <label style={label}>{tx('sex')}</label>
                 {choice('sex', SEXES, (o) => tx(o))}
-                {errors.sex && <div style={errStyle}>{errors.sex}</div>}
+                {errors.sex && <div style={errStyle}>{tx(errors.sex)}</div>}
 
                 <label style={label}>{tx('age')}</label>
                 <input style={box} type="number" inputMode="numeric" min="0" max="300" value={form.ageMonths} onChange={(e) => set('ageMonths', e.target.value)} />
-                {errors.ageMonths && <div style={errStyle}>{errors.ageMonths}</div>}
+                {errors.ageMonths && <div style={errStyle}>{tx(errors.ageMonths)}</div>}
 
                 {isGoat ? (
                     <>
                         <label style={label}>{tx('weight')}</label>
                         <input style={box} type="number" inputMode="decimal" value={form.weightKg} onChange={(e) => set('weightKg', e.target.value)} />
-                        {errors.weightKg && <div style={errStyle}>{errors.weightKg}</div>}
+                        {errors.weightKg && <div style={errStyle}>{tx(errors.weightKg)}</div>}
                     </>
                 ) : (
                     <>
@@ -199,24 +201,24 @@ const LivestockSell = () => {
 
                 <label style={label}>{tx('quantity')}</label>
                 <input style={box} type="number" inputMode="numeric" min="1" max="1000" value={form.quantity} onChange={(e) => set('quantity', e.target.value)} />
-                {errors.quantity && <div style={errStyle}>{errors.quantity}</div>}
+                {errors.quantity && <div style={errStyle}>{tx(errors.quantity)}</div>}
 
                 <label style={label}>{tx('price')}</label>
                 <input style={box} type="number" inputMode="numeric" min="1" value={form.price} onChange={(e) => set('price', e.target.value)} />
-                {errors.price && <div style={errStyle}>{errors.price}</div>}
+                {errors.price && <div style={errStyle}>{tx(errors.price)}</div>}
                 <label style={label}>{tx('price_type')}</label>
                 {choice('priceType', PRICE_TYPES, (o) => tx(o))}
 
                 <label style={label}>{tx('purpose')}</label>
                 {choice('purposeOfSale', PURPOSES, (o) => tx(o))}
-                {errors.purposeOfSale && <div style={errStyle}>{errors.purposeOfSale}</div>}
+                {errors.purposeOfSale && <div style={errStyle}>{tx(errors.purposeOfSale)}</div>}
 
                 <label style={label}>{tx('location')}</label>
                 <LocationSelector
                     selectedState={form.state} selectedDistrict={form.district} selectedTehsil={form.tehsil} vertical
                     onLocationChange={(loc) => setForm((f) => ({ ...f, state: loc.state, district: loc.district, tehsil: loc.tehsil }))}
                 />
-                {errors.location && <div style={errStyle}>{errors.location}</div>}
+                {errors.location && <div style={errStyle}>{tx(errors.location)}</div>}
 
                 <label style={label}>{tx('eartag')}</label>
                 <input style={box} maxLength={20} value={form.earTagNo} onChange={(e) => set('earTagNo', e.target.value)} />
@@ -247,7 +249,7 @@ const LivestockSell = () => {
                 <label style={label}>{tx('phone')}</label>
                 <input style={box} type="tel" inputMode="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} />
                 <div style={{ fontSize: '0.85rem', color: '#555' }}>{tx('phone_hint')}</div>
-                {errors.phone && <div style={errStyle}>{errors.phone}</div>}
+                {errors.phone && <div style={errStyle}>{tx(errors.phone)}</div>}
 
                 {!isGoat && (
                     <label style={{ display: 'flex', gap: 8, marginTop: 16, alignItems: 'flex-start' }}>
@@ -255,13 +257,13 @@ const LivestockSell = () => {
                         <span>{tx('not_slaughter')}</span>
                     </label>
                 )}
-                {errors.notForSlaughter && <div style={errStyle}>{errors.notForSlaughter}</div>}
+                {errors.notForSlaughter && <div style={errStyle}>{tx(errors.notForSlaughter)}</div>}
 
                 <label style={{ display: 'flex', gap: 8, marginTop: 16, alignItems: 'flex-start' }}>
                     <input type="checkbox" checked={form.termsAccepted} onChange={(e) => set('termsAccepted', e.target.checked)} />
                     <span>{tx('terms')}</span>
                 </label>
-                {errors.termsAccepted && <div style={errStyle}>{errors.termsAccepted}</div>}
+                {errors.termsAccepted && <div style={errStyle}>{tx(errors.termsAccepted)}</div>}
 
                 <button type="submit" disabled={busy} style={{
                     marginTop: 24, width: '100%', padding: '0.9rem', fontSize: '1.05rem', borderRadius: 10, border: 'none',

@@ -98,8 +98,10 @@ export const renewListing = (listing, status, config) => {
 
 export const deleteListing = async (listing) => {
     await Promise.all((listing.photos || []).map(deletePhotoByUrl));
-    await deleteDoc(doc(db, 'livestockContacts', listing.id)).catch(() => { });
+    // The listing first: if this fails nothing else was touched and the animal still works. If only the phone record fails afterwards,
+    // what is left is a record only the owner and the admin can read.
     await deleteDoc(doc(db, LISTINGS, listing.id));
+    await deleteDoc(doc(db, 'livestockContacts', listing.id)).catch((e) => console.warn('contact not deleted', e && (e.code || e)));
 };
 
 // ---- admin side ----

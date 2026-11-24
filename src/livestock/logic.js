@@ -16,27 +16,28 @@ export const enabledCategories = (config) =>
 // Returns an object of {field: message}. Empty object = valid.
 export const validateListing = (f, config) => {
     const e = {};
-    if (!enabledCategories(config).includes(f.category)) e.category = 'Choose an animal type';
-    if (!f.breed || !(config.breeds[f.category] || []).includes(f.breed)) e.breed = 'Choose a breed';
-    if (!SEXES.includes(f.sex)) e.sex = 'Choose male, female or mixed';
+    // The values are text KEYS (err_*), translated on screen with tx() in English, Hindi and Marathi.
+    if (!enabledCategories(config).includes(f.category)) e.category = 'err_category';
+    if (!f.breed || !(config.breeds[f.category] || []).includes(f.breed)) e.breed = 'err_breed';
+    if (!SEXES.includes(f.sex)) e.sex = 'err_sex';
     const age = Number(f.ageMonths);
-    if (f.ageMonths === '' || f.ageMonths == null || !Number.isFinite(age) || age < 0 || age > 300) e.ageMonths = 'Enter age in months (0 to 300)';
+    if (f.ageMonths === '' || f.ageMonths == null || !Number.isFinite(age) || age < 0 || age > 300) e.ageMonths = 'err_age';
     const qty = Number(f.quantity);
-    if (!Number.isInteger(qty) || qty < 1 || qty > 1000) e.quantity = 'Enter how many animals (1 to 1000)';
+    if (!Number.isInteger(qty) || qty < 1 || qty > 1000) e.quantity = 'err_qty';
     const price = Number(f.price);
-    if (!Number.isFinite(price) || price <= 0 || price > 100000000) e.price = 'Enter the price';
-    if (!PRICE_TYPES.includes(f.priceType)) e.priceType = 'Choose how the price is counted';
-    if (!PURPOSES.includes(f.purposeOfSale)) e.purposeOfSale = 'Choose the purpose of sale';
-    if (!f.state || !f.district) e.location = 'Choose state and district';
+    if (!Number.isFinite(price) || price <= 0 || price > 100000000) e.price = 'err_price';
+    if (!PRICE_TYPES.includes(f.priceType)) e.priceType = 'err_price_type';
+    if (!PURPOSES.includes(f.purposeOfSale)) e.purposeOfSale = 'err_purpose';
+    if (!f.state || !f.district) e.location = 'err_location';
     if (f.category === 'goat' && f.weightKg !== '' && f.weightKg != null) {
         const w = Number(f.weightKg);
-        if (!Number.isFinite(w) || w <= 0 || w > 200) e.weightKg = 'Weight must be 1 to 200 kg';
+        if (!Number.isFinite(w) || w <= 0 || w > 200) e.weightKg = 'err_weight';
     }
-    if (f.category !== 'goat' && !f.notForSlaughter) e.notForSlaughter = 'You must confirm: not for slaughter';
-    if (!f.termsAccepted) e.termsAccepted = 'Please accept the seller declaration';
-    if (!normalizePhone(f.phone)) e.phone = 'Enter a 10 digit mobile number';
-    if (!OWNER_TYPES.includes(f.ownerType)) e.ownerType = 'Choose who you are';
-    if (f.healthNote && String(f.healthNote).length > 500) e.healthNote = 'Keep it under 500 characters';
+    if (f.category !== 'goat' && !f.notForSlaughter) e.notForSlaughter = 'err_slaughter';
+    if (!f.termsAccepted) e.termsAccepted = 'err_terms';
+    if (!normalizePhone(f.phone)) e.phone = 'err_phone';
+    if (!OWNER_TYPES.includes(f.ownerType)) e.ownerType = 'err_owner';
+    if (f.healthNote && String(f.healthNote).length > 500) e.healthNote = 'err_health';
     return e;
 };
 
@@ -163,12 +164,13 @@ export const enquiryId = (listingId, buyerUid) => `${listingId}_${buyerUid}`;
 // Returns {field: message}. Empty object = valid. The phone is the buyer's login number.
 export const validateEnquiry = ({ name, message, phone }) => {
     const e = {};
-    if (!String(name || '').trim()) e.name = 'Enter your name';
-    else if (String(name).trim().length > 80) e.name = 'Name is too long (80 characters at most)';
+    // Values are text keys (err_*); the screen translates them, and err_msg_long takes {n} = ENQUIRY_MAX.
+    if (!String(name || '').trim()) e.name = 'err_name';
+    else if (String(name).trim().length > 80) e.name = 'err_name_long';
     const m = String(message || '').trim();
-    if (!m) e.message = 'Write a short message';
-    else if (m.length > ENQUIRY_MAX) e.message = `Keep it under ${ENQUIRY_MAX} characters`;
-    if (!normalizePhone(phone)) e.phone = 'Your mobile number is missing. Please log in again.';
+    if (!m) e.message = 'err_msg';
+    else if (m.length > ENQUIRY_MAX) e.message = 'err_msg_long';
+    if (!normalizePhone(phone)) e.phone = 'err_login_phone';
     return e;
 };
 
