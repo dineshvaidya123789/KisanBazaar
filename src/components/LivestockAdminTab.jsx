@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLivestockConfig } from '../livestock/useLivestockConfig';
 import { displayState, newReportCount } from '../livestock/logic';
+import PhotoThumb from '../livestock/PhotoThumb';
 import {
     subscribeReports, setReportStatus, deleteReport,
     subscribeAllListings, subscribeAccounts, approveListing, rejectListing, deleteListing, getContactPhone, saveConfig, setAccountFlag,
@@ -116,7 +117,7 @@ const LivestockAdminTab = () => {
                             return (
                                 <tr key={l.id}>
                                     <td style={cell}>
-                                        {l.photos && l.photos[0] && <img src={l.photos[0]} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, float: 'left', marginRight: 8 }} />}
+                                        {l.photos && l.photos[0] && <PhotoThumb photos={l.photos} size={56} radius={6} label={`${l.photos.length} photos`} style={{ float: 'left', marginRight: 8 }} />}
                                         <b>{l.quantity} × {l.breed} {l.category}</b><br />{l.sex}, {l.ageMonths} mo, {nice(l.purposeOfSale)}
                                         {l.notForSlaughter && <><br /><small>not for slaughter ✔</small></>}
                                         {l.healthNote && <><br /><small>{l.healthNote}</small></>}

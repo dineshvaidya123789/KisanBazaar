@@ -6,6 +6,7 @@ import LocationSelector from '../components/LocationSelector';
 import SEO from '../components/SEO';
 import { useLivestockConfig } from '../livestock/useLivestockConfig';
 import { makeT } from '../livestock/texts';
+import PhotoThumb from '../livestock/PhotoThumb';
 import {
     EMPTY_FILTERS, enabledCategories, serverFilters, serverFilterKey, applyPageFilters, hasPageFilters,
     ageText, formatRupees, listingTitle,
@@ -119,7 +120,7 @@ const LivestockBrowse = () => {
                 {shown.map((l) => (
                     <Link key={l.id} to={`/livestock/${l.id}`} style={{ display: 'flex', gap: 12, border: '1px solid #e5e7eb', borderRadius: 12, padding: '0.8rem', background: '#fff', color: 'inherit', textDecoration: 'none' }}>
                         {l.photos && l.photos[0]
-                            ? <img src={l.photos[0]} alt="" loading="lazy" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, flex: 'none' }} />
+                            ? <PhotoThumb photos={l.photos} size={96} lazy label={tx('photos_n', { n: l.photos.length })} />
                             : <div aria-hidden="true" style={{ width: 96, height: 96, background: '#f0fdf4', borderRadius: 8, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.4rem' }}>{{ goat: '🐐', cow: '🐄', buffalo: '🐃' }[l.category] || '🐾'}</div>}
                         <div style={{ minWidth: 0 }}>
                             <div style={{ fontWeight: 700 }}>{listingTitle(l)}</div>

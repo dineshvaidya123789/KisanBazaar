@@ -188,3 +188,9 @@ test('reports: reasons, note limit, record shape, and every text key exists in e
   const keys = ['rep_link', 'rep_title', 'rep_reason', 'rep_note', 'rep_send', 'rep_sending', 'rep_sent', 'rep_already', 'rep_failed', 'rep_cancel', 'rep_login', 'err_rep_reason', 'err_rep_note', ...REPORT_REASONS.map((r) => 'rep_' + r)];
   for (const k of keys) for (const lang of ['en', 'hi', 'mr']) assert.ok(TEXTS[lang][k], `${k} missing in ${lang}`);
 });
+
+test('photo count label exists in en/hi/mr and takes {n}', async () => {
+  const { TEXTS, makeT } = await import('./texts.js');
+  for (const lang of ['en', 'hi', 'mr']) { assert.ok(TEXTS[lang].photos_n, 'photos_n missing in ' + lang); assert.ok(makeT(lang)('photos_n', { n: 4 }).includes('4')); }
+  assert.equal(makeT('en')('photos_n', { n: 4 }), '4 photos');
+});

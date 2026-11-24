@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import SEO from '../components/SEO';
 import { useLivestockConfig } from '../livestock/useLivestockConfig';
 import { makeT } from '../livestock/texts';
+import PhotoThumb from '../livestock/PhotoThumb';
 import { displayState, canRenew, statusForSellerSubmit } from '../livestock/logic';
 import { subscribeMyListings, subscribeAccount, markSold, renewListing, deleteListing, subscribeSellerEnquiries } from '../livestock/livestockService';
 import { unreadCount } from '../livestock/logic';
@@ -52,7 +53,7 @@ const MyAnimals = () => {
                 return (
                     <div key={l.id} style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '0.9rem', marginTop: 14, background: '#fff' }}>
                         <div style={{ display: 'flex', gap: 12 }}>
-                            {l.photos && l.photos[0] ? <img src={l.photos[0]} alt="" style={{ width: 84, height: 84, objectFit: 'cover', borderRadius: 8 }} /> : <div style={{ width: 84, height: 84, background: '#f3f4f6', borderRadius: 8 }} />}
+                            {l.photos && l.photos[0] ? <PhotoThumb photos={l.photos} size={84} label={tx('photos_n', { n: l.photos.length })} /> : <div style={{ width: 84, height: 84, background: '#f3f4f6', borderRadius: 8 }} />}
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 700 }}>{l.quantity} × {l.breed} {l.category}</div>
                                 <div style={{ color: '#475569', fontSize: '0.9rem' }}>{l.district}, {l.state} · Rs {l.price} / {tx(l.priceType)}</div>
