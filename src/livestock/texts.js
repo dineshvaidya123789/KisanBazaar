@@ -15,6 +15,7 @@ const T = {
         status_pending: 'Waiting for approval', status_approved: 'Live', status_rejected: 'Rejected', status_sold: 'Sold', status_expired: 'Expired',
         reason: 'Reason', edit: 'Edit', renew: 'Renew', sold: 'Mark sold', delete: 'Delete', confirm_delete: 'Delete this listing for good?', none: 'You have no animals listed yet.',
         post_new: 'Post an animal', expires: 'Valid till', err_generic: 'Something went wrong. Please try again.',
+        not_yours: 'This listing was not found, or it is not yours to edit.',
     },
     hi: {
         sell_title: 'पशु बेचें', edit_title: 'लिस्टिंग बदलें', my_title: 'मेरे पशु', soon: 'पशु बाज़ार जल्द आ रहा है।',
@@ -31,6 +32,7 @@ const T = {
         status_pending: 'मंज़ूरी का इंतज़ार', status_approved: 'चालू', status_rejected: 'अस्वीकृत', status_sold: 'बिक गया', status_expired: 'समय समाप्त',
         reason: 'कारण', edit: 'बदलें', renew: 'फिर चालू करें', sold: 'बिक गया', delete: 'हटाएँ', confirm_delete: 'यह लिस्टिंग हमेशा के लिए हटाएँ?', none: 'आपने अभी कोई पशु नहीं डाला है।',
         post_new: 'पशु डालें', expires: 'तक मान्य', err_generic: 'कुछ गड़बड़ हुई। फिर कोशिश करें।',
+        not_yours: 'यह लिस्टिंग नहीं मिली, या इसे बदलने का अधिकार आपके पास नहीं है।',
     },
     mr: {
         sell_title: 'जनावरे विका', edit_title: 'यादी बदला', my_title: 'माझी जनावरे', soon: 'पशु बाजार लवकरच येत आहे.',
@@ -47,6 +49,7 @@ const T = {
         status_pending: 'मंजुरीची प्रतीक्षा', status_approved: 'सुरू', status_rejected: 'नाकारले', status_sold: 'विकले', status_expired: 'मुदत संपली',
         reason: 'कारण', edit: 'बदला', renew: 'पुन्हा सुरू करा', sold: 'विकले', delete: 'काढून टाका', confirm_delete: 'ही यादी कायमची काढायची?', none: 'तुम्ही अजून कोणतेही जनावर टाकलेले नाही.',
         post_new: 'जनावर टाका', expires: 'पर्यंत वैध', err_generic: 'काहीतरी चुकले. पुन्हा प्रयत्न करा.',
+        not_yours: 'ही यादी सापडली नाही, किंवा ती बदलण्याचा अधिकार तुम्हाला नाही.',
     },
 };
 

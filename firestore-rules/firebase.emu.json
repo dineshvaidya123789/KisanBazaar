@@ -1,0 +1,2 @@
+{"firestore":{"rules":"firestore.rules.PROPOSED"},"storage":{"rules":"storage.rules.PROPOSED"},
+ "emulators":{"auth":{"port":9190},"firestore":{"port":9137},"storage":{"port":9139},"ui":{"enabled":false}}}

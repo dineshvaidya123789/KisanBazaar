@@ -83,3 +83,14 @@ test('Hindi and Marathi have every English key', () => {
 test('text fallback and variables', () => {
   assert.equal(makeT('xx')('save'), 'Save changes'); assert.equal(makeT('en')('photo_hint', { n: 4 }), 'Up to 4 clear photos. They are made smaller automatically.');
 });
+test('phone with a leading zero is accepted, other 11 digit numbers are not', () => {
+  assert.equal(normalizePhone('09876543210'), '+919876543210');
+  assert.equal(normalizePhone('0 98765 43210'), '+919876543210');
+  assert.equal(normalizePhone('19876543210'), '');
+  assert.equal(normalizePhone('00876543210'), '');
+});
+test('a blank age is refused (it used to count as 0 months)', () => {
+  assert.ok(validateListing({ ...good, ageMonths: '' }, cfg).ageMonths);
+  assert.ok(validateListing({ ...good, ageMonths: null }, cfg).ageMonths);
+  assert.deepEqual(validateListing({ ...good, ageMonths: '0' }, cfg), {});
+});

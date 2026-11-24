@@ -43,16 +43,22 @@ const LivestockSell = () => {
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState('');
+    const [notYours, setNotYours] = useState(false);
 
     useEffect(() => (user ? subscribeAccount(user.uid, setAccount) : undefined), [user && user.uid]);
 
     // Load the listing when editing; otherwise start a blank form.
     useEffect(() => {
         if (!loaded || !user) return;
-        if (!id) { setForm((f) => f || emptyForm(config, user)); return; }
+        setNotYours(false); setMessage('');
+        if (!id) { setExisting(null); setKeepPhotos([]); setNewFiles([]); setForm(emptyForm(config, user)); return; }
+        // A new id means a different listing: drop whatever the previous one left in the form.
+        setForm(null); setExisting(null); setKeepPhotos([]); setNewFiles([]);
         (async () => {
-            const snap = await getDoc(doc(db, 'livestockListings', id));
-            if (!snap.exists()) { setMessage(tx('err_generic')); return; }
+            let snap;
+            try { snap = await getDoc(doc(db, 'livestockListings', id)); } catch (e) { console.warn('listing not readable', e.code || e); setNotYours(true); return; }
+            // Anyone signed in can read an approved listing, but only its owner (or the admin) may edit it.
+            if (!snap.exists() || (snap.data().ownerUid !== user.uid && !isAdmin)) { setNotYours(true); return; }
             const l = { id, ...snap.data() };
             const phone = await getContactPhone(id).catch(() => '');
             setExisting(l);
@@ -72,6 +78,12 @@ const LivestockSell = () => {
         </div>
     );
     if (!config.enabled && !isAdmin) return <div style={{ padding: 30, textAlign: 'center' }}><h2>{tx('soon')}</h2></div>;
+    if (notYours) return (
+        <div style={{ padding: 30, textAlign: 'center' }}>
+            <p>{tx('not_yours')}</p>
+            <Link to="/livestock/my">{tx('my_title')}</Link>
+        </div>
+    );
     if (!form) return <div style={{ padding: 20, textAlign: 'center' }}>...</div>;
 
     const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));

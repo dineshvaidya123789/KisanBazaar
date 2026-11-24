@@ -5,7 +5,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const normalizePhone = (p) => {
     const d = String(p || '').replace(/\D/g, '');
-    const ten = d.length >= 12 && d.startsWith('91') ? d.slice(2) : d;
+    // 12 digits starting 91 = country code; 11 digits starting 0 = the usual trunk zero people type before a mobile number.
+    const ten = d.length >= 12 && d.startsWith('91') ? d.slice(2) : (d.length === 11 && d.startsWith('0') ? d.slice(1) : d);
     return /^[6-9]\d{9}$/.test(ten) ? '+91' + ten : '';
 };
 
@@ -19,7 +20,7 @@ export const validateListing = (f, config) => {
     if (!f.breed || !(config.breeds[f.category] || []).includes(f.breed)) e.breed = 'Choose a breed';
     if (!SEXES.includes(f.sex)) e.sex = 'Choose male, female or mixed';
     const age = Number(f.ageMonths);
-    if (!Number.isFinite(age) || age < 0 || age > 300) e.ageMonths = 'Enter age in months (0 to 300)';
+    if (f.ageMonths === '' || f.ageMonths == null || !Number.isFinite(age) || age < 0 || age > 300) e.ageMonths = 'Enter age in months (0 to 300)';
     const qty = Number(f.quantity);
     if (!Number.isInteger(qty) || qty < 1 || qty > 1000) e.quantity = 'Enter how many animals (1 to 1000)';
     const price = Number(f.price);
