@@ -8,6 +8,7 @@ import { useSearchLogic } from '../hooks/useSearchLogic';
 import { useSmartVoice } from '../hooks/useSmartVoice';
 import { advisoryKeywords } from '../utils/voiceParser';
 import VoiceOverlay from './VoiceOverlay';
+import LivestockGate from '../livestock/LivestockGate';
 
 const Header = () => {
     const { user } = useAuth();
@@ -734,6 +735,20 @@ const Header = () => {
                     >
                         ⛰️ {t('land_section')}
                     </Link>
+
+                    {/* Livestock: shown only while the module is on (or to the admin) */}
+                    <LivestockGate>
+                        {(tx) => (
+                            <Link
+                                to="/livestock"
+                                onClick={closeMenu}
+                                className={isActive('/livestock')}
+                                style={{ color: '#555', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                                🐐 {tx('tile_title')}
+                            </Link>
+                        )}
+                    </LivestockGate>
 
                 </nav>
             </div>

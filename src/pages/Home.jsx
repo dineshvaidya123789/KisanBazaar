@@ -8,6 +8,7 @@ import InterestsModal from '../components/InterestsModal';
 
 import SEO from '../components/SEO';
 import LiveDealsTicker from '../components/LiveDealsTicker';
+import LivestockGate from '../livestock/LivestockGate';
 
 const Home = () => {
     const { t } = useLanguage();
@@ -178,6 +179,15 @@ const Home = () => {
                             {t('desc_land_lease')}
                         </div>
                     </QuickCard>
+                    <LivestockGate>
+                        {(tx) => (
+                            <QuickCard title={tx('tile_title')} icon="🐐" link="/livestock" color="#2e7d32">
+                                <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.3rem', lineHeight: '1.3', padding: '0 0.5rem' }}>
+                                    {tx('tile_desc')}
+                                </div>
+                            </QuickCard>
+                        )}
+                    </LivestockGate>
                 </div>
             </section>
 

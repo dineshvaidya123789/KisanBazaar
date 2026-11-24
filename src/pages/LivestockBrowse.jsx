@@ -68,11 +68,11 @@ const LivestockBrowse = () => {
     const anyFilter = activeCount > 0;
 
     return (
-        <div style={{ maxWidth: 720, margin: '0 auto', padding: '1rem' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto', padding: '1rem', paddingBottom: '3rem' }}>
             <SEO title={tx('browse_title')} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <h2 style={{ margin: 0 }}>{tx('browse_title')}</h2>
-                <Link to="/livestock/sell">{tx('sell_cta')}</Link>
+                <Link to="/livestock/sell" style={{ padding: '0.6rem 1.2rem', borderRadius: 10, background: 'var(--color-primary, #166534)', color: '#fff', fontWeight: 700, textDecoration: 'none' }}>{tx('sell_cta')}</Link>
             </div>
 
             {/* Folded by default so a phone shows animals first; the summary says how many filters are on. */}
@@ -114,12 +114,13 @@ const LivestockBrowse = () => {
 
             {error && <div role="alert" style={{ color: '#b91c1c', margin: '0.8rem 0' }}>{error}</div>}
 
-            <div style={{ marginTop: 14 }}>
+            {/* One column on a phone, two or three side by side on a wide screen */}
+            <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
                 {shown.map((l) => (
-                    <Link key={l.id} to={`/livestock/${l.id}`} style={{ display: 'flex', gap: 12, border: '1px solid #e5e7eb', borderRadius: 12, padding: '0.8rem', marginTop: 12, background: '#fff', color: 'inherit', textDecoration: 'none' }}>
+                    <Link key={l.id} to={`/livestock/${l.id}`} style={{ display: 'flex', gap: 12, border: '1px solid #e5e7eb', borderRadius: 12, padding: '0.8rem', background: '#fff', color: 'inherit', textDecoration: 'none' }}>
                         {l.photos && l.photos[0]
                             ? <img src={l.photos[0]} alt="" loading="lazy" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, flex: 'none' }} />
-                            : <div style={{ width: 96, height: 96, background: '#f3f4f6', borderRadius: 8, flex: 'none' }} />}
+                            : <div aria-hidden="true" style={{ width: 96, height: 96, background: '#f0fdf4', borderRadius: 8, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.4rem' }}>{{ goat: '🐐', cow: '🐄', buffalo: '🐃' }[l.category] || '🐾'}</div>}
                         <div style={{ minWidth: 0 }}>
                             <div style={{ fontWeight: 700 }}>{listingTitle(l)}</div>
                             <div style={{ color: '#166534', fontWeight: 700 }}>{formatRupees(l.price)} <span style={{ fontWeight: 400, color: '#475569', fontSize: '0.85rem' }}>/ {tx(l.priceType)}</span></div>
