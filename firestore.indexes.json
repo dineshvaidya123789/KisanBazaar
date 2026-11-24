@@ -1,0 +1,10 @@
+{
+  "indexes": [
+    { "collectionGroup": "livestockListings", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "livestockListings", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "category", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "livestockListings", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "breed", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "livestockListings", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "state", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "livestockListings", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "district", "order": "ASCENDING" }, { "fieldPath": "expiresAt", "order": "DESCENDING" } ] }
+  ],
+  "fieldOverrides": []
+}

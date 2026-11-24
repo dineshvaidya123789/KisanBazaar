@@ -94,3 +94,31 @@ test('a blank age is refused (it used to count as 0 months)', () => {
   assert.ok(validateListing({ ...good, ageMonths: null }, cfg).ageMonths);
   assert.deepEqual(validateListing({ ...good, ageMonths: '0' }, cfg), {});
 });
+
+import { serverFilters, serverFilterKey, hasPageFilters, matchesPageFilters, applyPageFilters, ageText, formatRupees, shareMessage, whatsappShareUrl, detailUrl, listingTitle } from './logic.js';
+const L = (o) => ({ id: 'x', quantity: 5, breed: 'Osmanabadi', category: 'goat', state: 'Maharashtra', district: 'Satara', price: 8000, priceType: 'per_animal', ageMonths: 12, ...o });
+
+test('browse: only equality filters go to the database, and a district needs its state', () => {
+  assert.deepEqual(serverFilters({ category: 'goat', breed: 'Beetal', state: '', district: 'Satara', minPrice: '5' }), { category: 'goat', breed: 'Beetal' });
+  assert.deepEqual(serverFilters({ breed: 'Beetal' }), { breed: 'Beetal' });
+  assert.deepEqual(serverFilters({ state: 'Maharashtra', district: 'Satara' }), { state: 'Maharashtra', district: 'Satara' });
+  assert.equal(serverFilterKey({ category: 'goat' }), serverFilterKey({ category: 'goat', minPrice: '100' }));
+});
+test('browse: price and age filters apply to the loaded page', () => {
+  const list = [L({ id: 'a', price: 5000 }), L({ id: 'b', price: 12000 }), L({ id: 'c', price: 400, priceType: 'per_kg' }), L({ id: 'd', ageMonths: 30 })];
+  assert.equal(hasPageFilters({ minPrice: '', maxPrice: ' ' }), false);
+  assert.deepEqual(applyPageFilters(list, { maxPrice: '9000' }).map((l) => l.id), ['a', 'd']); // per-kg one is left out
+  assert.deepEqual(applyPageFilters(list, { minAge: '24' }).map((l) => l.id), ['d']);
+  assert.equal(applyPageFilters(list, {}).length, 4);
+  assert.equal(matchesPageFilters(L({ price: 8000 }), { minPrice: '8000', maxPrice: '8000' }), true);
+  assert.equal(matchesPageFilters(L({}), { maxPrice: 'abc' }), true); // junk is ignored, not a reason to hide everything
+});
+test('browse: display helpers', () => {
+  assert.equal(ageText(8), '8 mo'); assert.equal(ageText(12), '1 yr'); assert.equal(ageText(14), '1 yr 2 mo'); assert.equal(ageText('x'), ''); assert.equal(ageText(0), '0 mo');
+  assert.equal(formatRupees(125000), 'Rs 1,25,000');
+  assert.equal(listingTitle(L({})), '5 × Osmanabadi goat');
+  const m = shareMessage(L({}), 'https://kisanbazzar.co.in/livestock/abc');
+  assert.ok(m.includes('Satara, Maharashtra') && m.includes('Rs 8,000') && m.includes('per animal') && m.endsWith('/livestock/abc'));
+  assert.ok(whatsappShareUrl('a b&c').startsWith('https://wa.me/?text=a%20b%26c'));
+  assert.equal(detailUrl('https://x.in/', 'id1'), 'https://x.in/livestock/id1');
+});

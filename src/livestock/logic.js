@@ -98,3 +98,57 @@ export const buildListingDoc = (f, { uid, nowMs, config, status, photos = [], ex
     Object.keys(d).forEach((k) => d[k] === undefined && delete d[k]); // Firestore rejects undefined
     return d;
 };
+
+// ---- buyer side: browsing ----
+
+export const BROWSE_PAGE_SIZE = 12;
+export const EMPTY_FILTERS = { category: '', breed: '', state: '', district: '', minPrice: '', maxPrice: '', minAge: '', maxAge: '' };
+
+// Only the filters the database can apply are sent to it (equality ones). Price and age are applied to the loaded page.
+export const serverFilters = (f) => {
+    const out = {};
+    ['category', 'breed', 'state', 'district'].forEach((k) => { if (f && f[k]) out[k] = String(f[k]); });
+    // A district only makes sense with its state. (A breed is allowed without an animal type: the breed list shows every type's breeds.)
+    if (out.district && !out.state) delete out.district;
+    return out;
+};
+
+export const serverFilterKey = (f) => JSON.stringify(serverFilters(f));
+
+const numOrNull = (v) => (v == null || String(v).trim() === '' || !Number.isFinite(Number(v)) ? null : Number(v));
+
+export const hasPageFilters = (f) => ['minPrice', 'maxPrice', 'minAge', 'maxAge'].some((k) => numOrNull(f && f[k]) !== null);
+
+// Price filter is per animal: a price per kg or per lot cannot be compared, so those are left out while a price filter is on.
+export const matchesPageFilters = (l, f) => {
+    const minP = numOrNull(f.minPrice), maxP = numOrNull(f.maxPrice), minA = numOrNull(f.minAge), maxA = numOrNull(f.maxAge);
+    if (minP !== null || maxP !== null) {
+        if (l.priceType !== 'per_animal') return false;
+        if (minP !== null && Number(l.price) < minP) return false;
+        if (maxP !== null && Number(l.price) > maxP) return false;
+    }
+    if (minA !== null && Number(l.ageMonths) < minA) return false;
+    if (maxA !== null && Number(l.ageMonths) > maxA) return false;
+    return true;
+};
+
+export const applyPageFilters = (list, f) => (hasPageFilters(f) ? list.filter((l) => matchesPageFilters(l, f)) : list);
+
+export const ageText = (months) => {
+    const m = Math.round(Number(months));
+    if (!Number.isFinite(m) || m < 0) return '';
+    const y = Math.floor(m / 12), r = m % 12;
+    if (y === 0) return `${m} mo`;
+    return r === 0 ? `${y} yr` : `${y} yr ${r} mo`;
+};
+
+export const formatRupees = (n) => 'Rs ' + Number(n).toLocaleString('en-IN');
+
+export const listingTitle = (l) => `${l.quantity} × ${l.breed} ${l.category}`;
+
+export const shareMessage = (l, url) =>
+    `${listingTitle(l)} for sale in ${l.district}, ${l.state}. ${formatRupees(l.price)} (${String(l.priceType || '').replace(/_/g, ' ')}). ${url}`;
+
+export const whatsappShareUrl = (text) => 'https://wa.me/?text=' + encodeURIComponent(text);
+
+export const detailUrl = (origin, id) => `${String(origin || '').replace(/\/$/, '')}/livestock/${id}`;
